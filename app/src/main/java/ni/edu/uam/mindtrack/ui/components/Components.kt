@@ -8,6 +8,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -223,5 +230,56 @@ fun HistoryItemCard(session: SessionResult) {
             )
         }
         ProfileBadge(profile = session.profile)
+    }
+}
+
+@Composable
+fun MindTrackBottomBar(
+    currentRoute: String?,
+    onNavigate: (String) -> Unit
+) {
+    NavigationBar(
+        containerColor = Background.copy(alpha = 0.95f),
+        contentColor = TextMuted,
+        tonalElevation = 0.dp,
+        modifier = Modifier
+            .height(80.dp)
+            .border(width = 1.dp, color = BorderColor, shape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp))
+            .background(Background)
+    ) {
+        val items = listOf(
+            Triple("home", Icons.Default.Home, "Inicio"),
+            Triple("history", Icons.Default.History, "Historial"),
+            Triple("settings", Icons.Default.Settings, "Ajustes")
+        )
+
+        items.forEach { (route, icon, label) ->
+            val isSelected = currentRoute == route
+            NavigationBarItem(
+                selected = isSelected,
+                onClick = { if (route != "settings") onNavigate(route) },
+                icon = {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = label,
+                            tint = if (isSelected) PrimaryAccent else TextFaint,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        if (isSelected) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(4.dp)
+                                    .background(PrimaryAccent, CircleShape)
+                            )
+                        }
+                    }
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = Color.Transparent
+                )
+            )
+        }
     }
 }
