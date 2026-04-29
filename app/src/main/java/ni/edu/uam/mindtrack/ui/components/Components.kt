@@ -265,7 +265,7 @@ fun MindTrackBottomBar(
             val isSelected = currentRoute == route
             NavigationBarItem(
                 selected = isSelected,
-                onClick = { if (route != "settings") onNavigate(route) },
+                onClick = { onNavigate(route) },
                 icon = {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,

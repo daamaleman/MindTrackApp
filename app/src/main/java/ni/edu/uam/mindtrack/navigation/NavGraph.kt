@@ -17,6 +17,8 @@ import ni.edu.uam.mindtrack.ui.screens.HistoryScreen
 import ni.edu.uam.mindtrack.ui.screens.HomeScreen
 import ni.edu.uam.mindtrack.ui.screens.ResultScreen
 import ni.edu.uam.mindtrack.ui.screens.ScenarioScreen
+import ni.edu.uam.mindtrack.ui.screens.SettingsScreen
+import ni.edu.uam.mindtrack.ui.screens.SettingsScreen
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 
 @Composable
@@ -28,8 +30,8 @@ fun MindTrackNavGraph() {
 
     Scaffold(
         bottomBar = {
-            // Only show bottom bar on top-level screens (Home and History)
-            if (currentRoute == Routes.Home.route || currentRoute == Routes.History.route) {
+            // Show bottom bar on Home, History, and Settings
+            if (currentRoute == Routes.Home.route || currentRoute == Routes.History.route || currentRoute == Routes.Settings.route) {
                 MindTrackBottomBar(
                     currentRoute = currentRoute,
                     onNavigate = { route ->
@@ -109,6 +111,9 @@ fun MindTrackNavGraph() {
                     viewModel = viewModel,
                     onBack = { navController.popBackStack() }
                 )
+            }
+            composable(Routes.Settings.route) {
+                SettingsScreen()
             }
         }
     }
