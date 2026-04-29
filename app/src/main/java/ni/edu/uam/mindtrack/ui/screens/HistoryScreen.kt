@@ -41,7 +41,10 @@ fun HistoryScreen(
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                         Text(
                             "Historial",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
                         )
                     }
                 },
@@ -51,12 +54,12 @@ fun HistoryScreen(
                             imageVector = Icons.Default.ArrowBackIosNew,
                             contentDescription = "Back",
                             modifier = Modifier.size(18.dp),
-                            tint = TextMuted
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
                 actions = {
-                    Box(modifier = Modifier.size(48.dp)) // Spacer to balance center title
+                    Box(modifier = Modifier.size(48.dp))
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent
@@ -91,7 +94,7 @@ fun HistoryScreen(
                 Text(
                     text = "Sesiones recientes",
                     style = MaterialTheme.typography.titleMedium.copy(
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold
                     )
                 )
@@ -116,7 +119,7 @@ fun HistoryScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = "Aún no hay sesiones",
-                            style = MaterialTheme.typography.bodyLarge.copy(color = TextFaint)
+                            style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
                         )
                     }
                 }
@@ -152,7 +155,7 @@ fun SummaryMiniCard(label: String, count: Int, color: Color, modifier: Modifier 
         )
         Text(
             text = label,
-            style = MaterialTheme.typography.labelSmall.copy(color = TextFaint)
+            style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
         )
     }
 }

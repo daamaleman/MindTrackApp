@@ -49,7 +49,11 @@ fun ResultScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Background, Color(0xFF16122A), Background)
+                    colors = listOf(
+                        MaterialTheme.colorScheme.background,
+                        if (MaterialTheme.colorScheme.background == Background) Color(0xFF16122A) else Color(0xFFE9ECEF),
+                        MaterialTheme.colorScheme.background
+                    )
                 )
             )
     ) {
@@ -112,7 +116,7 @@ fun ResultScreen(
                 text = resultProfile,
                 style = MaterialTheme.typography.displayMedium.copy(
                     brush = Brush.linearGradient(
-                        colors = listOf(Color.White, SecondaryAccent)
+                        colors = listOf(MaterialTheme.colorScheme.onSurface, SecondaryAccent)
                     )
                 )
             )
@@ -128,7 +132,7 @@ fun ResultScreen(
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    color = TextMuted,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                     lineHeight = 22.sp
                 ),
@@ -151,13 +155,16 @@ fun ResultScreen(
                     Column(
                         modifier = Modifier
                             .weight(1f)
-                            .background(SurfaceVariant, RoundedCornerShape(12.dp))
-                            .border(1.dp, BorderColor, RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
                             .padding(vertical = 12.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(text = emoji, fontSize = 20.sp)
-                        Text(text = label, style = MaterialTheme.typography.labelSmall.copy(color = TextMuted))
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        )
                     }
                 }
             }
@@ -168,14 +175,14 @@ fun ResultScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(SurfaceVariant, RoundedCornerShape(16.dp))
-                    .border(1.dp, BorderColor, RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
                     .padding(16.dp)
             ) {
                 Text(
                     text = "DISTRIBUCIÓN",
                     style = MaterialTheme.typography.labelSmall.copy(
-                        color = TextFaint,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp
                     )
@@ -210,13 +217,13 @@ fun DistributionBar(label: String, progress: Float, color: Color) {
         Text(
             text = label,
             modifier = Modifier.width(80.dp),
-            style = MaterialTheme.typography.bodySmall.copy(color = TextMuted)
+            style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
         )
         Box(
             modifier = Modifier
                 .weight(1f)
                 .height(8.dp)
-                .background(Surface, RoundedCornerShape(4.dp))
+                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
         ) {
             Box(
                 modifier = Modifier

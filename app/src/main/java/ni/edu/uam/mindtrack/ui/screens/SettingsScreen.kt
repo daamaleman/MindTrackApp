@@ -19,25 +19,28 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ni.edu.uam.mindtrack.ui.theme.*
+import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(viewModel: MindTrackViewModel) {
     var showDialog by remember { mutableStateOf(false) }
     var dialogTitle by remember { mutableStateOf("") }
     var dialogMessage by remember { mutableStateOf("") }
+    
+    val isDarkMode by viewModel.isDarkMode.collectAsState()
 
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
             title = { Text(text = dialogTitle, fontWeight = FontWeight.Bold, color = PrimaryAccent) },
-            text = { Text(text = dialogMessage, color = TextWhite) },
+            text = { Text(text = dialogMessage, color = MaterialTheme.colorScheme.onSurface) },
             confirmButton = {
                 TextButton(onClick = { showDialog = false }) {
                     Text("Entendido", color = PrimaryAccent)
                 }
             },
-            containerColor = SurfaceVariant,
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
             shape = RoundedCornerShape(16.dp)
         )
     }
@@ -68,12 +71,12 @@ fun SettingsScreen() {
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Perfil de Usuario (Placeholder)
+            // Perfil de Usuario
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(SurfaceVariant, RoundedCornerShape(16.dp))
-                    .border(1.dp, BorderColor, RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -89,7 +92,10 @@ fun SettingsScreen() {
                 Column {
                     Text(
                         text = "Usuario MindTrack",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = Color.White)
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                     )
                     Text(
                         text = "Premium",
@@ -102,7 +108,11 @@ fun SettingsScreen() {
 
             Text(
                 text = "Preferencias",
-                style = MaterialTheme.typography.labelSmall.copy(color = TextFaint, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
             )
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -124,21 +134,50 @@ fun SettingsScreen() {
                     showDialog = true
                 }
             )
-            SettingsItem(
-                icon = Icons.Default.Palette,
-                label = "Tema y Apariencia",
-                onClick = {
-                    dialogTitle = "Apariencia"
-                    dialogMessage = "MindTrack está optimizado para el modo oscuro para reducir la fatiga visual. Más temas vendrán pronto."
-                    showDialog = true
-                }
-            )
+            
+            // Item de Tema y Apariencia con Switch
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { viewModel.toggleTheme() }
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = if (isDarkMode) Icons.Default.DarkMode else Icons.Default.LightMode,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = "Modo Oscuro",
+                    style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                    modifier = Modifier.weight(1f)
+                )
+                Switch(
+                    checked = isDarkMode,
+                    onCheckedChange = { viewModel.toggleTheme() },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = PrimaryAccent,
+                        checkedTrackColor = PrimaryAccent.copy(alpha = 0.5f)
+                    )
+                )
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
                 text = "Soporte",
-                style = MaterialTheme.typography.labelSmall.copy(color = TextFaint, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
             )
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -166,7 +205,7 @@ fun SettingsScreen() {
             Text(
                 text = "Versión 1.0.0",
                 modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
-                style = MaterialTheme.typography.labelSmall.copy(color = TextFaint),
+                style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
         }
@@ -179,16 +218,30 @@ fun SettingsItem(icon: ImageVector, label: String, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
-            .background(SurfaceVariant, RoundedCornerShape(12.dp))
-            .border(1.dp, BorderColor, RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(imageVector = icon, contentDescription = null, tint = TextMuted, modifier = Modifier.size(24.dp))
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(24.dp)
+        )
         Spacer(modifier = Modifier.width(16.dp))
-        Text(text = label, style = MaterialTheme.typography.bodyMedium.copy(color = Color.White), modifier = Modifier.weight(1f))
-        Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null, tint = TextFaint, modifier = Modifier.size(20.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+            modifier = Modifier.weight(1f)
+        )
+        Icon(
+            imageVector = Icons.Default.ChevronRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(20.dp)
+        )
     }
 }

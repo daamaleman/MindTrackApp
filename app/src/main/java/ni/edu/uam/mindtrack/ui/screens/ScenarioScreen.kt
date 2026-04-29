@@ -1,11 +1,11 @@
 package ni.edu.uam.mindtrack.ui.screens
 
 import androidx.compose.animation.*
-import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.sp
 import ni.edu.uam.mindtrack.ui.components.MindTrackButton
 import ni.edu.uam.mindtrack.ui.components.ScenarioOptionCard
 import ni.edu.uam.mindtrack.ui.theme.PrimaryAccent
-import ni.edu.uam.mindtrack.ui.theme.TextMuted
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,7 +42,10 @@ fun ScenarioScreen(
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                         Text(
                             "Escenario",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
                         )
                     }
                 },
@@ -53,7 +55,7 @@ fun ScenarioScreen(
                             imageVector = Icons.Default.ArrowBackIosNew,
                             contentDescription = "Back",
                             modifier = Modifier.size(18.dp),
-                            tint = TextMuted
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
@@ -95,8 +97,8 @@ fun ScenarioScreen(
             // Category Chip
             Surface(
                 color = PrimaryAccent.copy(alpha = 0.14f),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(100.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, PrimaryAccent.copy(alpha = 0.28f))
+                shape = RoundedCornerShape(100.dp),
+                border = BorderStroke(1.dp, PrimaryAccent.copy(alpha = 0.28f))
             ) {
                 Text(
                     text = "${scenario.emoji} ${scenario.category}",
@@ -115,7 +117,7 @@ fun ScenarioScreen(
                 text = scenario.question,
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     lineHeight = 32.sp
                 )
             )

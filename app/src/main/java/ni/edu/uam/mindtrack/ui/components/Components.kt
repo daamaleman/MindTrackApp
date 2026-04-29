@@ -8,9 +8,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
@@ -28,7 +25,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ni.edu.uam.mindtrack.model.Option
@@ -64,14 +60,14 @@ fun MindTrackButton(
         modifier
             .fillMaxWidth()
             .height(56.dp)
-            .border(1.dp, BorderColor, RoundedCornerShape(14.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(14.dp))
             .clip(RoundedCornerShape(14.dp))
             .clickable(enabled = enabled, onClick = onClick)
     } else {
         modifier
             .fillMaxWidth()
             .height(56.dp)
-            .background(Color.Gray.copy(alpha = 0.3f), RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
             .clip(RoundedCornerShape(14.dp))
     }
 
@@ -84,7 +80,7 @@ fun MindTrackButton(
             style = MaterialTheme.typography.labelLarge.copy(
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
-                color = if (isSecondary) TextMuted else Color.White
+                color = if (isSecondary) MaterialTheme.colorScheme.onSurfaceVariant else Color.White
             )
         )
     }
@@ -121,11 +117,11 @@ fun ScenarioOptionCard(
     onClick: () -> Unit
 ) {
     val backgroundColor by animateColorAsState(
-        targetValue = if (isSelected) PrimaryAccent.copy(alpha = 0.1f) else SurfaceVariant,
+        targetValue = if (isSelected) PrimaryAccent.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant,
         label = "backgroundColor"
     )
     val borderColor by animateColorAsState(
-        targetValue = if (isSelected) PrimaryAccent else BorderColor,
+        targetValue = if (isSelected) PrimaryAccent else MaterialTheme.colorScheme.outline,
         label = "borderColor"
     )
 
@@ -143,7 +139,7 @@ fun ScenarioOptionCard(
         Box(
             modifier = Modifier
                 .size(20.dp)
-                .border(1.5.dp, if (isSelected) PrimaryAccent else BorderColor, CircleShape)
+                .border(1.5.dp, if (isSelected) PrimaryAccent else MaterialTheme.colorScheme.outline, CircleShape)
                 .background(if (isSelected) PrimaryAccent else Color.Transparent, CircleShape),
             contentAlignment = Alignment.Center
         ) {
@@ -159,7 +155,7 @@ fun ScenarioOptionCard(
         Text(
             text = option.text,
             style = MaterialTheme.typography.bodyMedium.copy(
-                color = if (isSelected) TextWhite else TextMuted
+                color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
             )
         )
     }
@@ -170,8 +166,8 @@ fun StatCard(number: String, label: String) {
     Column(
         modifier = Modifier
             .width(100.dp)
-            .background(SurfaceVariant, RoundedCornerShape(10.dp))
-            .border(1.dp, BorderColor, RoundedCornerShape(10.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(10.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(10.dp))
             .padding(vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -185,7 +181,7 @@ fun StatCard(number: String, label: String) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall.copy(
-                color = TextFaint
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         )
     }
@@ -203,8 +199,8 @@ fun HistoryItemCard(session: SessionResult) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
-            .background(SurfaceVariant, RoundedCornerShape(16.dp))
-            .border(1.dp, BorderColor, RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -222,13 +218,13 @@ fun HistoryItemCard(session: SessionResult) {
                 text = "Perfil ${session.profile}",
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.Bold,
-                    color = TextWhite
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             )
             Text(
                 text = "${session.date} • ${session.decisionCount} decisiones",
                 style = MaterialTheme.typography.bodySmall.copy(
-                    color = TextFaint
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             )
         }
@@ -242,18 +238,18 @@ fun MindTrackBottomBar(
     onNavigate: (String) -> Unit
 ) {
     NavigationBar(
-        containerColor = Background.copy(alpha = 0.98f),
-        contentColor = TextMuted,
+        containerColor = MaterialTheme.colorScheme.background.copy(alpha = 0.98f),
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         tonalElevation = 8.dp,
         modifier = Modifier
             .height(100.dp)
             .border(
                 width = 1.dp,
-                color = BorderColor.copy(alpha = 0.5f),
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
                 shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
             )
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-            .background(Background)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         val items = listOf(
             Triple("home", Icons.Filled.Home to Icons.Outlined.Home, "Inicio"),
@@ -274,7 +270,7 @@ fun MindTrackBottomBar(
                         Icon(
                             imageVector = if (isSelected) icons.first else icons.second,
                             contentDescription = label,
-                            tint = if (isSelected) PrimaryAccent else TextFaint,
+                            tint = if (isSelected) PrimaryAccent else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(32.dp)
                         )
                         if (isSelected) {
@@ -290,7 +286,7 @@ fun MindTrackBottomBar(
                             Text(
                                 text = label,
                                 style = MaterialTheme.typography.labelSmall.copy(
-                                    color = TextFaint,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontSize = 10.sp
                                 )
                             )

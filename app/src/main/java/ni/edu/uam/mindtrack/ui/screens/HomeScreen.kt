@@ -10,11 +10,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,8 +20,6 @@ import ni.edu.uam.mindtrack.ui.components.MindTrackButton
 import ni.edu.uam.mindtrack.ui.components.StatCard
 import ni.edu.uam.mindtrack.ui.theme.PrimaryAccent
 import ni.edu.uam.mindtrack.ui.theme.SecondaryAccent
-import ni.edu.uam.mindtrack.ui.theme.TextMuted
-import ni.edu.uam.mindtrack.ui.theme.TextWhite
 
 @Composable
 fun HomeScreen(
@@ -97,7 +93,7 @@ fun HomeScreen(
                         text = "MindTrack",
                         style = MaterialTheme.typography.displayMedium.copy(
                             brush = Brush.linearGradient(
-                                colors = listOf(Color.White, SecondaryAccent)
+                                colors = listOf(MaterialTheme.colorScheme.onSurface, SecondaryAccent)
                             )
                         )
                     )
@@ -108,7 +104,7 @@ fun HomeScreen(
                     Text(
                         text = "Descubre tu perfil de toma\nde decisiones en 3 minutos",
                         style = MaterialTheme.typography.bodyLarge.copy(
-                            color = TextMuted,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,
                             lineHeight = 24.sp
                         )

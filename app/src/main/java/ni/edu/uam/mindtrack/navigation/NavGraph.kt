@@ -7,7 +7,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -18,13 +17,11 @@ import ni.edu.uam.mindtrack.ui.screens.HomeScreen
 import ni.edu.uam.mindtrack.ui.screens.ResultScreen
 import ni.edu.uam.mindtrack.ui.screens.ScenarioScreen
 import ni.edu.uam.mindtrack.ui.screens.SettingsScreen
-import ni.edu.uam.mindtrack.ui.screens.SettingsScreen
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 
 @Composable
-fun MindTrackNavGraph() {
+fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     val navController = rememberNavController()
-    val viewModel: MindTrackViewModel = viewModel()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -113,7 +110,7 @@ fun MindTrackNavGraph() {
                 )
             }
             composable(Routes.Settings.route) {
-                SettingsScreen()
+                SettingsScreen(viewModel = viewModel)
             }
         }
     }

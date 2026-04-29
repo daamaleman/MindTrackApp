@@ -16,6 +16,13 @@ import java.util.UUID
 class MindTrackViewModel : ViewModel() {
     private val decisionEngine = DecisionEngine()
 
+    private val _isDarkMode = MutableStateFlow(true)
+    val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
+
+    fun toggleTheme() {
+        _isDarkMode.value = !_isDarkMode.value
+    }
+
     val scenarios = listOf(
         Scenario(
             id = 1,
@@ -64,9 +71,6 @@ class MindTrackViewModel : ViewModel() {
     val currentResult: StateFlow<String> = _currentResult.asStateFlow()
 
     fun selectOption(type: String) {
-        // We handle selection in the screen, but we could also handle it here if we want to store it immediately.
-        // For simplicity and matching the request: "userChoices: mutableListOf<String>()"
-        // I'll add the type to the list when nextScenario or finishSession is called.
         _userChoices.add(type)
     }
 
