@@ -15,6 +15,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -239,39 +242,57 @@ fun MindTrackBottomBar(
     onNavigate: (String) -> Unit
 ) {
     NavigationBar(
-        containerColor = Background.copy(alpha = 0.95f),
+        containerColor = Background.copy(alpha = 0.98f),
         contentColor = TextMuted,
-        tonalElevation = 0.dp,
+        tonalElevation = 8.dp,
         modifier = Modifier
-            .height(80.dp)
-            .border(width = 1.dp, color = BorderColor, shape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp))
+            .height(100.dp)
+            .border(
+                width = 1.dp,
+                color = BorderColor.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+            )
+            .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
             .background(Background)
     ) {
         val items = listOf(
-            Triple("home", Icons.Default.Home, "Inicio"),
-            Triple("history", Icons.Default.History, "Historial"),
-            Triple("settings", Icons.Default.Settings, "Ajustes")
+            Triple("home", Icons.Filled.Home to Icons.Outlined.Home, "Inicio"),
+            Triple("history", Icons.Filled.History to Icons.Outlined.History, "Historial"),
+            Triple("settings", Icons.Filled.Settings to Icons.Outlined.Settings, "Ajustes")
         )
 
-        items.forEach { (route, icon, label) ->
+        items.forEach { (route, icons, label) ->
             val isSelected = currentRoute == route
             NavigationBarItem(
                 selected = isSelected,
                 onClick = { if (route != "settings") onNavigate(route) },
                 icon = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
                         Icon(
-                            imageVector = icon,
+                            imageVector = if (isSelected) icons.first else icons.second,
                             contentDescription = label,
                             tint = if (isSelected) PrimaryAccent else TextFaint,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(32.dp)
                         )
                         if (isSelected) {
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(6.dp))
                             Box(
                                 modifier = Modifier
-                                    .size(4.dp)
+                                    .size(6.dp)
                                     .background(PrimaryAccent, CircleShape)
+                                    .shadow(4.dp, CircleShape, spotColor = PrimaryAccent)
+                            )
+                        } else {
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    color = TextFaint,
+                                    fontSize = 10.sp
+                                )
                             )
                         }
                     }
