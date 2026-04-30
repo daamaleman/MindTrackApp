@@ -1,19 +1,23 @@
 package ni.edu.uam.mindtrack.ui.screens
 
 import androidx.compose.animation.*
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ni.edu.uam.mindtrack.model.Option
 import ni.edu.uam.mindtrack.ui.components.MindTrackButton
 import ni.edu.uam.mindtrack.ui.components.ScenarioOptionCard
 import ni.edu.uam.mindtrack.ui.theme.PrimaryAccent
@@ -26,139 +30,148 @@ fun ScenarioScreen(
     onBack: () -> Unit,
     onFinish: () -> Unit
 ) {
-    val currentStep by viewModel.currentScenarioIndex.collectAsState()
-    val scenario = viewModel.scenarios[currentStep]
-    var selectedOptionType by remember { mutableStateOf<String?>(null) }
+    val scenario = viewModel.getCurrentScenario()
+    val playerState by viewModel.playerState.collectAsState()
+    val gameFinished by viewModel.gameFinished.collectAsState()
+    val progress = viewModel.getScenarioProgress()
+    
+    var selectedOption by remember { mutableStateOf<Option?>(null) }
 
-    // Reset selection when scenario changes
-    LaunchedEffect(currentStep) {
-        selectedOptionType = null
+    LaunchedEffect(gameFinished) {
+        if (gameFinished) {
+            onFinish()
+        }
     }
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            "Escenario",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                            text = scenario?.title ?: "Simulación",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                        )
+                        LinearProgressIndicator(
+                            progress = { progress },
+                            modifier = Modifier
+                                .width(100.dp)
+                                .height(4.dp)
+                                .clip(RoundedCornerShape(2.dp)),
+                            color = PrimaryAccent,
+                            trackColor = MaterialTheme.colorScheme.outlineVariant
                         )
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBackIosNew,
-                            contentDescription = "Back",
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar")
                     }
-                },
-                actions = {
-                    Text(
-                        text = "${currentStep + 1} / ${viewModel.scenarios.size}",
-                        modifier = Modifier.padding(end = 16.dp),
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            color = PrimaryAccent,
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent
                 )
             )
         },
-        containerColor = MaterialTheme.colorScheme.background
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(24.dp)
-        ) {
-            // Progress Indicator
-            LinearProgressIndicator(
-                progress = { (currentStep + 1).toFloat() / viewModel.scenarios.size },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(4.dp),
-                color = PrimaryAccent,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Category Chip
+        bottomBar = {
             Surface(
-                color = PrimaryAccent.copy(alpha = 0.14f),
-                shape = RoundedCornerShape(100.dp),
-                border = BorderStroke(1.dp, PrimaryAccent.copy(alpha = 0.28f))
+                modifier = Modifier.fillMaxWidth(),
+                tonalElevation = 8.dp,
+                shadowElevation = 16.dp,
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
             ) {
-                Text(
-                    text = "${scenario.emoji} ${scenario.category}",
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        color = PrimaryAccent,
-                        fontWeight = FontWeight.Bold
+                Column(
+                    modifier = Modifier
+                        .padding(24.dp)
+                        .navigationBarsPadding()
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        StateIndicator(label = "Energía", value = playerState.energy, icon = "⚡")
+                        StateIndicator(label = "Estrés", value = playerState.stress, icon = "🧘")
+                        StateIndicator(label = "Progreso", value = playerState.progress, icon = "📈")
+                        StateIndicator(label = "Dinero", value = playerState.money, icon = "💵")
+                    }
+                    
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    MindTrackButton(
+                        text = "Confirmar elección",
+                        enabled = selectedOption != null,
+                        onClick = {
+                            selectedOption?.let {
+                                viewModel.selectOption(it)
+                                selectedOption = null
+                            }
+                        }
                     )
-                )
+                }
             }
+        }
+    ) { paddingValues ->
+        Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+            if (scenario != null) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        SuggestionChip(
+                            onClick = { },
+                            label = { Text(scenario.title) },
+                            colors = SuggestionChipDefaults.suggestionChipColors(
+                                containerColor = PrimaryAccent.copy(alpha = 0.1f),
+                                labelColor = PrimaryAccent
+                            ),
+                            border = SuggestionChipDefaults.suggestionChipBorder(
+                                borderColor = PrimaryAccent.copy(alpha = 0.3f),
+                                enabled = true
+                            )
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = scenario.question,
+                            style = MaterialTheme.typography.headlineSmall.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                lineHeight = 32.sp
+                            )
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Question
-            Text(
-                text = scenario.question,
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    lineHeight = 32.sp
-                )
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Options with AnimatedContent for transitions
-            AnimatedContent(
-                targetState = scenario,
-                transitionSpec = {
-                    fadeIn() togetherWith fadeOut()
-                },
-                label = "scenarioTransition"
-            ) { targetScenario ->
-                Column {
-                    targetScenario.options.forEach { option ->
+                    items(scenario.options) { option ->
                         ScenarioOptionCard(
                             option = option,
-                            isSelected = selectedOptionType == option.type,
-                            onClick = { selectedOptionType = option.type }
+                            isSelected = selectedOption == option,
+                            onClick = { selectedOption = option }
                         )
+                    }
+                    
+                    item {
+                        Spacer(modifier = Modifier.height(32.dp))
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Confirm Button
-            MindTrackButton(
-                text = "Confirmar elección  →",
-                enabled = selectedOptionType != null,
-                onClick = {
-                    selectedOptionType?.let { type ->
-                        viewModel.selectOption(type)
-                        if (!viewModel.nextScenario()) {
-                            viewModel.finishSession()
-                            onFinish()
-                        }
-                    }
-                }
-            )
         }
+    }
+}
+
+@Composable
+fun StateIndicator(label: String, value: Int, icon: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = icon, fontSize = 20.sp)
+        Text(
+            text = value.toString(),
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+        )
     }
 }

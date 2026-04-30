@@ -4,9 +4,10 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import ni.edu.uam.mindtrack.engine.DecisionEngine
+import ni.edu.uam.mindtrack.engine.GameEngine
 import ni.edu.uam.mindtrack.model.Option
 import ni.edu.uam.mindtrack.model.Scenario
+import ni.edu.uam.mindtrack.model.PlayerState
 import ni.edu.uam.mindtrack.model.SessionResult
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -14,7 +15,14 @@ import java.util.Locale
 import java.util.UUID
 
 class MindTrackViewModel : ViewModel() {
-    private val decisionEngine = DecisionEngine()
+    private val gameEngine = GameEngine()
+
+    private val initialState = PlayerState(
+        energy = 80,
+        stress = 20,
+        progress = 0,
+        money = 100
+    )
 
     private val _isDarkMode = MutableStateFlow(true)
     val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
@@ -26,90 +34,118 @@ class MindTrackViewModel : ViewModel() {
     val scenarios = listOf(
         Scenario(
             id = 1,
-            category = "💼 Trabajo & Carrera",
-            emoji = "💼",
-            question = "Te ofrecen un aumento del 30% pero debes mudarte en 2 semanas. ¿Qué haces?",
+            title = "Trabajo",
+            question = "Te ofrecen un proyecto de alta prioridad con un plazo muy corto. ¿Cómo procedes?",
             options = listOf(
-                Option("Analizo pros y contras detalladamente antes de decidir", "rational"),
-                Option("Acepto de inmediato, es demasiado bueno para rechazarlo", "impulsive"),
-                Option("Negocio más tiempo para tomar la decisión con calma", "balanced")
+                Option("Aceptar y trabajar horas extra", 2, -20, 15, 25, 30),
+                Option("Negociar plazos más largos", 3, -5, 5, 10, 10),
+                Option("Rechazar para evitar estrés", 4, 10, -10, 0, -5)
             )
         ),
         Scenario(
             id = 2,
-            category = "💰 Finanzas",
-            emoji = "💰",
-            question = "Recibes una herencia inesperada de $10,000. ¿Cómo actúas?",
+            title = "Crisis",
+            question = "El proyecto tiene errores críticos a mitad de camino. ¿Qué haces?",
             options = listOf(
-                Option("La invierto en un portafolio diversificado tras investigar opciones", "rational"),
-                Option("La gasto en un viaje que siempre quise hacer, ¡YOLO!", "impulsive"),
-                Option("Ahorro la mitad y uso el resto en algo significativo para mí", "balanced")
+                Option("Resolverlo solo sin dormir", 5, -30, 25, 30, 0),
+                Option("Pedir ayuda al equipo", 5, -10, 10, 20, -10),
+                Option("Ignorar y esperar que no se note", null, -5, 20, -20, -20)
             )
         ),
         Scenario(
             id = 3,
-            category = "❤️ Relaciones",
-            emoji = "❤️",
-            question = "Tu mejor amigo te pide un favor enorme que te incomoda. ¿Qué haces?",
+            title = "Estudio",
+            question = "Tienes un examen importante mañana pero estás agotado.",
             options = listOf(
-                Option("Evalúo el impacto en mí antes de dar una respuesta definitiva", "rational"),
-                Option("Digo que sí de inmediato para no decepcionarlo", "impulsive"),
-                Option("Hablo honestamente sobre mis limitaciones y busco un punto medio", "balanced")
+                Option("Estudiar toda la noche", 5, -25, 20, 25, 0),
+                Option("Repasar y dormir temprano", 5, 10, -10, 15, 0),
+                Option("No estudiar y confiar en la suerte", null, 15, -15, -10, 0)
+            )
+        ),
+        Scenario(
+            id = 4,
+            title = "Social",
+            question = "Tus amigos te invitan a salir, pero tienes gastos pendientes.",
+            options = listOf(
+                Option("Ir y gastar en grande", 5, 15, -10, -5, -40),
+                Option("Ir y controlar el gasto", 5, 5, -5, 0, -15),
+                Option("Quedarte en casa ahorrando", 5, 10, -5, 5, 0)
+            )
+        ),
+        Scenario(
+            id = 5,
+            title = "Decisión Final",
+            question = "¿Cómo quieres cerrar este ciclo?",
+            options = listOf(
+                Option("Invertir en crecimiento personal", null, -10, 5, 20, -30),
+                Option("Tomar unas vacaciones merecidas", null, 30, -25, 0, -40),
+                Option("Seguir trabajando duro", null, -20, 15, 15, 20)
             )
         )
     )
 
-    private val _currentScenarioIndex = MutableStateFlow(0)
-    val currentScenarioIndex: StateFlow<Int> = _currentScenarioIndex.asStateFlow()
+    private val _playerState = MutableStateFlow(initialState)
+    val playerState: StateFlow<PlayerState> = _playerState.asStateFlow()
 
-    private val _userChoices = mutableListOf<String>()
-    
+    private val _currentScenarioId = MutableStateFlow(1)
+    val currentScenarioId: StateFlow<Int> = _currentScenarioId.asStateFlow()
+
+    private val _gameFinished = MutableStateFlow(false)
+    val gameFinished: StateFlow<Boolean> = _gameFinished.asStateFlow()
+
+    private val _finalResult = MutableStateFlow("")
+    val finalResult: StateFlow<String> = _finalResult.asStateFlow()
+
     private val _sessionHistory = MutableStateFlow<List<SessionResult>>(emptyList())
     val sessionHistory: StateFlow<List<SessionResult>> = _sessionHistory.asStateFlow()
 
-    private val _currentResult = MutableStateFlow("")
-    val currentResult: StateFlow<String> = _currentResult.asStateFlow()
+    private val _decisionPath = MutableStateFlow<List<Int>>(emptyList())
+    val decisionPath: StateFlow<List<Int>> = _decisionPath.asStateFlow()
 
-    fun selectOption(type: String) {
-        _userChoices.add(type)
+    fun resetSession() {
+        _playerState.value = initialState
+        _currentScenarioId.value = 1
+        _gameFinished.value = false
+        _finalResult.value = ""
+        _decisionPath.value = emptyList()
     }
 
-    fun nextScenario(): Boolean {
-        if (_currentScenarioIndex.value < scenarios.size - 1) {
-            _currentScenarioIndex.value += 1
-            return true
+    fun selectOption(option: Option) {
+        if (_gameFinished.value) return
+
+        _playerState.value = gameEngine.applyOption(_playerState.value, option)
+        _decisionPath.value = _decisionPath.value + (_currentScenarioId.value)
+
+        if (option.nextScenarioId == null) {
+            finishSimulation()
+        } else {
+            _currentScenarioId.value = option.nextScenarioId
         }
-        return false
     }
 
-    fun finishSession() {
-        val profile = decisionEngine.analyze(_userChoices)
-        _currentResult.value = profile
-        
+    private fun finishSimulation() {
+        val result = gameEngine.evaluateFinal(_playerState.value, _decisionPath.value)
+        _finalResult.value = result
+        _gameFinished.value = true
+
         val newResult = SessionResult(
             id = UUID.randomUUID().toString(),
-            profile = profile,
+            finalResult = result,
             date = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date()),
-            decisionCount = _userChoices.size
+            finalState = _playerState.value.copy(),
+            choicesMade = _decisionPath.value.size,
+            path = _decisionPath.value
         )
         _sessionHistory.value = listOf(newResult) + _sessionHistory.value
     }
 
-    fun resetSession() {
-        _currentScenarioIndex.value = 0
-        _userChoices.clear()
-        _currentResult.value = ""
+    fun getCurrentScenario(): Scenario? {
+        return scenarios.find { it.id == _currentScenarioId.value }
     }
-    
-    fun getDistribution(): Map<String, Float> {
-        val total = _userChoices.size.toFloat()
-        if (total == 0f) return emptyMap()
-        
-        val counts = _userChoices.groupingBy { it }.eachCount()
-        return mapOf(
-            "Racional" to (counts.getOrDefault("rational", 0).toFloat() / total),
-            "Impulsivo" to (counts.getOrDefault("impulsive", 0).toFloat() / total),
-            "Equilibrado" to (counts.getOrDefault("balanced", 0).toFloat() / total)
-        )
+
+    fun getScenarioProgress(): Float {
+        val totalSteps = 4f 
+        val stepsTaken = _decisionPath.value.size.toFloat()
+        return (stepsTaken + 1) / (totalSteps + 1)
     }
 }

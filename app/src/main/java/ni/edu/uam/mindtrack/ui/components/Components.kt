@@ -87,11 +87,12 @@ fun MindTrackButton(
 }
 
 @Composable
-fun ProfileBadge(profile: String) {
-    val color = when (profile) {
-        "Racional" -> RationalColor
-        "Impulsivo" -> ImpulsiveColor
-        else -> BalancedColor
+fun ResultBadge(result: String) {
+    val color = when {
+        result.contains("exitoso", ignoreCase = true) -> RationalColor
+        result.contains("estratégico", ignoreCase = true) -> BalancedColor
+        result.contains("crítico", ignoreCase = true) -> ImpulsiveColor
+        else -> SecondaryAccent
     }
 
     Surface(
@@ -100,7 +101,7 @@ fun ProfileBadge(profile: String) {
         border = BorderStroke(1.dp, color.copy(alpha = 0.28f))
     ) {
         Text(
-            text = profile,
+            text = result,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
             style = MaterialTheme.typography.labelSmall.copy(
                 color = color,
@@ -152,13 +153,29 @@ fun ScenarioOptionCard(
             }
         }
         Spacer(modifier = Modifier.width(12.dp))
-        Text(
-            text = option.text,
-            style = MaterialTheme.typography.bodyMedium.copy(
-                color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = option.text,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                )
             )
-        )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "⚡ ${formatEffect(option.energyEffect)}  •  🧘 ${formatEffect(option.stressEffect)}  •  📈 ${formatEffect(option.progressEffect)}  •  💵 ${formatEffect(option.moneyEffect)}",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 10.sp
+                )
+            )
+        }
     }
+}
+
+private fun formatEffect(value: Int): String = when {
+    value > 0 -> "+$value"
+    value < 0 -> value.toString()
+    else -> "0"
 }
 
 @Composable
@@ -189,10 +206,11 @@ fun StatCard(number: String, label: String) {
 
 @Composable
 fun HistoryItemCard(session: SessionResult) {
-    val (emoji, color) = when (session.profile) {
-        "Racional" -> "🧠" to RationalColor
-        "Impulsivo" -> "⚡" to ImpulsiveColor
-        else -> "⚖️" to BalancedColor
+    val (emoji, color) = when {
+        session.finalResult.contains("exitoso", ignoreCase = true) -> "🧠" to RationalColor
+        session.finalResult.contains("estratégico", ignoreCase = true) -> "⚖️" to BalancedColor
+        session.finalResult.contains("crítico", ignoreCase = true) -> "⚡" to ImpulsiveColor
+        else -> "📊" to SecondaryAccent
     }
 
     Row(
@@ -215,20 +233,20 @@ fun HistoryItemCard(session: SessionResult) {
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Perfil ${session.profile}",
+                text = session.finalResult,
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             )
             Text(
-                text = "${session.date} • ${session.decisionCount} decisiones",
+                text = "${session.date} • ${session.choicesMade} decisiones • E:${session.finalState.energy} S:${session.finalState.stress} P:${session.finalState.progress} M:${session.finalState.money}",
                 style = MaterialTheme.typography.bodySmall.copy(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             )
         }
-        ProfileBadge(profile = session.profile)
+        ResultBadge(result = session.finalResult)
     }
 }
 
