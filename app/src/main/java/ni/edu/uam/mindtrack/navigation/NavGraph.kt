@@ -25,6 +25,22 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    fun isForwardNavigation(initial: String?, target: String?): Boolean {
+        val order = listOf(Routes.Home.route, Routes.History.route, Routes.Settings.route)
+        val initialIdx = order.indexOf(initial)
+        val targetIdx = order.indexOf(target)
+        
+        // Navigation to Scenario is always forward
+        if (target == Routes.Scenario.route || target == Routes.Result.route) return true
+        
+        // Between bottom bar items, use index order
+        if (initialIdx != -1 && targetIdx != -1) {
+            return targetIdx > initialIdx
+        }
+        
+        return true
+    }
+
     Scaffold(
         bottomBar = {
             // Show bottom bar on Home, History, and Settings
@@ -49,14 +65,24 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
             startDestination = Routes.Home.route,
             modifier = Modifier.padding(innerPadding),
             enterTransition = {
+                val target = targetState.destination.route
+                val initial = initialState.destination.route
+                val isForward = isForwardNavigation(initial, target)
+                
                 slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    if (isForward) AnimatedContentTransitionScope.SlideDirection.Left 
+                    else AnimatedContentTransitionScope.SlideDirection.Right,
                     animationSpec = tween(500)
                 )
             },
             exitTransition = {
+                val target = targetState.destination.route
+                val initial = initialState.destination.route
+                val isForward = isForwardNavigation(initial, target)
+                
                 slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    if (isForward) AnimatedContentTransitionScope.SlideDirection.Left 
+                    else AnimatedContentTransitionScope.SlideDirection.Right,
                     animationSpec = tween(500)
                 )
             },
@@ -78,9 +104,6 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                     onStartSimulation = {
                         viewModel.resetSession()
                         navController.navigate(Routes.Scenario.route)
-                    },
-                    onViewHistory = {
-                        navController.navigate(Routes.History.route)
                     }
                 )
             }

@@ -23,8 +23,7 @@ import ni.edu.uam.mindtrack.ui.theme.SecondaryAccent
 
 @Composable
 fun HomeScreen(
-    onStartSimulation: () -> Unit,
-    onViewHistory: () -> Unit
+    onStartSimulation: () -> Unit
 ) {
     var visible by remember { mutableStateOf(false) }
 
@@ -122,14 +121,6 @@ fun HomeScreen(
                     MindTrackButton(
                         text = "▶  Iniciar Simulación",
                         onClick = onStartSimulation
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    MindTrackButton(
-                        text = "📋  Ver Historial",
-                        onClick = onViewHistory,
-                        isSecondary = true
                     )
                 }
             }
