@@ -7,10 +7,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import ni.edu.uam.mindtrack.ui.screens.HistoryScreen
-import ni.edu.uam.mindtrack.ui.screens.HomeScreen
-import ni.edu.uam.mindtrack.ui.screens.ResultScreen
-import ni.edu.uam.mindtrack.ui.screens.ScenarioScreen
+import ni.edu.uam.mindtrack.ui.screens.*
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 
 @Composable
@@ -20,7 +17,7 @@ fun MindTrackNavGraph() {
 
     NavHost(
         navController = navController,
-        startDestination = Routes.Home.route,
+        startDestination = Routes.Login.route,
         enterTransition = {
             slideIntoContainer(
                 AnimatedContentTransitionScope.SlideDirection.Left,
@@ -46,6 +43,32 @@ fun MindTrackNavGraph() {
             )
         }
     ) {
+        composable(Routes.Login.route) {
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate(Routes.Home.route) {
+                        popUpTo(Routes.Login.route) { inclusive = true }
+                    }
+                },
+                onNavigateToRegister = {
+                    navController.navigate(Routes.Register.route)
+                }
+            )
+        }
+
+        composable(Routes.Register.route) {
+            RegisterScreen(
+                onRegisterSuccess = {
+                    navController.navigate(Routes.Login.route) {
+                        popUpTo(Routes.Register.route) { inclusive = true }
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
         composable(Routes.Home.route) {
             HomeScreen(
                 onStartSimulation = {
