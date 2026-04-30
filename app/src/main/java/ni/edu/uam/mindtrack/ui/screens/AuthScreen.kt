@@ -108,7 +108,7 @@ fun AuthScreen(
                     )
                 } else {
                     RegisterContent(
-                        onRegisterSuccess = { isLogin = true }
+                        onRegisterSuccess = onAuthSuccess
                     )
                 }
             }

@@ -55,7 +55,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Routes.Home.route,
+            startDestination = Routes.Login.route,
             modifier = Modifier.padding(innerPadding),
             enterTransition = {
                 val target = targetState.destination.route
@@ -92,6 +92,30 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                 )
             }
         ) {
+            composable(Routes.Login.route) {
+                LoginScreen(
+                    onLoginSuccess = {
+                        navController.navigate(Routes.Home.route) {
+                            popUpTo(Routes.Login.route) { inclusive = true }
+                        }
+                    },
+                    onNavigateToRegister = {
+                        navController.navigate(Routes.Register.route)
+                    }
+                )
+            }
+            composable(Routes.Register.route) {
+                RegisterScreen(
+                    onRegisterSuccess = {
+                        navController.navigate(Routes.Home.route) {
+                            popUpTo(Routes.Login.route) { inclusive = true }
+                        }
+                    },
+                    onNavigateToLogin = {
+                        navController.popBackStack()
+                    }
+                )
+            }
             composable(Routes.Home.route) {
                 HomeScreen(
                     onStartSimulation = {
