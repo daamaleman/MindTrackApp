@@ -5,8 +5,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -14,67 +15,108 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import ni.edu.uam.mindtrack.ui.components.HistoryItemCard
-import ni.edu.uam.mindtrack.ui.components.StatCard
+import ni.edu.uam.mindtrack.ui.components.IconCircleButton
+import ni.edu.uam.mindtrack.ui.components.SectionLabel
+import ni.edu.uam.mindtrack.ui.components.StatTile
+import ni.edu.uam.mindtrack.ui.theme.*
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
     viewModel: MindTrackViewModel,
     onBack: () -> Unit
 ) {
     val history by viewModel.sessionHistory.collectAsState()
-    
-    val successCount = history.count { it.finalResult.contains("exitoso", ignoreCase = true) }
-    val burnoutCount = history.count { it.finalResult.contains("burnout", ignoreCase = true) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Historial de Sesiones", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar")
-                    }
-                }
+    val totalCount = history.size
+    val rationalCount = history.count {
+        it.finalResult.contains("racional", true) || it.finalResult.contains("exitoso", true)
+    }
+    val impulsiveCount = history.count {
+        it.finalResult.contains("impulsiv", true) || it.finalResult.contains("crítico", true)
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Background)
+            .padding(horizontal = 20.dp)
+            .padding(top = 16.dp, bottom = 100.dp)
+    ) {
+        // Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(
+                    text = "Historial",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 22.sp,
+                        letterSpacing = (-0.6).sp,
+                        color = TextWhite
+                    )
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = "Tus sesiones anteriores",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = TextMuted,
+                        fontSize = 12.5.sp
+                    )
+                )
+            }
+            IconCircleButton(icon = Icons.Filled.FilterList, onClick = {})
+        }
+
+        Spacer(Modifier.height(18.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            StatTile(number = totalCount.toString(), label = "Total", modifier = Modifier.weight(1f))
+            StatTile(
+                number = rationalCount.toString(),
+                label = "Racional",
+                numberColor = RationalColor,
+                modifier = Modifier.weight(1f)
+            )
+            StatTile(
+                number = impulsiveCount.toString(),
+                label = "Impulsivo",
+                numberColor = ImpulsiveColor,
+                modifier = Modifier.weight(1f)
             )
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                StatCard(number = history.size.toString(), label = "Total")
-                StatCard(number = successCount.toString(), label = "Exitosos")
-                StatCard(number = burnoutCount.toString(), label = "Burnout")
-            }
 
-            if (history.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = "No hay sesiones registradas",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+        Spacer(Modifier.height(22.dp))
+
+        if (history.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No hay sesiones registradas",
+                    style = MaterialTheme.typography.bodyLarge.copy(color = TextMuted)
+                )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                item {
+                    SectionLabel(text = "Esta semana")
+                    Spacer(Modifier.height(8.dp))
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(history) { session ->
-                        HistoryItemCard(session = session)
-                    }
+                items(history) { session ->
+                    HistoryItemCard(session = session)
                 }
             }
         }
