@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -73,7 +74,8 @@ private val StatisticsPeriods = listOf("Semana", "Mes", "Año", "Todo")
 @Composable
 fun StatisticsScreen(
     viewModel: MindTrackViewModel,
-    onStartSimulation: () -> Unit
+    onStartSimulation: () -> Unit,
+    onOpenHistory: () -> Unit
 ) {
     val history by viewModel.sessionHistory.collectAsState()
     val currentStreak by viewModel.currentStreak.collectAsState()
@@ -141,6 +143,13 @@ fun StatisticsScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onOpenHistory) {
+                        Icon(
+                            imageVector = Icons.Filled.History,
+                            contentDescription = "Ver historial",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                     IconButton(
                         onClick = {
                             runCatching {

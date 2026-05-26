@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
@@ -271,7 +273,7 @@ fun MindTrackBottomBar(
     ) {
         val items = listOf(
             Triple("home", Icons.Filled.Home to Icons.Outlined.Home, "Inicio"),
-            Triple("history", Icons.Filled.History to Icons.Outlined.History, "Historial"),
+            Triple("statistics", Icons.Filled.BarChart to Icons.Outlined.BarChart, "Estadísticas"),
             Triple("settings", Icons.Filled.Settings to Icons.Outlined.Settings, "Ajustes")
         )
 

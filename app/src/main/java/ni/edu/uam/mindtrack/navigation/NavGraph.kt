@@ -22,7 +22,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     fun isForwardNavigation(initial: String?, target: String?): Boolean {
-        val order = listOf(Routes.Home.route, Routes.History.route, Routes.Settings.route)
+        val order = listOf(Routes.Home.route, Routes.Statistics.route, Routes.History.route, Routes.Settings.route)
         val initialIdx = order.indexOf(initial)
         val targetIdx = order.indexOf(target)
         
@@ -37,7 +37,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
 
     Scaffold(
         bottomBar = {
-            if (currentRoute == Routes.Home.route || currentRoute == Routes.History.route || currentRoute == Routes.Settings.route) {
+            if (currentRoute == Routes.Home.route || currentRoute == Routes.Statistics.route || currentRoute == Routes.History.route || currentRoute == Routes.Settings.route) {
                 MindTrackBottomBar(
                     currentRoute = currentRoute,
                     onNavigate = { route ->
@@ -140,6 +140,18 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                     viewModel = viewModel,
                     onBackHome = {
                         navController.popBackStack(Routes.Home.route, inclusive = false)
+                    }
+                )
+            }
+            composable(Routes.Statistics.route) {
+                StatisticsScreen(
+                    viewModel = viewModel,
+                    onStartSimulation = {
+                        viewModel.resetSession()
+                        navController.navigate(Routes.Scenario.route)
+                    },
+                    onOpenHistory = {
+                        navController.navigate(Routes.History.route)
                     }
                 )
             }
