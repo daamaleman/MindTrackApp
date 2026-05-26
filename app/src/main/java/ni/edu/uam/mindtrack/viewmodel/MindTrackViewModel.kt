@@ -9,6 +9,8 @@ import ni.edu.uam.mindtrack.model.Option
 import ni.edu.uam.mindtrack.model.Scenario
 import ni.edu.uam.mindtrack.model.PlayerState
 import ni.edu.uam.mindtrack.model.SessionResult
+import java.time.LocalDate
+import java.time.ZoneId
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -99,6 +101,12 @@ class MindTrackViewModel : ViewModel() {
     private val _sessionHistory = MutableStateFlow<List<SessionResult>>(emptyList())
     val sessionHistory: StateFlow<List<SessionResult>> = _sessionHistory.asStateFlow()
 
+    private val _currentStreak = MutableStateFlow(0)
+    val currentStreak: StateFlow<Int> = _currentStreak.asStateFlow()
+
+    private val _bestStreak = MutableStateFlow(0)
+    val bestStreak: StateFlow<Int> = _bestStreak.asStateFlow()
+
     private val _decisionPath = MutableStateFlow<List<Int>>(emptyList())
     val decisionPath: StateFlow<List<Int>> = _decisionPath.asStateFlow()
 
@@ -137,6 +145,72 @@ class MindTrackViewModel : ViewModel() {
             path = _decisionPath.value
         )
         _sessionHistory.value = listOf(newResult) + _sessionHistory.value
+        recalculateStreaks()
+    }
+
+    fun filterSessionsByPeriod(period: String): List<SessionResult> {
+        val now = System.currentTimeMillis()
+        val cutoff = when (period) {
+            "Semana" -> now - 7L * 24 * 60 * 60 * 1000
+            "Mes" -> now - 30L * 24 * 60 * 60 * 1000
+            "Año" -> now - 365L * 24 * 60 * 60 * 1000
+            else -> 0L
+        }
+        val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+
+        return _sessionHistory.value.filter {
+            runCatching { formatter.parse(it.date)?.time ?: 0L }.getOrDefault(0L) >= cutoff
+        }
+    }
+
+    private fun recalculateStreaks() {
+        val uniqueDates = _sessionHistory.value
+            .mapNotNull { parseSessionDate(it.date) }
+            .toSet()
+
+        _currentStreak.value = calculateCurrentStreak(uniqueDates)
+        _bestStreak.value = calculateBestStreak(uniqueDates)
+    }
+
+    private fun parseSessionDate(date: String): LocalDate? {
+        val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        return runCatching {
+            val parsed = formatter.parse(date) ?: return null
+            parsed.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+        }.getOrNull()
+    }
+
+    private fun calculateCurrentStreak(dates: Set<LocalDate>): Int {
+        if (dates.isEmpty()) return 0
+
+        var streak = 0
+        var cursor = LocalDate.now()
+
+        while (dates.contains(cursor)) {
+            streak += 1
+            cursor = cursor.minusDays(1)
+        }
+
+        return streak
+    }
+
+    private fun calculateBestStreak(dates: Set<LocalDate>): Int {
+        if (dates.isEmpty()) return 0
+
+        val sortedDates = dates.sorted()
+        var best = 1
+        var current = 1
+
+        for (index in 1 until sortedDates.size) {
+            current = if (sortedDates[index] == sortedDates[index - 1].plusDays(1)) {
+                current + 1
+            } else {
+                1
+            }
+            best = maxOf(best, current)
+        }
+
+        return best
     }
 
     fun getCurrentScenario(): Scenario? {

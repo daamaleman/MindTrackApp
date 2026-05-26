@@ -652,8 +652,8 @@ private fun buildStatisticsMetrics(
     val previousSessions = history.filterByPreviousPeriod(selectedPeriod).sortedBy { parseSessionMillis(it.date) }
 
     val sessionsCount = currentSessions.size
-    val totalDecisions = currentSessions.sumOf { it.decisionCount }
-    val previousTotalDecisions = previousSessions.sumOf { it.decisionCount }
+    val totalDecisions = currentSessions.sumOf { it.choicesMade }
+    val previousTotalDecisions = previousSessions.sumOf { it.choicesMade }
 
     val deltaLabel = when {
         previousTotalDecisions == 0 -> "Nuevo"
@@ -665,7 +665,7 @@ private fun buildStatisticsMetrics(
     }
     val deltaColor = if (previousTotalDecisions == 0 || totalDecisions >= previousTotalDecisions) RationalColor else ImpulsiveColor
 
-    val values = currentSessions.map { it.decisionCount }
+    val values = currentSessions.map { it.choicesMade }
     val paddedValues = if (values.size < 14) List(14 - values.size) { 0 } + values else values
     val latestIndex = if (values.isNotEmpty()) paddedValues.lastIndex else -1
     val sparklineValues = paddedValues.mapIndexed { index, value ->
@@ -675,9 +675,9 @@ private fun buildStatisticsMetrics(
         )
     }
 
-    val rationalCount = currentSessions.count { it.profile == "Racional" }
-    val balancedCount = currentSessions.count { it.profile == "Equilibrado" }
-    val impulsiveCount = currentSessions.count { it.profile == "Impulsivo" }
+    val rationalCount = currentSessions.count { deriveProfile(it) == "Racional" }
+    val balancedCount = currentSessions.count { deriveProfile(it) == "Equilibrado" }
+    val impulsiveCount = currentSessions.count { deriveProfile(it) == "Impulsivo" }
 
     val profileShares = listOf(
         ProfileShare("Racional", rationalCount, RationalColor),
@@ -708,6 +708,16 @@ private fun buildStatisticsMetrics(
     )
 }
 
+private fun deriveProfile(session: SessionResult): String {
+    return when {
+        session.finalResult.contains("Burnout", ignoreCase = true) -> "Impulsivo"
+        session.finalResult.contains("Éxito", ignoreCase = true) -> "Racional"
+        session.finalState.stress >= 70 || session.finalState.energy <= 30 -> "Impulsivo"
+        session.finalState.progress >= 70 && session.finalState.stress <= 45 -> "Racional"
+        else -> "Equilibrado"
+    }
+}
+
 private fun List<SessionResult>.filterByPreviousPeriod(period: String): List<SessionResult> {
     if (period == "Todo") return emptyList()
 
@@ -730,6 +740,8 @@ private fun parseSessionMillis(date: String): Long {
     val format = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
     return runCatching { format.parse(date)?.time ?: 0L }.getOrDefault(0L)
 }
+
+
 
 
 
