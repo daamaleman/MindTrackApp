@@ -103,15 +103,9 @@ fun AuthScreen(
                 label = "authTransition"
             ) { targetIsLogin ->
                 if (targetIsLogin) {
-                    LoginScreen(
-                        onLoginSuccess = onAuthSuccess,
-                        onNavigateToRegister = { isLogin = false }
-                    )
+                    LoginContent(onLoginSuccess = onAuthSuccess)
                 } else {
-                    RegisterScreen(
-                        onRegisterSuccess = onAuthSuccess,
-                        onNavigateToLogin = { isLogin = true }
-                    )
+                    RegisterContent(onRegisterSuccess = onAuthSuccess)
                 }
             }
             
