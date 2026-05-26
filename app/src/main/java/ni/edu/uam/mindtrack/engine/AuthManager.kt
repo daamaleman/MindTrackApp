@@ -1,16 +1,22 @@
 package ni.edu.uam.mindtrack.engine
 
+<<<<<<< HEAD
 import android.net.Uri
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+=======
+>>>>>>> main
 import ni.edu.uam.mindtrack.model.User
 
 object AuthManager {
     private val users = mutableListOf<User>()
+<<<<<<< HEAD
     
     private val _currentUser = MutableStateFlow<User?>(null)
     val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
+=======
+>>>>>>> main
 
     fun validateEmail(email: String): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
@@ -20,6 +26,13 @@ object AuthManager {
         return password.length >= 6
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * Valida los datos de registro y devuelve un mensaje de error si algo está mal,
+     * o null si todo es válido.
+     */
+>>>>>>> main
     fun validateUserRegistration(fullName: String, email: String, password: String): String? {
         return when {
             fullName.isBlank() -> "El nombre no puede estar vacío"
@@ -32,14 +45,34 @@ object AuthManager {
         }
     }
 
+<<<<<<< HEAD
     fun register(user: User): Boolean {
         if (users.any { it.email == user.email }) return false
         users.add(user)
         _currentUser.value = user
+=======
+    /**
+     * Valida los datos de login y devuelve un mensaje de error si algo está mal,
+     * o null si todo es válido.
+     */
+    fun validateUserLogin(email: String, password: String): String? {
+        return when {
+            email.isBlank() -> "El correo no puede estar vacío"
+            password.isBlank() -> "La contraseña no puede estar vacía"
+            !validateEmail(email) -> "Correo electrónico inválido"
+            else -> null
+        }
+    }
+
+    fun register(user: User): Boolean {
+        if (users.any { it.email == user.email }) return false
+        users.add(user)
+>>>>>>> main
         return true
     }
 
     fun login(email: String, password: String): Boolean {
+<<<<<<< HEAD
         val user = users.find { it.email == email && it.password == password }
         return if (user != null) {
             _currentUser.value = user
@@ -95,5 +128,8 @@ object AuthManager {
     
     fun logout() {
         _currentUser.value = null
+=======
+        return users.any { it.email == email && it.password == password }
+>>>>>>> main
     }
 }

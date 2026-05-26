@@ -12,11 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import ni.edu.uam.mindtrack.ui.components.MindTrackBottomBar
-import ni.edu.uam.mindtrack.ui.screens.HistoryScreen
-import ni.edu.uam.mindtrack.ui.screens.HomeScreen
-import ni.edu.uam.mindtrack.ui.screens.ResultScreen
-import ni.edu.uam.mindtrack.ui.screens.ScenarioScreen
-import ni.edu.uam.mindtrack.ui.screens.SettingsScreen
+import ni.edu.uam.mindtrack.ui.screens.*
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 
 @Composable
@@ -30,10 +26,8 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
         val initialIdx = order.indexOf(initial)
         val targetIdx = order.indexOf(target)
         
-        // Navigation to Scenario is always forward
         if (target == Routes.Scenario.route || target == Routes.Result.route) return true
         
-        // Between bottom bar items, use index order
         if (initialIdx != -1 && targetIdx != -1) {
             return targetIdx > initialIdx
         }
@@ -43,7 +37,6 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
 
     Scaffold(
         bottomBar = {
-            // Show bottom bar on Home, History, and Settings
             if (currentRoute == Routes.Home.route || currentRoute == Routes.History.route || currentRoute == Routes.Settings.route) {
                 MindTrackBottomBar(
                     currentRoute = currentRoute,
@@ -62,7 +55,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Routes.Home.route,
+            startDestination = Routes.Login.route,
             modifier = Modifier.padding(innerPadding),
             enterTransition = {
                 val target = targetState.destination.route
@@ -99,6 +92,30 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                 )
             }
         ) {
+            composable(Routes.Login.route) {
+                LoginScreen(
+                    onLoginSuccess = {
+                        navController.navigate(Routes.Home.route) {
+                            popUpTo(Routes.Login.route) { inclusive = true }
+                        }
+                    },
+                    onNavigateToRegister = {
+                        navController.navigate(Routes.Register.route)
+                    }
+                )
+            }
+            composable(Routes.Register.route) {
+                RegisterScreen(
+                    onRegisterSuccess = {
+                        navController.navigate(Routes.Home.route) {
+                            popUpTo(Routes.Login.route) { inclusive = true }
+                        }
+                    },
+                    onNavigateToLogin = {
+                        navController.popBackStack()
+                    }
+                )
+            }
             composable(Routes.Home.route) {
                 HomeScreen(
                     onStartSimulation = {
