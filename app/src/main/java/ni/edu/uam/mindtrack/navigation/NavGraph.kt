@@ -37,7 +37,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
 
     Scaffold(
         bottomBar = {
-            if (currentRoute == Routes.Home.route || currentRoute == Routes.Statistics.route || currentRoute == Routes.History.route || currentRoute == Routes.Settings.route) {
+            if (currentRoute == Routes.Home.route || currentRoute == Routes.Statistics.route || currentRoute == Routes.Achievements.route || currentRoute == Routes.Settings.route) {
                 MindTrackBottomBar(
                     currentRoute = currentRoute,
                     onNavigate = { route ->
