@@ -1,6 +1,10 @@
 package ni.edu.uam.mindtrack.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import ni.edu.uam.mindtrack.data.OnboardingPreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,7 +18,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
-class MindTrackViewModel : ViewModel() {
+class MindTrackViewModel(private val onboardingPreferences: OnboardingPreferences) : ViewModel() {
     private val gameEngine = GameEngine()
 
     private val initialState = PlayerState(
@@ -26,6 +30,10 @@ class MindTrackViewModel : ViewModel() {
 
     private val _isDarkMode = MutableStateFlow(true)
     val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
+
+    // Onboarding persistence state
+    private val _onboardingCompleted = MutableStateFlow(false)
+    val onboardingCompleted: StateFlow<Boolean> = _onboardingCompleted.asStateFlow()
 
     fun toggleTheme() {
         _isDarkMode.value = !_isDarkMode.value
@@ -147,5 +155,21 @@ class MindTrackViewModel : ViewModel() {
         val totalSteps = 4f 
         val stepsTaken = _decisionPath.value.size.toFloat()
         return (stepsTaken + 1) / (totalSteps + 1)
+    }
+
+    init {
+        // Leer el flag de DataStore y exponerlo
+        viewModelScope.launch {
+            onboardingPreferences.onboardingCompletedFlow.collectLatest { completed ->
+                _onboardingCompleted.value = completed
+            }
+        }
+    }
+
+    fun completeOnboarding() {
+        viewModelScope.launch {
+            onboardingPreferences.setOnboardingCompleted(true)
+            _onboardingCompleted.value = true
+        }
     }
 }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -35,6 +36,8 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
         return true
     }
 
+    val onboardingCompleted by viewModel.onboardingCompleted.collectAsState()
+
     Scaffold(
         bottomBar = {
             if (currentRoute == Routes.Home.route || currentRoute == Routes.History.route || currentRoute == Routes.Settings.route) {
@@ -53,9 +56,9 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
             }
         }
     ) { innerPadding ->
-        NavHost(
+            NavHost(
             navController = navController,
-            startDestination = Routes.Home.route,
+            startDestination = if (onboardingCompleted) Routes.Home.route else Routes.Onboarding.route,
             modifier = Modifier.padding(innerPadding),
             enterTransition = {
                 val target = targetState.destination.route
@@ -92,6 +95,15 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                 )
             }
         ) {
+            composable(Routes.Onboarding.route) {
+                OnboardingScreen(viewModel = viewModel, onFinish = {
+                    navController.navigate(Routes.Home.route) {
+                        // remove onboarding from backstack
+                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                    }
+                })
+            }
+
             composable(Routes.Home.route) {
                 HomeScreen(
                     onStartSimulation = {
