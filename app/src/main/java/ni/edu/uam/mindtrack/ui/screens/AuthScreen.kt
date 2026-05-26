@@ -103,9 +103,19 @@ fun AuthScreen(
                 label = "authTransition"
             ) { targetIsLogin ->
                 if (targetIsLogin) {
-                    LoginContent(onLoginSuccess = onAuthSuccess)
+                    LoginScreen(
+                        onLoginSuccess = onAuthSuccess,
+                        onNavigateToRegister = { isLogin = false }
+                    )
                 } else {
-                    RegisterContent(onRegisterSuccess = onAuthSuccess)
+                    RegisterScreen(
+                        onRegisterSuccess = {
+                            // after successful registration, switch to login and notify success
+                            isLogin = true
+                            onAuthSuccess()
+                        },
+                        onNavigateToLogin = { isLogin = true }
+                    )
                 }
             }
             
