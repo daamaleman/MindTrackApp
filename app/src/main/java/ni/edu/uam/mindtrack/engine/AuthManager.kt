@@ -48,7 +48,7 @@ object AuthManager {
         return true
     }
 
-    fun login(email: String, password: String): Boolean {
-        return users.any { it.email == email && it.password == password }
+    fun login(email: String, password: String): User? {
+        return users.find { it.email == email && it.password == password }
     }
 }

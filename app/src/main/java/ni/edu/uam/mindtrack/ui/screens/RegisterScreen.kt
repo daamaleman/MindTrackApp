@@ -23,18 +23,25 @@ import ni.edu.uam.mindtrack.engine.AuthManager
 import ni.edu.uam.mindtrack.model.User
 import ni.edu.uam.mindtrack.ui.components.MindTrackButton
 import ni.edu.uam.mindtrack.ui.theme.*
+import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 
 @Composable
 fun RegisterScreen(
+    viewModel: MindTrackViewModel,
     onRegisterSuccess: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
-    AuthScreen(initialIsLogin = false, onAuthSuccess = onRegisterSuccess)
+    AuthScreen(
+        viewModel = viewModel,
+        initialIsLogin = false, 
+        onAuthSuccess = onRegisterSuccess
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterContent(
+    viewModel: MindTrackViewModel,
     onRegisterSuccess: () -> Unit
 ) {
     var fullName by remember { mutableStateOf("") }
@@ -199,6 +206,7 @@ fun RegisterContent(
                         if (validationError == null) {
                             val user = User(fullName, email, password)
                             if (AuthManager.register(user)) {
+                                viewModel.setUser(user)
                                 onRegisterSuccess()
                             } else {
                                 error = "El correo ya está registrado"

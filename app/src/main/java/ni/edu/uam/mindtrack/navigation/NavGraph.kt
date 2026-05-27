@@ -95,6 +95,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
         ) {
             composable(Routes.Login.route) {
                 LoginScreen(
+                    viewModel = viewModel,
                     onLoginSuccess = {
                         navController.navigate(Routes.Home.route) {
                             popUpTo(Routes.Login.route) { inclusive = true }
@@ -107,6 +108,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
             }
             composable(Routes.Register.route) {
                 RegisterScreen(
+                    viewModel = viewModel,
                     onRegisterSuccess = {
                         navController.navigate(Routes.Home.route) {
                             popUpTo(Routes.Login.route) { inclusive = true }

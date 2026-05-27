@@ -21,18 +21,25 @@ import androidx.compose.ui.unit.dp
 import ni.edu.uam.mindtrack.engine.AuthManager
 import ni.edu.uam.mindtrack.ui.components.MindTrackButton
 import ni.edu.uam.mindtrack.ui.theme.*
+import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 
 @Composable
 fun LoginScreen(
+    viewModel: MindTrackViewModel,
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit
 ) {
-    AuthScreen(initialIsLogin = true, onAuthSuccess = onLoginSuccess)
+    AuthScreen(
+        viewModel = viewModel,
+        initialIsLogin = true,
+        onAuthSuccess = onLoginSuccess
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginContent(
+    viewModel: MindTrackViewModel,
     onLoginSuccess: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
@@ -130,7 +137,9 @@ fun LoginContent(
                     onClick = {
                         val validationError = AuthManager.validateUserLogin(email, password)
                         if (validationError == null) {
-                            if (AuthManager.login(email, password)) {
+                            val user = AuthManager.login(email, password)
+                            if (user != null) {
+                                viewModel.setUser(user)
                                 onLoginSuccess()
                             } else {
                                 error = "Credenciales incorrectas"

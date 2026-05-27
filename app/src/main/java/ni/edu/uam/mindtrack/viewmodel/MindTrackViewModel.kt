@@ -31,10 +31,10 @@ class MindTrackViewModel : ViewModel() {
 
     private val _userProfile = MutableStateFlow(
         UserProfile(
-            name = "Daniel Maleman",
-            email = "daniel.maleman@uam.edu.ni",
-            memberSince = "Mar 2025",
-            isPremium = true
+            name = "Invitado",
+            email = "invitado@mindtrack.ni",
+            memberSince = SimpleDateFormat("MMM yyyy", Locale.getDefault()).format(Date()),
+            isPremium = false
         )
     )
     val userProfile: StateFlow<UserProfile> = _userProfile.asStateFlow()
@@ -174,7 +174,15 @@ class MindTrackViewModel : ViewModel() {
 
     fun logout() {
         // En una app real limpiaríamos tokens, etc.
-        // Aquí reiniciamos sesión y podríamos resetear el perfil si fuera necesario.
         resetSession()
+    }
+
+    fun setUser(user: ni.edu.uam.mindtrack.model.User) {
+        _userProfile.value = UserProfile(
+            name = user.fullName,
+            email = user.email,
+            memberSince = SimpleDateFormat("MMM yyyy", Locale.getDefault()).format(Date()),
+            isPremium = false
+        )
     }
 }
