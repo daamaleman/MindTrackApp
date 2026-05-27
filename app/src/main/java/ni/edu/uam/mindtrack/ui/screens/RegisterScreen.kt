@@ -1,7 +1,10 @@
 package ni.edu.uam.mindtrack.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,13 +15,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import ni.edu.uam.mindtrack.engine.AuthManager
 import ni.edu.uam.mindtrack.model.User
 import ni.edu.uam.mindtrack.ui.components.MindTrackButton
@@ -49,6 +55,13 @@ fun RegisterContent(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    var profileImageUri by remember { mutableStateOf<android.net.Uri?>(null) }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: android.net.Uri? ->
+        profileImageUri = uri
+    }
 
     Column(
         modifier = Modifier
@@ -58,7 +71,9 @@ fun RegisterContent(
     ) {
         // Icono de persona con cámara
         Box(
-            modifier = Modifier.size(110.dp),
+            modifier = Modifier
+                .size(110.dp)
+                .clickable { launcher.launch("image/*") },
             contentAlignment = Alignment.Center
         ) {
             Box(
@@ -66,15 +81,25 @@ fun RegisterContent(
                     .size(100.dp)
                     .shadow(elevation = 10.dp, shape = CircleShape, spotColor = PrimaryAccent)
                     .background(SurfaceVariant, CircleShape)
-                    .border(2.dp, PrimaryAccent.copy(alpha = 0.5f), CircleShape),
+                    .border(2.dp, PrimaryAccent.copy(alpha = 0.5f), CircleShape)
+                    .clip(CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null,
-                    tint = TextMuted,
-                    modifier = Modifier.size(60.dp)
-                )
+                if (profileImageUri != null) {
+                    AsyncImage(
+                        model = profileImageUri,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        tint = TextMuted,
+                        modifier = Modifier.size(60.dp)
+                    )
+                }
             }
             
             Surface(
@@ -206,7 +231,7 @@ fun RegisterContent(
                         if (validationError == null) {
                             val user = User(fullName, email, password)
                             if (AuthManager.register(user)) {
-                                viewModel.setUser(user)
+                                viewModel.setUser(user, profileImageUri?.toString())
                                 onRegisterSuccess()
                             } else {
                                 error = "El correo ya está registrado"

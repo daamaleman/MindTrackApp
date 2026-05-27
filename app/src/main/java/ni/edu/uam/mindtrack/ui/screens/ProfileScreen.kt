@@ -21,6 +21,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import ni.edu.uam.mindtrack.model.Achievement
 import ni.edu.uam.mindtrack.model.SessionResult
 import ni.edu.uam.mindtrack.ui.components.MindTrackButton
@@ -94,6 +95,7 @@ fun ProfileScreen(
                 email = userProfile.email,
                 memberSince = userProfile.memberSince,
                 isPremium = userProfile.isPremium,
+                profileImageUri = userProfile.profileImageUri,
                 onOpenSettings = onOpenSettings
             )
         }
@@ -148,6 +150,7 @@ fun ProfileHeader(
     email: String,
     memberSince: String,
     isPremium: Boolean,
+    profileImageUri: String?,
     onOpenSettings: () -> Unit
 ) {
     Box(
@@ -180,13 +183,22 @@ fun ProfileHeader(
                     color = PrimaryAccent.copy(alpha = 0.6f)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = name.firstOrNull()?.toString() ?: "U",
-                            style = MaterialTheme.typography.displayMedium.copy(
-                                color = Color.White,
-                                fontWeight = FontWeight.Black
+                        if (profileImageUri != null) {
+                            AsyncImage(
+                                model = profileImageUri,
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
                             )
-                        )
+                        } else {
+                            Text(
+                                text = name.firstOrNull()?.toString() ?: "U",
+                                style = MaterialTheme.typography.displayMedium.copy(
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Black
+                                )
+                            )
+                        }
                     }
                 }
                 Surface(

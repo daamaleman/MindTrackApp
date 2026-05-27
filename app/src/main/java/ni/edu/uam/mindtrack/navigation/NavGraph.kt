@@ -170,6 +170,13 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                     }
                 )
             }
+            composable(Routes.EditProfile.route) {
+                EditProfileScreen(
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() },
+                    onSaved = { navController.popBackStack() }
+                )
+            }
             composable(Routes.Settings.route) {
                 SettingsScreen(viewModel = viewModel)
             }

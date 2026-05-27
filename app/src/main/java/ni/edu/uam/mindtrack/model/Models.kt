@@ -36,7 +36,12 @@ data class UserProfile(
     val name: String,
     val email: String,
     val memberSince: String,
-    val isPremium: Boolean = false
+    val isPremium: Boolean = false,
+    val profileImageUri: String? = null,
+    val age: String = "",
+    val gender: String = "",
+    val bio: String = "",
+    val dailyReminder: Boolean = false
 )
 
 data class Achievement(
