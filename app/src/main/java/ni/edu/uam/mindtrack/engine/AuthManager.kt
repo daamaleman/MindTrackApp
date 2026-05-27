@@ -1,9 +1,16 @@
 package ni.edu.uam.mindtrack.engine
 
+import android.net.Uri
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import ni.edu.uam.mindtrack.model.User
 
 object AuthManager {
     private val users = mutableListOf<User>()
+
+    private val _currentUser = MutableStateFlow<User?>(null)
+    val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
 
     fun validateEmail(email: String): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
@@ -13,10 +20,6 @@ object AuthManager {
         return password.length >= 6
     }
 
-    /**
-     * Valida los datos de registro y devuelve un mensaje de error si algo está mal,
-     * o null si todo es válido.
-     */
     fun validateUserRegistration(fullName: String, email: String, password: String): String? {
         return when {
             fullName.isBlank() -> "El nombre no puede estar vacío"
@@ -29,10 +32,6 @@ object AuthManager {
         }
     }
 
-    /**
-     * Valida los datos de login y devuelve un mensaje de error si algo está mal,
-     * o null si todo es válido.
-     */
     fun validateUserLogin(email: String, password: String): String? {
         return when {
             email.isBlank() -> "El correo no puede estar vacío"
@@ -45,10 +44,60 @@ object AuthManager {
     fun register(user: User): Boolean {
         if (users.any { it.email == user.email }) return false
         users.add(user)
+        _currentUser.value = user
         return true
     }
 
     fun login(email: String, password: String): User? {
-        return users.find { it.email == email && it.password == password }
+        val user = users.find { it.email == email && it.password == password } ?: return null
+        _currentUser.value = user
+        return user
+    }
+
+    fun updateProfile(fullName: String, email: String, profileImageUri: Uri? = null): Boolean {
+        val current = _currentUser.value ?: return false
+
+        if (email != current.email && users.any { it.email == email }) return false
+
+        val updatedUser = current.copy(
+            fullName = fullName,
+            email = email,
+            profileImageUri = profileImageUri ?: current.profileImageUri
+        )
+
+        val index = users.indexOfFirst { it.email == current.email }
+        if (index != -1) {
+            users[index] = updatedUser
+        } else {
+            users.add(updatedUser)
+        }
+
+        _currentUser.value = updatedUser
+        return true
+    }
+
+    fun updatePassword(currentPassword: String, newPassword: String): String? {
+        val current = _currentUser.value ?: return "Sesión no válida"
+
+        if (current.password != currentPassword) {
+            return "La contraseña actual es incorrecta"
+        }
+
+        if (!validatePassword(newPassword)) {
+            return "La nueva contraseña debe tener al menos 6 caracteres"
+        }
+
+        val updatedUser = current.copy(password = newPassword)
+        val index = users.indexOfFirst { it.email == current.email }
+        if (index != -1) {
+            users[index] = updatedUser
+        }
+
+        _currentUser.value = updatedUser
+        return null
+    }
+
+    fun logout() {
+        _currentUser.value = null
     }
 }

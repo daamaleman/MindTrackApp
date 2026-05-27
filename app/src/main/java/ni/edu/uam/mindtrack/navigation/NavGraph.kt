@@ -22,22 +22,22 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     fun isForwardNavigation(initial: String?, target: String?): Boolean {
-        val order = listOf(Routes.Home.route, Routes.History.route, Routes.Profile.route, Routes.Settings.route)
+        val order = listOf(Routes.Home.route, Routes.Statistics.route, Routes.Profile.route, Routes.Settings.route)
         val initialIdx = order.indexOf(initial)
         val targetIdx = order.indexOf(target)
-        
+
         if (target == Routes.Scenario.route || target == Routes.Result.route) return true
-        
+
         if (initialIdx != -1 && targetIdx != -1) {
             return targetIdx > initialIdx
         }
-        
+
         return true
     }
 
     Scaffold(
         bottomBar = {
-            if (currentRoute == Routes.Home.route || currentRoute == Routes.History.route || 
+            if (currentRoute == Routes.Home.route || currentRoute == Routes.Statistics.route ||
                 currentRoute == Routes.Profile.route || currentRoute == Routes.Settings.route) {
                 MindTrackBottomBar(
                     currentRoute = currentRoute,
@@ -146,6 +146,18 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                     }
                 )
             }
+            composable(Routes.Statistics.route) {
+                StatisticsScreen(
+                    viewModel = viewModel,
+                    onStartSimulation = {
+                        viewModel.resetSession()
+                        navController.navigate(Routes.Scenario.route)
+                    },
+                    onOpenHistory = {
+                        navController.navigate(Routes.History.route)
+                    }
+                )
+            }
             composable(Routes.History.route) {
                 HistoryScreen(
                     viewModel = viewModel,
@@ -175,6 +187,12 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                     viewModel = viewModel,
                     onBack = { navController.popBackStack() },
                     onSaved = { navController.popBackStack() }
+                )
+            }
+            composable(Routes.Achievements.route) {
+                AchievementsScreen(
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() }
                 )
             }
             composable(Routes.Settings.route) {
