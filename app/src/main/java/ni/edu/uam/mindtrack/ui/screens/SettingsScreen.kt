@@ -71,41 +71,6 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Perfil de Usuario
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .background(PrimaryAccent.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(Icons.Default.Person, contentDescription = null, tint = PrimaryAccent, modifier = Modifier.size(32.dp))
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                Column {
-                    Text(
-                        text = "Usuario MindTrack",
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    )
-                    Text(
-                        text = "Premium",
-                        style = MaterialTheme.typography.labelSmall.copy(color = PrimaryAccent, fontWeight = FontWeight.Bold)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
             Text(
                 text = "Preferencias",
                 style = MaterialTheme.typography.labelSmall.copy(
