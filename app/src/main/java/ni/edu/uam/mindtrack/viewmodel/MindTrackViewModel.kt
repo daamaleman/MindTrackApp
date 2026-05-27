@@ -142,7 +142,7 @@ class MindTrackViewModel : ViewModel() {
 
     fun resetSession() {
         _playerState.value = initialState
-        _currentScenarioId.value = 1
+        _currentScenarioId.value = 1  // Asegurar que empieza en el escenario 1
         _gameFinished.value = false
         _finalResult.value = ""
         _decisionPath.value = emptyList()
@@ -153,15 +153,31 @@ class MindTrackViewModel : ViewModel() {
     }
 
     fun selectOption(option: Option) {
+        // Prevenir selecciones si el juego ya terminó
         if (_gameFinished.value) return
+        
+        // Validar que el escenario actual exista
+        val currentScenario = getCurrentScenario() ?: return
 
+        // Aplicar los efectos de la opción
         _playerState.value = gameEngine.applyOption(_playerState.value, option)
+        
+        // Registrar la decisión tomada
         _decisionPath.value = _decisionPath.value + (_currentScenarioId.value)
 
+        // Determinar siguiente acción
         if (option.nextScenarioId == null) {
+            // La opción no tiene siguiente escenario, terminar simulación
             finishSimulation()
         } else {
-            _currentScenarioId.value = option.nextScenarioId
+            // Validar que el siguiente escenario existe antes de navegar
+            val nextScenario = scenarios.find { it.id == option.nextScenarioId }
+            if (nextScenario != null) {
+                _currentScenarioId.value = option.nextScenarioId
+            } else {
+                // Si el siguiente escenario no existe, terminar también
+                finishSimulation()
+            }
         }
     }
 
@@ -246,7 +262,7 @@ class MindTrackViewModel : ViewModel() {
                 id = "first_step",
                 name = "Primer paso",
                 description = "Completa tu primera simulación.",
-                emoji = "🌱",
+                emoji = "",
                 category = AchievementCategory.CONSTANCIA,
                 unlocked = totalSessions >= 1,
                 progress = progressPercent(totalSessions, 1),
@@ -256,7 +272,7 @@ class MindTrackViewModel : ViewModel() {
                 id = "steady_3",
                 name = "Ritmo de 3",
                 description = "Mantén tres simulaciones completadas.",
-                emoji = "🔥",
+                emoji = "",
                 category = AchievementCategory.CONSTANCIA,
                 unlocked = totalSessions >= 3,
                 progress = progressPercent(totalSessions, 3),
@@ -276,7 +292,7 @@ class MindTrackViewModel : ViewModel() {
                 id = "unstoppable",
                 name = "Imparable",
                 description = "Alcanza 14 días seguidos de constancia.",
-                emoji = "🏆",
+                emoji = "",
                 category = AchievementCategory.CONSTANCIA,
                 unlocked = bestStreakValue >= 14,
                 progress = progressPercent(bestStreakValue, 14),
@@ -286,7 +302,7 @@ class MindTrackViewModel : ViewModel() {
                 id = "thinker",
                 name = "Pensador",
                 description = "Consigue resultados de Éxito equilibrado.",
-                emoji = "🧠",
+                emoji = "",
                 category = AchievementCategory.MAESTRIA,
                 unlocked = successSessions >= 2,
                 progress = progressPercent(successSessions, 2),
@@ -306,7 +322,7 @@ class MindTrackViewModel : ViewModel() {
                 id = "master",
                 name = "Maestro",
                 description = "Mantén el progreso alto con poco estrés.",
-                emoji = "🎯",
+                emoji = "",
                 category = AchievementCategory.MAESTRIA,
                 unlocked = masterySessions >= 5,
                 progress = progressPercent(masterySessions, 5),
@@ -326,7 +342,7 @@ class MindTrackViewModel : ViewModel() {
                 id = "explorer",
                 name = "Explorador",
                 description = "Recorre al menos 3 rutas distintas.",
-                emoji = "🧭",
+                emoji = "",
                 category = AchievementCategory.EXPLORACION,
                 unlocked = distinctPaths >= 3,
                 progress = progressPercent(distinctPaths, 3),
@@ -336,7 +352,7 @@ class MindTrackViewModel : ViewModel() {
                 id = "cartographer",
                 name = "Cartógrafo",
                 description = "Descubre 5 rutas distintas.",
-                emoji = "🗺️",
+                emoji = "️",
                 category = AchievementCategory.EXPLORACION,
                 unlocked = distinctPaths >= 5,
                 progress = progressPercent(distinctPaths, 5),
@@ -346,7 +362,7 @@ class MindTrackViewModel : ViewModel() {
                 id = "curious",
                 name = "Curioso",
                 description = "Visita los 5 escenarios del juego.",
-                emoji = "👀",
+                emoji = "",
                 category = AchievementCategory.EXPLORACION,
                 unlocked = distinctScenarios.size >= 5,
                 progress = progressPercent(distinctScenarios.size, 5),
@@ -356,7 +372,7 @@ class MindTrackViewModel : ViewModel() {
                 id = "chronicle",
                 name = "Cronista",
                 description = "Completa 12 simulaciones.",
-                emoji = "📜",
+                emoji = "",
                 category = AchievementCategory.EXPLORACION,
                 unlocked = totalSessions >= 12,
                 progress = progressPercent(totalSessions, 12),
@@ -508,7 +524,7 @@ class MindTrackViewModel : ViewModel() {
     }
 
     fun getScenarioProgress(): Float {
-        val totalSteps = 4f 
+        val totalSteps = scenarios.size.toFloat()
         val stepsTaken = _decisionPath.value.size.toFloat()
         return (stepsTaken + 1) / (totalSteps + 1)
     }

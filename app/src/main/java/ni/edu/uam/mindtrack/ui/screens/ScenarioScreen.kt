@@ -125,10 +125,19 @@ fun ScenarioScreen(
     val gameFinished by viewModel.gameFinished.collectAsState()
     val progress = viewModel.getScenarioProgress()
 
-    var selectedOption by remember { mutableStateOf<Option?>(null) }
+    // Usar índice en lugar de referencia de objeto para mayor estabilidad
+    var selectedOptionIndex by remember { mutableStateOf<Int?>(null) }
 
+    // Reset selectedOptionIndex cuando cambia el escenario
+    LaunchedEffect(scenario?.id) {
+        selectedOptionIndex = null
+    }
+
+    // Navega a ResultScreen cuando el juego termina
     LaunchedEffect(gameFinished) {
-        if (gameFinished) onFinish()
+        if (gameFinished) {
+            onFinish()
+        }
     }
 
     BoxWithConstraints(
@@ -157,12 +166,15 @@ fun ScenarioScreen(
             bottomBar = {
                 ScenarioBottomBar(
                     playerState = playerState,
-                    enabled = selectedOption != null,
+                    enabled = selectedOptionIndex != null,
                     spec = spec,
                     onConfirm = {
-                        selectedOption?.let {
-                            viewModel.selectOption(it)
-                            selectedOption = null
+                        if (selectedOptionIndex != null && scenario != null) {
+                            val selectedOption = scenario.options.getOrNull(selectedOptionIndex!!)
+                            if (selectedOption != null) {
+                                viewModel.selectOption(selectedOption)
+                                selectedOptionIndex = null
+                            }
                         }
                     }
                 )
@@ -170,8 +182,8 @@ fun ScenarioScreen(
         ) { paddingValues ->
             ScenarioContent(
                 scenario = scenario,
-                selectedOption = selectedOption,
-                onOptionSelected = { selectedOption = it },
+                selectedOptionIndex = selectedOptionIndex,
+                onOptionSelected = { index -> selectedOptionIndex = index },
                 spec = spec,
                 paddingValues = paddingValues
             )
@@ -272,8 +284,8 @@ private fun ScenarioTopBar(
 @Composable
 private fun ScenarioContent(
     scenario: ni.edu.uam.mindtrack.model.Scenario?,
-    selectedOption: Option?,
-    onOptionSelected: (Option) -> Unit,
+    selectedOptionIndex: Int?,
+    onOptionSelected: (Int) -> Unit,
     spec: ResponsiveSpec,
     paddingValues: PaddingValues
 ) {
@@ -283,7 +295,16 @@ private fun ScenarioContent(
             .fillMaxSize(),
         contentAlignment = Alignment.TopCenter
     ) {
-        if (scenario == null) return@Box
+        if (scenario == null || scenario.options.isEmpty()) {
+            // Mostrar mensaje si no hay escenario disponible
+            Text(
+                text = if (scenario == null) "Escenario no disponible" else "No hay opciones disponibles",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(24.dp)
+            )
+            return@Box
+        }
 
         LazyColumn(
             modifier = Modifier
@@ -313,12 +334,15 @@ private fun ScenarioContent(
                 )
             }
 
-            items(scenario.options, key = { it.hashCode() }) { option ->
+            items(scenario.options.size, key = { index -> "${scenario.id}_${index}" }) { index ->
+                val option = scenario.options[index]
+                val isSelected = selectedOptionIndex == index
+
                 OptionCard(
                     option = option,
-                    isSelected = selectedOption == option,
+                    isSelected = isSelected,
                     cardPadding = spec.cardPadding,
-                    onClick = { onOptionSelected(option) }
+                    onClick = { onOptionSelected(index) }
                 )
             }
 
