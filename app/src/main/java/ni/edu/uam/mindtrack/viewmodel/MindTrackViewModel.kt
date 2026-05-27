@@ -12,13 +12,9 @@ import ni.edu.uam.mindtrack.model.Option
 import ni.edu.uam.mindtrack.model.Scenario
 import ni.edu.uam.mindtrack.model.PlayerState
 import ni.edu.uam.mindtrack.model.SessionResult
-<<<<<<< HEAD
+import ni.edu.uam.mindtrack.model.UserProfile
 import java.time.LocalDate
 import java.time.ZoneId
-=======
-import ni.edu.uam.mindtrack.model.UserProfile
-import ni.edu.uam.mindtrack.model.Achievement
->>>>>>> main
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -46,17 +42,6 @@ class MindTrackViewModel : ViewModel() {
         )
     )
     val userProfile: StateFlow<UserProfile> = _userProfile.asStateFlow()
-
-    private val _achievements = MutableStateFlow(
-        listOf(
-            Achievement("1", "Primer paso", "Completa tu primera simulación", true, "🎯"),
-            Achievement("2", "Analista", "Obtén un resultado racional", false, "🧠"),
-            Achievement("3", "Estratega", "Obtén un resultado estratégico", true, "⚖️"),
-            Achievement("4", "Constancia", "Realiza simulaciones 3 días seguidos", true, "🔥"),
-            Achievement("5", "Maestro", "Desbloquea todos los perfiles", false, "👑")
-        )
-    )
-    val achievements: StateFlow<List<Achievement>> = _achievements.asStateFlow()
 
     private val _avatarUri = MutableStateFlow<Uri?>(null)
     val avatarUri: StateFlow<Uri?> = _avatarUri.asStateFlow()

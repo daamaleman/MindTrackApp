@@ -12,6 +12,4 @@ sealed class Routes(val route: String) {
     object Settings : Routes("settings")
     object Profile : Routes("profile")
     object EditProfile : Routes("edit_profile")
-    object Achievements : Routes("achievements")
-    object Statistics : Routes("statistics")
 }

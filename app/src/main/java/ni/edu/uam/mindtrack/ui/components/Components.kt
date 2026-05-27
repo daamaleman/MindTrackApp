@@ -273,12 +273,8 @@ fun MindTrackBottomBar(
     ) {
         val items = listOf(
             Triple("home", Icons.Filled.Home to Icons.Outlined.Home, "Inicio"),
-<<<<<<< HEAD
             Triple("statistics", Icons.Filled.BarChart to Icons.Outlined.BarChart, "Estadísticas"),
-=======
-            Triple("history", Icons.Filled.History to Icons.Outlined.History, "Historial"),
             Triple("profile", Icons.Filled.Person to Icons.Outlined.Person, "Perfil"),
->>>>>>> main
             Triple("settings", Icons.Filled.Settings to Icons.Outlined.Settings, "Ajustes")
         )
 

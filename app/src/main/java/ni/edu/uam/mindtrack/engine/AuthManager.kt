@@ -48,11 +48,10 @@ object AuthManager {
         return true
     }
 
-<<<<<<< HEAD
-    fun login(email: String, password: String): Boolean {
-        val user = users.find { it.email == email && it.password == password } ?: return false
+    fun login(email: String, password: String): User? {
+        val user = users.find { it.email == email && it.password == password } ?: return null
         _currentUser.value = user
-        return true
+        return user
     }
 
     fun updateProfile(fullName: String, email: String, profileImageUri: Uri? = null): Boolean {
@@ -100,9 +99,5 @@ object AuthManager {
 
     fun logout() {
         _currentUser.value = null
-=======
-    fun login(email: String, password: String): User? {
-        return users.find { it.email == email && it.password == password }
->>>>>>> main
     }
 }

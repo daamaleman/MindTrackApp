@@ -461,7 +461,7 @@ fun RecentAchievementsRow(achievements: List<Achievement>) {
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Text(achievement.icon, fontSize = 32.sp)
+                    Text(achievement.emoji, fontSize = 32.sp)
                 }
             }
         }

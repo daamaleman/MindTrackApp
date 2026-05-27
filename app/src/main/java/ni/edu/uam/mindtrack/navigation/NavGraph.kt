@@ -22,31 +22,23 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     fun isForwardNavigation(initial: String?, target: String?): Boolean {
-<<<<<<< HEAD
-        val order = listOf(Routes.Home.route, Routes.Statistics.route, Routes.History.route, Routes.Settings.route)
-=======
-        val order = listOf(Routes.Home.route, Routes.History.route, Routes.Profile.route, Routes.Settings.route)
->>>>>>> main
+        val order = listOf(Routes.Home.route, Routes.Statistics.route, Routes.Profile.route, Routes.Settings.route)
         val initialIdx = order.indexOf(initial)
         val targetIdx = order.indexOf(target)
-        
+
         if (target == Routes.Scenario.route || target == Routes.Result.route) return true
-        
+
         if (initialIdx != -1 && targetIdx != -1) {
             return targetIdx > initialIdx
         }
-        
+
         return true
     }
 
     Scaffold(
         bottomBar = {
-<<<<<<< HEAD
-            if (currentRoute == Routes.Home.route || currentRoute == Routes.Statistics.route || currentRoute == Routes.Achievements.route || currentRoute == Routes.Settings.route) {
-=======
-            if (currentRoute == Routes.Home.route || currentRoute == Routes.History.route || 
+            if (currentRoute == Routes.Home.route || currentRoute == Routes.Statistics.route ||
                 currentRoute == Routes.Profile.route || currentRoute == Routes.Settings.route) {
->>>>>>> main
                 MindTrackBottomBar(
                     currentRoute = currentRoute,
                     onNavigate = { route ->
@@ -195,6 +187,12 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                     viewModel = viewModel,
                     onBack = { navController.popBackStack() },
                     onSaved = { navController.popBackStack() }
+                )
+            }
+            composable(Routes.Achievements.route) {
+                AchievementsScreen(
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() }
                 )
             }
             composable(Routes.Settings.route) {
