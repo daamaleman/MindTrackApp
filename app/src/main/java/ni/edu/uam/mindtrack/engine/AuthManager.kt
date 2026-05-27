@@ -48,6 +48,7 @@ object AuthManager {
         return true
     }
 
+<<<<<<< HEAD
     fun login(email: String, password: String): Boolean {
         val user = users.find { it.email == email && it.password == password } ?: return false
         _currentUser.value = user
@@ -99,5 +100,9 @@ object AuthManager {
 
     fun logout() {
         _currentUser.value = null
+=======
+    fun login(email: String, password: String): User? {
+        return users.find { it.email == email && it.password == password }
+>>>>>>> main
     }
 }

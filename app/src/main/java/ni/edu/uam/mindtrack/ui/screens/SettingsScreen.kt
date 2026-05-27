@@ -236,6 +236,7 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
+<<<<<<< HEAD
             // Perfil de Usuario con Imagen Editable
             Column(
                 modifier = Modifier
@@ -304,6 +305,8 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
+=======
+>>>>>>> main
             Text(
                 text = "Seguridad",
                 style = MaterialTheme.typography.labelSmall.copy(

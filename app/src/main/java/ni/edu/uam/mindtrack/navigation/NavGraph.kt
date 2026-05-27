@@ -22,7 +22,11 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     fun isForwardNavigation(initial: String?, target: String?): Boolean {
+<<<<<<< HEAD
         val order = listOf(Routes.Home.route, Routes.Statistics.route, Routes.History.route, Routes.Settings.route)
+=======
+        val order = listOf(Routes.Home.route, Routes.History.route, Routes.Profile.route, Routes.Settings.route)
+>>>>>>> main
         val initialIdx = order.indexOf(initial)
         val targetIdx = order.indexOf(target)
         
@@ -37,7 +41,12 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
 
     Scaffold(
         bottomBar = {
+<<<<<<< HEAD
             if (currentRoute == Routes.Home.route || currentRoute == Routes.Statistics.route || currentRoute == Routes.Achievements.route || currentRoute == Routes.Settings.route) {
+=======
+            if (currentRoute == Routes.Home.route || currentRoute == Routes.History.route || 
+                currentRoute == Routes.Profile.route || currentRoute == Routes.Settings.route) {
+>>>>>>> main
                 MindTrackBottomBar(
                     currentRoute = currentRoute,
                     onNavigate = { route ->
@@ -94,6 +103,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
         ) {
             composable(Routes.Login.route) {
                 LoginScreen(
+                    viewModel = viewModel,
                     onLoginSuccess = {
                         navController.navigate(Routes.Home.route) {
                             popUpTo(Routes.Login.route) { inclusive = true }
@@ -106,6 +116,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
             }
             composable(Routes.Register.route) {
                 RegisterScreen(
+                    viewModel = viewModel,
                     onRegisterSuccess = {
                         navController.navigate(Routes.Home.route) {
                             popUpTo(Routes.Login.route) { inclusive = true }
@@ -159,6 +170,31 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                 HistoryScreen(
                     viewModel = viewModel,
                     onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Routes.Profile.route) {
+                ProfileScreen(
+                    viewModel = viewModel,
+                    onEditProfile = { navController.navigate(Routes.EditProfile.route) },
+                    onOpenAchievements = { navController.navigate(Routes.Achievements.route) },
+                    onOpenStatistics = { navController.navigate(Routes.Statistics.route) },
+                    onOpenSettings = { navController.navigate(Routes.Settings.route) },
+                    onLogout = {
+                        viewModel.logout()
+                        navController.navigate(Routes.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
+                    onStartFirstSimulation = {
+                        navController.navigate(Routes.Home.route)
+                    }
+                )
+            }
+            composable(Routes.EditProfile.route) {
+                EditProfileScreen(
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() },
+                    onSaved = { navController.popBackStack() }
                 )
             }
             composable(Routes.Settings.route) {

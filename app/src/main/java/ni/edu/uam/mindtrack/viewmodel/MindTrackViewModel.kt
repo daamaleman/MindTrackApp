@@ -1,5 +1,6 @@
 package ni.edu.uam.mindtrack.viewmodel
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,8 +12,13 @@ import ni.edu.uam.mindtrack.model.Option
 import ni.edu.uam.mindtrack.model.Scenario
 import ni.edu.uam.mindtrack.model.PlayerState
 import ni.edu.uam.mindtrack.model.SessionResult
+<<<<<<< HEAD
 import java.time.LocalDate
 import java.time.ZoneId
+=======
+import ni.edu.uam.mindtrack.model.UserProfile
+import ni.edu.uam.mindtrack.model.Achievement
+>>>>>>> main
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -30,6 +36,30 @@ class MindTrackViewModel : ViewModel() {
 
     private val _isDarkMode = MutableStateFlow(true)
     val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
+
+    private val _userProfile = MutableStateFlow(
+        UserProfile(
+            name = "Invitado",
+            email = "invitado@mindtrack.ni",
+            memberSince = SimpleDateFormat("MMM yyyy", Locale.getDefault()).format(Date()),
+            isPremium = false
+        )
+    )
+    val userProfile: StateFlow<UserProfile> = _userProfile.asStateFlow()
+
+    private val _achievements = MutableStateFlow(
+        listOf(
+            Achievement("1", "Primer paso", "Completa tu primera simulación", true, "🎯"),
+            Achievement("2", "Analista", "Obtén un resultado racional", false, "🧠"),
+            Achievement("3", "Estratega", "Obtén un resultado estratégico", true, "⚖️"),
+            Achievement("4", "Constancia", "Realiza simulaciones 3 días seguidos", true, "🔥"),
+            Achievement("5", "Maestro", "Desbloquea todos los perfiles", false, "👑")
+        )
+    )
+    val achievements: StateFlow<List<Achievement>> = _achievements.asStateFlow()
+
+    private val _avatarUri = MutableStateFlow<Uri?>(null)
+    val avatarUri: StateFlow<Uri?> = _avatarUri.asStateFlow()
 
     fun toggleTheme() {
         _isDarkMode.value = !_isDarkMode.value
@@ -496,5 +526,29 @@ class MindTrackViewModel : ViewModel() {
         val totalSteps = 4f 
         val stepsTaken = _decisionPath.value.size.toFloat()
         return (stepsTaken + 1) / (totalSteps + 1)
+    }
+
+    fun logout() {
+        // En una app real limpiaríamos tokens, etc.
+        resetSession()
+    }
+
+    fun setUser(user: ni.edu.uam.mindtrack.model.User, profileImageUri: String? = null) {
+        _userProfile.value = UserProfile(
+            name = user.fullName,
+            email = user.email,
+            memberSince = SimpleDateFormat("MMM yyyy", Locale.getDefault()).format(Date()),
+            isPremium = false,
+            profileImageUri = profileImageUri
+        )
+        _avatarUri.value = profileImageUri?.let { Uri.parse(it) }
+    }
+
+    fun updateProfile(newProfile: UserProfile) {
+        _userProfile.value = newProfile
+    }
+
+    fun setAvatarUri(uri: Uri?) {
+        _avatarUri.value = uri
     }
 }

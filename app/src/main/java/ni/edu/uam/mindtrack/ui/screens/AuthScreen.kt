@@ -23,9 +23,11 @@ import ni.edu.uam.mindtrack.ui.theme.Background
 import ni.edu.uam.mindtrack.ui.theme.PrimaryAccent
 import ni.edu.uam.mindtrack.ui.theme.TextMuted
 import ni.edu.uam.mindtrack.ui.theme.TextWhite
+import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 
 @Composable
 fun AuthScreen(
+    viewModel: MindTrackViewModel,
     initialIsLogin: Boolean = true,
     onAuthSuccess: () -> Unit
 ) {
@@ -103,9 +105,15 @@ fun AuthScreen(
                 label = "authTransition"
             ) { targetIsLogin ->
                 if (targetIsLogin) {
-                    LoginContent(onLoginSuccess = onAuthSuccess)
+                    LoginContent(
+                        viewModel = viewModel,
+                        onLoginSuccess = onAuthSuccess
+                    )
                 } else {
-                    RegisterContent(onRegisterSuccess = onAuthSuccess)
+                    RegisterContent(
+                        viewModel = viewModel,
+                        onRegisterSuccess = onAuthSuccess
+                    )
                 }
             }
             
