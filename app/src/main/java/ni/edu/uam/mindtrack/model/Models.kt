@@ -31,3 +31,18 @@ data class SessionResult(
     val choicesMade: Int,
     val path: List<Int>
 )
+
+data class UserProfile(
+    val name: String,
+    val email: String,
+    val memberSince: String,
+    val isPremium: Boolean = false
+)
+
+data class Achievement(
+    val id: String,
+    val title: String,
+    val description: String,
+    val unlocked: Boolean = false,
+    val icon: String = "🏆"
+)

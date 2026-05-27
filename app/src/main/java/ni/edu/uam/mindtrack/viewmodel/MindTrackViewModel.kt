@@ -9,6 +9,8 @@ import ni.edu.uam.mindtrack.model.Option
 import ni.edu.uam.mindtrack.model.Scenario
 import ni.edu.uam.mindtrack.model.PlayerState
 import ni.edu.uam.mindtrack.model.SessionResult
+import ni.edu.uam.mindtrack.model.UserProfile
+import ni.edu.uam.mindtrack.model.Achievement
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -26,6 +28,27 @@ class MindTrackViewModel : ViewModel() {
 
     private val _isDarkMode = MutableStateFlow(true)
     val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
+
+    private val _userProfile = MutableStateFlow(
+        UserProfile(
+            name = "Daniel Maleman",
+            email = "daniel.maleman@uam.edu.ni",
+            memberSince = "Mar 2025",
+            isPremium = true
+        )
+    )
+    val userProfile: StateFlow<UserProfile> = _userProfile.asStateFlow()
+
+    private val _achievements = MutableStateFlow(
+        listOf(
+            Achievement("1", "Primer paso", "Completa tu primera simulación", true, "🎯"),
+            Achievement("2", "Analista", "Obtén un resultado racional", false, "🧠"),
+            Achievement("3", "Estratega", "Obtén un resultado estratégico", true, "⚖️"),
+            Achievement("4", "Constancia", "Realiza simulaciones 3 días seguidos", true, "🔥"),
+            Achievement("5", "Maestro", "Desbloquea todos los perfiles", false, "👑")
+        )
+    )
+    val achievements: StateFlow<List<Achievement>> = _achievements.asStateFlow()
 
     fun toggleTheme() {
         _isDarkMode.value = !_isDarkMode.value
@@ -147,5 +170,11 @@ class MindTrackViewModel : ViewModel() {
         val totalSteps = 4f 
         val stepsTaken = _decisionPath.value.size.toFloat()
         return (stepsTaken + 1) / (totalSteps + 1)
+    }
+
+    fun logout() {
+        // En una app real limpiaríamos tokens, etc.
+        // Aquí reiniciamos sesión y podríamos resetear el perfil si fuera necesario.
+        resetSession()
     }
 }

@@ -22,7 +22,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     fun isForwardNavigation(initial: String?, target: String?): Boolean {
-        val order = listOf(Routes.Home.route, Routes.History.route, Routes.Settings.route)
+        val order = listOf(Routes.Home.route, Routes.History.route, Routes.Profile.route, Routes.Settings.route)
         val initialIdx = order.indexOf(initial)
         val targetIdx = order.indexOf(target)
         
@@ -37,7 +37,8 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
 
     Scaffold(
         bottomBar = {
-            if (currentRoute == Routes.Home.route || currentRoute == Routes.History.route || currentRoute == Routes.Settings.route) {
+            if (currentRoute == Routes.Home.route || currentRoute == Routes.History.route || 
+                currentRoute == Routes.Profile.route || currentRoute == Routes.Settings.route) {
                 MindTrackBottomBar(
                     currentRoute = currentRoute,
                     onNavigate = { route ->
@@ -147,6 +148,24 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                 HistoryScreen(
                     viewModel = viewModel,
                     onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Routes.Profile.route) {
+                ProfileScreen(
+                    viewModel = viewModel,
+                    onEditProfile = { navController.navigate(Routes.EditProfile.route) },
+                    onOpenAchievements = { navController.navigate(Routes.Achievements.route) },
+                    onOpenStatistics = { navController.navigate(Routes.Statistics.route) },
+                    onOpenSettings = { navController.navigate(Routes.Settings.route) },
+                    onLogout = {
+                        viewModel.logout()
+                        navController.navigate(Routes.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
+                    onStartFirstSimulation = {
+                        navController.navigate(Routes.Home.route)
+                    }
                 )
             }
             composable(Routes.Settings.route) {
