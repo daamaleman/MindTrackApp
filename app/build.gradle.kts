@@ -5,16 +5,12 @@ plugins {
 
 android {
     namespace = "ni.edu.uam.mindtrack"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "ni.edu.uam.mindtrack"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -52,12 +48,9 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.accompanist.systemuicontroller)
-<<<<<<< HEAD
     // DataStore Preferences for onboarding persistence
     implementation("androidx.datastore:datastore-preferences:1.1.1")
-=======
     implementation(libs.coil.compose)
->>>>>>> main
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

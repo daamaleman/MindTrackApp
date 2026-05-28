@@ -9,28 +9,21 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-<<<<<<< HEAD
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Payments
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Tune
-=======
-import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.BarChart
-import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Settings
->>>>>>> main
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -53,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ni.edu.uam.mindtrack.model.Option
 import ni.edu.uam.mindtrack.model.SessionResult
+import ni.edu.uam.mindtrack.navigation.Routes
 import ni.edu.uam.mindtrack.ui.theme.*
 
 private val PrimaryGradient = Brush.verticalGradient(
@@ -734,9 +728,10 @@ fun MindTrackBottomBar(
     onNavigate: (String) -> Unit
 ) {
     val items = listOf(
-        Triple("home", Triple(Icons.Filled.Home, Icons.Outlined.Home, "Inicio"), null),
-        Triple("history", Triple(Icons.Filled.History, Icons.Outlined.History, "Historial"), null),
-        Triple("settings", Triple(Icons.Filled.Tune, Icons.Outlined.Tune, "Ajustes"), null)
+        Triple(Routes.Home.route, Triple(Icons.Filled.Home, Icons.Outlined.Home, "Inicio"), null),
+        Triple(Routes.Statistics.route, Triple(Icons.Filled.BarChart, Icons.Outlined.BarChart, "Estadísticas"), null),
+        Triple(Routes.Profile.route, Triple(Icons.Filled.Person, Icons.Outlined.Person, "Perfil"), null),
+        Triple(Routes.Settings.route, Triple(Icons.Filled.Tune, Icons.Outlined.Tune, "Ajustes"), null)
     )
     val shape = RoundedCornerShape(20.dp)
     Box(
@@ -744,7 +739,6 @@ fun MindTrackBottomBar(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 16.dp)
     ) {
-<<<<<<< HEAD
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -781,30 +775,6 @@ fun MindTrackBottomBar(
                                 .size(4.dp)
                                 .clip(CircleShape)
                                 .background(PrimaryAccent)
-=======
-        val items = listOf(
-            Triple("home", Icons.Filled.Home to Icons.Outlined.Home, "Inicio"),
-            Triple("statistics", Icons.Filled.BarChart to Icons.Outlined.BarChart, "Estadísticas"),
-            Triple("profile", Icons.Filled.Person to Icons.Outlined.Person, "Perfil"),
-            Triple("settings", Icons.Filled.Settings to Icons.Outlined.Settings, "Ajustes")
-        )
-
-        items.forEach { (route, icons, label) ->
-            val isSelected = currentRoute == route
-            NavigationBarItem(
-                selected = isSelected,
-                onClick = { onNavigate(route) },
-                icon = {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = if (isSelected) icons.first else icons.second,
-                            contentDescription = label,
-                            tint = if (isSelected) PrimaryAccent else MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(32.dp)
->>>>>>> main
                         )
                     } else {
                         Text(

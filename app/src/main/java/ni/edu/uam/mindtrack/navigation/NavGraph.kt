@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
@@ -20,9 +21,17 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val onboardingCompleted by viewModel.onboardingCompleted.collectAsState()
 
     fun isForwardNavigation(initial: String?, target: String?): Boolean {
-        val order = listOf(Routes.Home.route, Routes.Statistics.route, Routes.Profile.route, Routes.Settings.route)
+        val order = listOf(
+            Routes.Onboarding.route,
+            Routes.Login.route,
+            Routes.Home.route,
+            Routes.Statistics.route,
+            Routes.Profile.route,
+            Routes.Settings.route
+        )
         val initialIdx = order.indexOf(initial)
         val targetIdx = order.indexOf(target)
 
@@ -56,7 +65,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Routes.Home.route,
+            startDestination = if (onboardingCompleted) Routes.Login.route else Routes.Onboarding.route,
             modifier = Modifier.padding(innerPadding),
             enterTransition = {
                 val target = targetState.destination.route
@@ -93,8 +102,16 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                 )
             }
         ) {
-<<<<<<< HEAD
-=======
+            composable(Routes.Onboarding.route) {
+                OnboardingScreen(
+                    viewModel = viewModel,
+                    onFinish = {
+                        navController.navigate(Routes.Login.route) {
+                            popUpTo(Routes.Onboarding.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
             composable(Routes.Login.route) {
                 LoginScreen(
                     viewModel = viewModel,
@@ -121,7 +138,6 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                     }
                 )
             }
->>>>>>> main
             composable(Routes.Home.route) {
                 HomeScreen(
                     onStartSimulation = {

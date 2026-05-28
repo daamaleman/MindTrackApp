@@ -37,11 +37,10 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
     private val _isDarkMode = MutableStateFlow(true)
     val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
 
-<<<<<<< HEAD
     // Onboarding persistence state
     private val _onboardingCompleted = MutableStateFlow(false)
     val onboardingCompleted: StateFlow<Boolean> = _onboardingCompleted.asStateFlow()
-=======
+
     private val _userProfile = MutableStateFlow(
         UserProfile(
             name = "Invitado",
@@ -54,7 +53,6 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
 
     private val _avatarUri = MutableStateFlow<Uri?>(null)
     val avatarUri: StateFlow<Uri?> = _avatarUri.asStateFlow()
->>>>>>> main
 
     fun toggleTheme() {
         _isDarkMode.value = !_isDarkMode.value
@@ -148,6 +146,12 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
     init {
         recalculateStreaks()
         recalculateAchievements()
+        // Leer el flag de DataStore y exponerlo
+        viewModelScope.launch {
+            onboardingPreferences.onboardingCompletedFlow.collectLatest { completed ->
+                _onboardingCompleted.value = completed
+            }
+        }
     }
 
     fun resetSession() {
@@ -539,22 +543,13 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
         return (stepsTaken + 1) / (totalSteps + 1)
     }
 
-<<<<<<< HEAD
-    init {
-        // Leer el flag de DataStore y exponerlo
-        viewModelScope.launch {
-            onboardingPreferences.onboardingCompletedFlow.collectLatest { completed ->
-                _onboardingCompleted.value = completed
-            }
-        }
-    }
-
     fun completeOnboarding() {
         viewModelScope.launch {
             onboardingPreferences.setOnboardingCompleted(true)
             _onboardingCompleted.value = true
         }
-=======
+    }
+
     fun logout() {
         // En una app real limpiaríamos tokens, etc.
         resetSession()
@@ -577,6 +572,5 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
 
     fun setAvatarUri(uri: Uri?) {
         _avatarUri.value = uri
->>>>>>> main
     }
 }
