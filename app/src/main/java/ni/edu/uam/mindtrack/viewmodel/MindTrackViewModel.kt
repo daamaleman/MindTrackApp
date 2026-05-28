@@ -1,5 +1,6 @@
 package ni.edu.uam.mindtrack.viewmodel
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.collectLatest
@@ -9,10 +10,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import ni.edu.uam.mindtrack.engine.GameEngine
+import ni.edu.uam.mindtrack.model.Achievement
+import ni.edu.uam.mindtrack.model.AchievementCategory
 import ni.edu.uam.mindtrack.model.Option
 import ni.edu.uam.mindtrack.model.Scenario
 import ni.edu.uam.mindtrack.model.PlayerState
 import ni.edu.uam.mindtrack.model.SessionResult
+import ni.edu.uam.mindtrack.model.UserProfile
+import java.time.LocalDate
+import java.time.ZoneId
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -31,9 +37,24 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
     private val _isDarkMode = MutableStateFlow(true)
     val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
 
+<<<<<<< HEAD
     // Onboarding persistence state
     private val _onboardingCompleted = MutableStateFlow(false)
     val onboardingCompleted: StateFlow<Boolean> = _onboardingCompleted.asStateFlow()
+=======
+    private val _userProfile = MutableStateFlow(
+        UserProfile(
+            name = "Invitado",
+            email = "invitado@mindtrack.ni",
+            memberSince = SimpleDateFormat("MMM yyyy", Locale.getDefault()).format(Date()),
+            isPremium = false
+        )
+    )
+    val userProfile: StateFlow<UserProfile> = _userProfile.asStateFlow()
+
+    private val _avatarUri = MutableStateFlow<Uri?>(null)
+    val avatarUri: StateFlow<Uri?> = _avatarUri.asStateFlow()
+>>>>>>> main
 
     fun toggleTheme() {
         _isDarkMode.value = !_isDarkMode.value
@@ -107,27 +128,66 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
     private val _sessionHistory = MutableStateFlow<List<SessionResult>>(emptyList())
     val sessionHistory: StateFlow<List<SessionResult>> = _sessionHistory.asStateFlow()
 
+    private val _currentStreak = MutableStateFlow(0)
+    val currentStreak: StateFlow<Int> = _currentStreak.asStateFlow()
+
+    private val _bestStreak = MutableStateFlow(0)
+    val bestStreak: StateFlow<Int> = _bestStreak.asStateFlow()
+
     private val _decisionPath = MutableStateFlow<List<Int>>(emptyList())
     val decisionPath: StateFlow<List<Int>> = _decisionPath.asStateFlow()
 
+    private val _achievements = MutableStateFlow<List<Achievement>>(emptyList())
+    val achievements: StateFlow<List<Achievement>> = _achievements.asStateFlow()
+
+    private val _newlyUnlocked = MutableStateFlow<Set<String>>(emptySet())
+    val newlyUnlocked: StateFlow<Set<String>> = _newlyUnlocked.asStateFlow()
+
+    private var knownUnlockedAchievementIds: Set<String> = emptySet()
+
+    init {
+        recalculateStreaks()
+        recalculateAchievements()
+    }
+
     fun resetSession() {
         _playerState.value = initialState
-        _currentScenarioId.value = 1
+        _currentScenarioId.value = 1  // Asegurar que empieza en el escenario 1
         _gameFinished.value = false
         _finalResult.value = ""
         _decisionPath.value = emptyList()
     }
 
-    fun selectOption(option: Option) {
-        if (_gameFinished.value) return
+    fun consumeNewlyUnlocked(id: String) {
+        _newlyUnlocked.value = _newlyUnlocked.value - id
+    }
 
+    fun selectOption(option: Option) {
+        // Prevenir selecciones si el juego ya terminó
+        if (_gameFinished.value) return
+        
+        // Validar que el escenario actual exista
+        val currentScenario = getCurrentScenario() ?: return
+
+        // Aplicar los efectos de la opción
         _playerState.value = gameEngine.applyOption(_playerState.value, option)
+        
+        // Registrar la decisión tomada
         _decisionPath.value = _decisionPath.value + (_currentScenarioId.value)
 
+        // Determinar siguiente acción
         if (option.nextScenarioId == null) {
+            // La opción no tiene siguiente escenario, terminar simulación
             finishSimulation()
         } else {
-            _currentScenarioId.value = option.nextScenarioId
+            // Validar que el siguiente escenario existe antes de navegar
+            val nextScenario = scenarios.find { it.id == option.nextScenarioId }
+            if (nextScenario != null) {
+                _currentScenarioId.value = option.nextScenarioId
+            } else {
+                // Si el siguiente escenario no existe, terminar también
+                finishSimulation()
+            }
         }
     }
 
@@ -145,6 +205,328 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
             path = _decisionPath.value
         )
         _sessionHistory.value = listOf(newResult) + _sessionHistory.value
+        recalculateStreaks()
+        recalculateAchievements()
+    }
+
+    fun filterSessionsByPeriod(period: String): List<SessionResult> {
+        val now = System.currentTimeMillis()
+        val cutoff = when (period) {
+            "Semana" -> now - 7L * 24 * 60 * 60 * 1000
+            "Mes" -> now - 30L * 24 * 60 * 60 * 1000
+            "Año" -> now - 365L * 24 * 60 * 60 * 1000
+            else -> 0L
+        }
+        val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+
+        return _sessionHistory.value.filter {
+            runCatching { formatter.parse(it.date)?.time ?: 0L }.getOrDefault(0L) >= cutoff
+        }
+    }
+
+    private fun recalculateStreaks() {
+        val uniqueDates = _sessionHistory.value
+            .mapNotNull { parseSessionDate(it.date) }
+            .toSet()
+
+        _currentStreak.value = calculateCurrentStreak(uniqueDates)
+        _bestStreak.value = calculateBestStreak(uniqueDates)
+    }
+
+    private fun recalculateAchievements() {
+        val history = _sessionHistory.value.sortedBy { parseSessionMillis(it.date) }
+        val achievements = buildAchievements(history)
+        val unlockedIds = achievements.filter { it.unlocked }.mapTo(mutableSetOf()) { it.id }
+        val newlyUnlockedIds = unlockedIds - knownUnlockedAchievementIds
+
+        if (newlyUnlockedIds.isNotEmpty()) {
+            _newlyUnlocked.value = _newlyUnlocked.value + newlyUnlockedIds
+        }
+
+        _achievements.value = achievements
+        knownUnlockedAchievementIds = unlockedIds
+    }
+
+    private fun buildAchievements(history: List<SessionResult>): List<Achievement> {
+        val totalSessions = history.size
+        val totalDecisions = history.sumOf { it.choicesMade }
+        val bestStreakValue = _bestStreak.value
+        val successSessions = history.count { it.finalResult.contains("Éxito", ignoreCase = true) }
+        val highProgressSessions = history.count { it.finalState.progress >= 80 }
+        val masterySessions = history.count { it.finalState.progress >= 70 && it.finalState.stress <= 40 }
+        val distinctPaths = history.map { it.path.joinToString(separator = "-") }.toSet().size
+
+        val distinctScenarios = mutableSetOf<Int>()
+        var explorationUnlockDate: String? = null
+        history.forEach { session ->
+            distinctScenarios.addAll(session.path)
+            if (explorationUnlockDate == null && distinctScenarios.size >= 5) {
+                explorationUnlockDate = session.date
+            }
+        }
+
+        val newestHistory = history
+
+        return listOf(
+            achievement(
+                id = "first_step",
+                name = "Primer paso",
+                description = "Completa tu primera simulación.",
+                emoji = "",
+                category = AchievementCategory.CONSTANCIA,
+                unlocked = totalSessions >= 1,
+                progress = progressPercent(totalSessions, 1),
+                unlockedDate = firstSessionDateAtOrAfter(newestHistory, 1)
+            ),
+            achievement(
+                id = "steady_3",
+                name = "Ritmo de 3",
+                description = "Mantén tres simulaciones completadas.",
+                emoji = "",
+                category = AchievementCategory.CONSTANCIA,
+                unlocked = totalSessions >= 3,
+                progress = progressPercent(totalSessions, 3),
+                unlockedDate = firstSessionDateAtOrAfter(newestHistory, 3)
+            ),
+            achievement(
+                id = "streak_7",
+                name = "Racha de 7",
+                description = "Consigue 7 días seguidos con actividad.",
+                emoji = "⚡",
+                category = AchievementCategory.CONSTANCIA,
+                unlocked = bestStreakValue >= 7,
+                progress = progressPercent(bestStreakValue, 7),
+                unlockedDate = firstStreakDateAtOrAfter(history, 7)
+            ),
+            achievement(
+                id = "unstoppable",
+                name = "Imparable",
+                description = "Alcanza 14 días seguidos de constancia.",
+                emoji = "",
+                category = AchievementCategory.CONSTANCIA,
+                unlocked = bestStreakValue >= 14,
+                progress = progressPercent(bestStreakValue, 14),
+                unlockedDate = firstStreakDateAtOrAfter(history, 14)
+            ),
+            achievement(
+                id = "thinker",
+                name = "Pensador",
+                description = "Consigue resultados de Éxito equilibrado.",
+                emoji = "",
+                category = AchievementCategory.MAESTRIA,
+                unlocked = successSessions >= 2,
+                progress = progressPercent(successSessions, 2),
+                unlockedDate = firstDateWhenCountReached(history, 2) { it.finalResult.contains("Éxito", ignoreCase = true) }
+            ),
+            achievement(
+                id = "strategist",
+                name = "Estratega",
+                description = "Completa sesiones con progreso alto.",
+                emoji = "♟️",
+                category = AchievementCategory.MAESTRIA,
+                unlocked = highProgressSessions >= 3,
+                progress = progressPercent(highProgressSessions, 3),
+                unlockedDate = firstDateWhenCountReached(history, 3) { it.finalState.progress >= 80 }
+            ),
+            achievement(
+                id = "master",
+                name = "Maestro",
+                description = "Mantén el progreso alto con poco estrés.",
+                emoji = "",
+                category = AchievementCategory.MAESTRIA,
+                unlocked = masterySessions >= 5,
+                progress = progressPercent(masterySessions, 5),
+                unlockedDate = firstDateWhenCountReached(history, 5) { it.finalState.progress >= 70 && it.finalState.stress <= 40 }
+            ),
+            achievement(
+                id = "visionary",
+                name = "Visionario",
+                description = "Acumula 25 decisiones en total.",
+                emoji = "✨",
+                category = AchievementCategory.MAESTRIA,
+                unlocked = totalDecisions >= 25,
+                progress = progressPercent(totalDecisions, 25),
+                unlockedDate = firstDateWhenDecisionCountReached(history)
+            ),
+            achievement(
+                id = "explorer",
+                name = "Explorador",
+                description = "Recorre al menos 3 rutas distintas.",
+                emoji = "",
+                category = AchievementCategory.EXPLORACION,
+                unlocked = distinctPaths >= 3,
+                progress = progressPercent(distinctPaths, 3),
+                unlockedDate = firstDateWhenDistinctPathReached(history, 3)
+            ),
+            achievement(
+                id = "cartographer",
+                name = "Cartógrafo",
+                description = "Descubre 5 rutas distintas.",
+                emoji = "️",
+                category = AchievementCategory.EXPLORACION,
+                unlocked = distinctPaths >= 5,
+                progress = progressPercent(distinctPaths, 5),
+                unlockedDate = firstDateWhenDistinctPathReached(history, 5)
+            ),
+            achievement(
+                id = "curious",
+                name = "Curioso",
+                description = "Visita los 5 escenarios del juego.",
+                emoji = "",
+                category = AchievementCategory.EXPLORACION,
+                unlocked = distinctScenarios.size >= 5,
+                progress = progressPercent(distinctScenarios.size, 5),
+                unlockedDate = explorationUnlockDate
+            ),
+            achievement(
+                id = "chronicle",
+                name = "Cronista",
+                description = "Completa 12 simulaciones.",
+                emoji = "",
+                category = AchievementCategory.EXPLORACION,
+                unlocked = totalSessions >= 12,
+                progress = progressPercent(totalSessions, 12),
+                unlockedDate = firstSessionDateAtOrAfter(newestHistory, 12)
+            )
+        )
+    }
+
+    private fun achievement(
+        id: String,
+        name: String,
+        description: String,
+        emoji: String,
+        category: AchievementCategory,
+        unlocked: Boolean,
+        progress: Int,
+        unlockedDate: String?
+    ): Achievement {
+        return Achievement(
+            id = id,
+            name = name,
+            description = description,
+            emoji = emoji,
+            category = category,
+            unlocked = unlocked,
+            progress = progress.coerceIn(0, 100),
+            unlockedDate = unlockedDate
+        )
+    }
+
+    private fun progressPercent(current: Int, threshold: Int): Int {
+        if (threshold <= 0) return 0
+        return ((current.toFloat() / threshold.toFloat()) * 100f).toInt().coerceIn(0, 100)
+    }
+
+    private fun firstSessionDateAtOrAfter(history: List<SessionResult>, threshold: Int): String? {
+        if (history.isEmpty()) return null
+        return history.getOrNull(threshold - 1)?.date
+    }
+
+    private fun firstDateWhenCountReached(
+        history: List<SessionResult>,
+        threshold: Int,
+        predicate: (SessionResult) -> Boolean
+    ): String? {
+        if (threshold <= 0) return null
+        var count = 0
+        history.forEach { session ->
+            if (predicate(session)) {
+                count++
+                if (count >= threshold) return session.date
+            }
+        }
+        return null
+    }
+
+    private fun firstDateWhenDecisionCountReached(history: List<SessionResult>): String? {
+        var count = 0
+        history.forEach { session ->
+            count += session.choicesMade
+            if (count >= 25) return session.date
+        }
+        return null
+    }
+
+    private fun firstDateWhenDistinctPathReached(history: List<SessionResult>, threshold: Int): String? {
+        if (threshold <= 0) return null
+        val seen = mutableSetOf<String>()
+        history.forEach { session ->
+            if (seen.add(session.path.joinToString(separator = "-")) && seen.size >= threshold) {
+                return session.date
+            }
+        }
+        return null
+    }
+
+    private fun firstStreakDateAtOrAfter(history: List<SessionResult>, threshold: Int): String? {
+        if (threshold <= 0) return null
+        val uniqueDates = history
+            .mapNotNull { parseSessionDate(it.date) }
+            .distinct()
+            .sorted()
+
+        if (uniqueDates.isEmpty()) return null
+
+        var streak = 1
+        for (index in 1 until uniqueDates.size) {
+            streak = if (uniqueDates[index] == uniqueDates[index - 1].plusDays(1)) {
+                streak + 1
+            } else {
+                1
+            }
+            if (streak >= threshold) {
+                val targetDate = uniqueDates[index]
+                return history.firstOrNull { parseSessionDate(it.date) == targetDate }?.date
+            }
+        }
+        return null
+    }
+
+    private fun parseSessionDate(date: String): LocalDate? {
+        val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        return runCatching {
+            val parsed = formatter.parse(date) ?: return null
+            parsed.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+        }.getOrNull()
+    }
+
+    private fun parseSessionMillis(date: String): Long {
+        val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        return runCatching { formatter.parse(date)?.time ?: 0L }.getOrDefault(0L)
+    }
+
+    private fun calculateCurrentStreak(dates: Set<LocalDate>): Int {
+        if (dates.isEmpty()) return 0
+
+        var streak = 0
+        var cursor = LocalDate.now()
+
+        while (dates.contains(cursor)) {
+            streak += 1
+            cursor = cursor.minusDays(1)
+        }
+
+        return streak
+    }
+
+    private fun calculateBestStreak(dates: Set<LocalDate>): Int {
+        if (dates.isEmpty()) return 0
+
+        val sortedDates = dates.sorted()
+        var best = 1
+        var current = 1
+
+        for (index in 1 until sortedDates.size) {
+            current = if (sortedDates[index] == sortedDates[index - 1].plusDays(1)) {
+                current + 1
+            } else {
+                1
+            }
+            best = maxOf(best, current)
+        }
+
+        return best
     }
 
     fun getCurrentScenario(): Scenario? {
@@ -152,11 +534,12 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
     }
 
     fun getScenarioProgress(): Float {
-        val totalSteps = 4f 
+        val totalSteps = scenarios.size.toFloat()
         val stepsTaken = _decisionPath.value.size.toFloat()
         return (stepsTaken + 1) / (totalSteps + 1)
     }
 
+<<<<<<< HEAD
     init {
         // Leer el flag de DataStore y exponerlo
         viewModelScope.launch {
@@ -171,5 +554,29 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
             onboardingPreferences.setOnboardingCompleted(true)
             _onboardingCompleted.value = true
         }
+=======
+    fun logout() {
+        // En una app real limpiaríamos tokens, etc.
+        resetSession()
+    }
+
+    fun setUser(user: ni.edu.uam.mindtrack.model.User, profileImageUri: String? = null) {
+        _userProfile.value = UserProfile(
+            name = user.fullName,
+            email = user.email,
+            memberSince = SimpleDateFormat("MMM yyyy", Locale.getDefault()).format(Date()),
+            isPremium = false,
+            profileImageUri = profileImageUri
+        )
+        _avatarUri.value = profileImageUri?.let { Uri.parse(it) }
+    }
+
+    fun updateProfile(newProfile: UserProfile) {
+        _userProfile.value = newProfile
+    }
+
+    fun setAvatarUri(uri: Uri?) {
+        _avatarUri.value = uri
+>>>>>>> main
     }
 }

@@ -31,3 +31,16 @@ data class SessionResult(
     val choicesMade: Int,
     val path: List<Int>
 )
+
+data class UserProfile(
+    val name: String,
+    val email: String,
+    val memberSince: String,
+    val isPremium: Boolean = false,
+    val profileImageUri: String? = null,
+    val age: String = "",
+    val gender: String = "",
+    val bio: String = "",
+    val dailyReminder: Boolean = false
+)
+

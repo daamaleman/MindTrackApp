@@ -7,6 +7,10 @@ sealed class Routes(val route: String) {
     object Home : Routes("home")
     object Scenario : Routes("scenario")
     object Result : Routes("result")
+    object Statistics : Routes("statistics")
+    object Achievements : Routes("achievements")
     object History : Routes("history")
     object Settings : Routes("settings")
+    object Profile : Routes("profile")
+    object EditProfile : Routes("edit_profile")
 }

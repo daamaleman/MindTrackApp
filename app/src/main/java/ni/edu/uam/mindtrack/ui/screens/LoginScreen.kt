@@ -34,12 +34,30 @@ import ni.edu.uam.mindtrack.ui.components.AuthToggle
 import ni.edu.uam.mindtrack.ui.components.MindTrackInput
 import ni.edu.uam.mindtrack.ui.components.MindTrackPrimaryButton
 import ni.edu.uam.mindtrack.ui.theme.*
+import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 
 @Composable
 fun LoginScreen(
+    viewModel: MindTrackViewModel,
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit
 ) {
+<<<<<<< HEAD
+=======
+    AuthScreen(
+        viewModel = viewModel,
+        initialIsLogin = true,
+        onAuthSuccess = onLoginSuccess
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LoginContent(
+    viewModel: MindTrackViewModel,
+    onLoginSuccess: () -> Unit
+) {
+>>>>>>> main
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -77,11 +95,97 @@ fun LoginScreen(
                     ),
                 contentAlignment = Alignment.Center
             ) {
+<<<<<<< HEAD
                 androidx.compose.material3.Icon(
                     imageVector = Icons.Filled.Psychology,
                     contentDescription = null,
                     tint = Color.White,
                     modifier = Modifier.size(32.dp)
+=======
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { 
+                        email = it
+                        error = null
+                    },
+                    label = { Text("Correo electrónico") },
+                    placeholder = { Text("ejemplo@correo.com") },
+                    modifier = Modifier.fillMaxWidth(),
+                    leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = PrimaryAccent) },
+                    singleLine = true,
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryAccent,
+                        unfocusedBorderColor = BorderColor,
+                        focusedContainerColor = SurfaceVariant.copy(alpha = 0.5f),
+                        unfocusedContainerColor = SurfaceVariant.copy(alpha = 0.5f),
+                        focusedTextColor = TextWhite,
+                        unfocusedTextColor = TextWhite,
+                        cursorColor = PrimaryAccent
+                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { 
+                        password = it
+                        error = null
+                    },
+                    label = { Text("Contraseña") },
+                    modifier = Modifier.fillMaxWidth(),
+                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = PrimaryAccent) },
+                    trailingIcon = {
+                        val image = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(imageVector = image, contentDescription = null, tint = TextMuted)
+                        }
+                    },
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    singleLine = true,
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryAccent,
+                        unfocusedBorderColor = BorderColor,
+                        focusedContainerColor = SurfaceVariant.copy(alpha = 0.5f),
+                        unfocusedContainerColor = SurfaceVariant.copy(alpha = 0.5f),
+                        focusedTextColor = TextWhite,
+                        unfocusedTextColor = TextWhite,
+                        cursorColor = PrimaryAccent
+                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                )
+
+                if (error != null) {
+                    Text(
+                        text = error!!,
+                        color = ImpulsiveColor,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 12.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                MindTrackButton(
+                    text = "Iniciar sesión",
+                    onClick = {
+                        val validationError = AuthManager.validateUserLogin(email, password)
+                        if (validationError == null) {
+                            val user = AuthManager.login(email, password)
+                            if (user != null) {
+                                viewModel.setUser(user)
+                                onLoginSuccess()
+                            } else {
+                                error = "Credenciales incorrectas"
+                            }
+                        } else {
+                            error = validationError
+                        }
+                    }
+>>>>>>> main
                 )
             }
             Spacer(Modifier.height(16.dp))

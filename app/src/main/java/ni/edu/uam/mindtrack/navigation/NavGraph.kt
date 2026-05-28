@@ -22,22 +22,23 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     fun isForwardNavigation(initial: String?, target: String?): Boolean {
-        val order = listOf(Routes.Home.route, Routes.History.route, Routes.Settings.route)
+        val order = listOf(Routes.Home.route, Routes.Statistics.route, Routes.Profile.route, Routes.Settings.route)
         val initialIdx = order.indexOf(initial)
         val targetIdx = order.indexOf(target)
-        
+
         if (target == Routes.Scenario.route || target == Routes.Result.route) return true
-        
+
         if (initialIdx != -1 && targetIdx != -1) {
             return targetIdx > initialIdx
         }
-        
+
         return true
     }
 
     Scaffold(
         bottomBar = {
-            if (currentRoute == Routes.Home.route || currentRoute == Routes.History.route || currentRoute == Routes.Settings.route) {
+            if (currentRoute == Routes.Home.route || currentRoute == Routes.Statistics.route ||
+                currentRoute == Routes.Profile.route || currentRoute == Routes.Settings.route) {
                 MindTrackBottomBar(
                     currentRoute = currentRoute,
                     onNavigate = { route ->
@@ -92,6 +93,35 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                 )
             }
         ) {
+<<<<<<< HEAD
+=======
+            composable(Routes.Login.route) {
+                LoginScreen(
+                    viewModel = viewModel,
+                    onLoginSuccess = {
+                        navController.navigate(Routes.Home.route) {
+                            popUpTo(Routes.Login.route) { inclusive = true }
+                        }
+                    },
+                    onNavigateToRegister = {
+                        navController.navigate(Routes.Register.route)
+                    }
+                )
+            }
+            composable(Routes.Register.route) {
+                RegisterScreen(
+                    viewModel = viewModel,
+                    onRegisterSuccess = {
+                        navController.navigate(Routes.Home.route) {
+                            popUpTo(Routes.Login.route) { inclusive = true }
+                        }
+                    },
+                    onNavigateToLogin = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+>>>>>>> main
             composable(Routes.Home.route) {
                 HomeScreen(
                     onStartSimulation = {
@@ -119,8 +149,51 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                     }
                 )
             }
+            composable(Routes.Statistics.route) {
+                StatisticsScreen(
+                    viewModel = viewModel,
+                    onStartSimulation = {
+                        viewModel.resetSession()
+                        navController.navigate(Routes.Scenario.route)
+                    },
+                    onOpenHistory = {
+                        navController.navigate(Routes.History.route)
+                    }
+                )
+            }
             composable(Routes.History.route) {
                 HistoryScreen(
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Routes.Profile.route) {
+                ProfileScreen(
+                    viewModel = viewModel,
+                    onEditProfile = { navController.navigate(Routes.EditProfile.route) },
+                    onOpenAchievements = { navController.navigate(Routes.Achievements.route) },
+                    onOpenStatistics = { navController.navigate(Routes.Statistics.route) },
+                    onOpenSettings = { navController.navigate(Routes.Settings.route) },
+                    onLogout = {
+                        viewModel.logout()
+                        navController.navigate(Routes.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
+                    onStartFirstSimulation = {
+                        navController.navigate(Routes.Home.route)
+                    }
+                )
+            }
+            composable(Routes.EditProfile.route) {
+                EditProfileScreen(
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() },
+                    onSaved = { navController.popBackStack() }
+                )
+            }
+            composable(Routes.Achievements.route) {
+                AchievementsScreen(
                     viewModel = viewModel,
                     onBack = { navController.popBackStack() }
                 )

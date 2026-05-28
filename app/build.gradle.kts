@@ -52,8 +52,12 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.accompanist.systemuicontroller)
+<<<<<<< HEAD
     // DataStore Preferences for onboarding persistence
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+=======
+    implementation(libs.coil.compose)
+>>>>>>> main
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
