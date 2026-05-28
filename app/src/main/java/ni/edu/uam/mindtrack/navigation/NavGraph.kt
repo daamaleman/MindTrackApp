@@ -140,6 +140,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
             }
             composable(Routes.Home.route) {
                 HomeScreen(
+                    viewModel = viewModel,
                     onStartSimulation = {
                         viewModel.resetSession()
                         navController.navigate(Routes.Scenario.route)

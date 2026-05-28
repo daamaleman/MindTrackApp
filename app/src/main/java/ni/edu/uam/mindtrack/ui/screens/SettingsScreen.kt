@@ -43,6 +43,7 @@ import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 @Composable
 fun SettingsScreen(viewModel: MindTrackViewModel) {
     val isDarkMode by viewModel.isDarkMode.collectAsState()
+    val userProfile by viewModel.userProfile.collectAsState()
     var notificationsEnabled by remember { mutableStateOf(false) }
 
     Column(
@@ -91,7 +92,7 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "DA",
+                    text = userProfile.name.split(" ").mapNotNull { it.firstOrNull()?.toString() }.take(2).joinToString("").uppercase(),
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 20.sp,
@@ -103,7 +104,7 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
             Spacer(Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Daniela A.",
+                    text = userProfile.name,
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp,
@@ -112,7 +113,7 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
                 )
                 Spacer(Modifier.height(2.dp))
                 Text(
-                    text = "daniela@uam.edu.ni",
+                    text = userProfile.email,
                     style = MaterialTheme.typography.bodySmall.copy(
                         color = TextMuted,
                         fontSize = 12.sp

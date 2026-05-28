@@ -24,17 +24,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import ni.edu.uam.mindtrack.ui.components.IconCircleButton
 import ni.edu.uam.mindtrack.ui.components.MindTrackPrimaryButton
 import ni.edu.uam.mindtrack.ui.components.Pill
 import ni.edu.uam.mindtrack.ui.components.SectionLabel
 import ni.edu.uam.mindtrack.ui.components.StatTile
 import ni.edu.uam.mindtrack.ui.theme.*
+import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 
 @Composable
 fun HomeScreen(
+    viewModel: MindTrackViewModel,
     onStartSimulation: () -> Unit
 ) {
+    val userProfile by viewModel.userProfile.collectAsState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -70,7 +76,7 @@ fun HomeScreen(
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        text = "Daniela 👋",
+                        text = "${userProfile.name} 👋",
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
