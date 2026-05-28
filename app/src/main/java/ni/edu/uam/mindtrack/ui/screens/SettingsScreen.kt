@@ -8,17 +8,25 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -27,327 +35,253 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberAsyncImagePainter
-import ni.edu.uam.mindtrack.engine.AuthManager
+import ni.edu.uam.mindtrack.ui.components.MindTrackGhostButton
+import ni.edu.uam.mindtrack.ui.components.SectionLabel
 import ni.edu.uam.mindtrack.ui.theme.*
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(viewModel: MindTrackViewModel) {
-    var showDialog by remember { mutableStateOf(false) }
-    var dialogTitle by remember { mutableStateOf("") }
-    var dialogMessage by remember { mutableStateOf("") }
-    
-    var showEditProfileDialog by remember { mutableStateOf(false) }
-    var showPasswordDialog by remember { mutableStateOf(false) }
-    
     val isDarkMode by viewModel.isDarkMode.collectAsState()
-    val currentUser by AuthManager.currentUser.collectAsState()
+    var notificationsEnabled by remember { mutableStateOf(false) }
 
-    val photoLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
-            AuthManager.updateProfile(
-                fullName = currentUser?.fullName ?: "",
-                email = currentUser?.email ?: "",
-                profileImageUri = it
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Background)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp)
+            .padding(top = 16.dp, bottom = 100.dp)
+    ) {
+        Text(
+            text = "Ajustes",
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 22.sp,
+                letterSpacing = (-0.6).sp,
+                color = TextWhite
             )
-        }
-    }
-
-    // Diálogo informativo genérico
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text(text = dialogTitle, fontWeight = FontWeight.Bold, color = PrimaryAccent) },
-            text = { Text(text = dialogMessage, color = MaterialTheme.colorScheme.onSurface) },
-            confirmButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text("Entendido", color = PrimaryAccent)
-                }
-            },
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            shape = RoundedCornerShape(16.dp)
         )
-    }
-    
-    // Diálogo para editar perfil (Nombre y Correo)
-    if (showEditProfileDialog) {
-        var newName by remember { mutableStateOf(currentUser?.fullName ?: "") }
-        var newEmail by remember { mutableStateOf(currentUser?.email ?: "") }
-        var editError by remember { mutableStateOf<String?>(null) }
 
-        AlertDialog(
-            onDismissRequest = { showEditProfileDialog = false },
-            title = { Text("Editar Perfil", fontWeight = FontWeight.Bold) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OutlinedTextField(
-                        value = newName,
-                        onValueChange = { newName = it },
-                        label = { Text("Nombre Completo") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-                    OutlinedTextField(
-                        value = newEmail,
-                        onValueChange = { newEmail = it },
-                        label = { Text("Correo Electrónico") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-                    if (editError != null) {
-                        Text(editError!!, color = ImpulsiveColor, style = MaterialTheme.typography.labelSmall)
-                    }
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        if (newName.isNotBlank() && AuthManager.validateEmail(newEmail)) {
-                            if (AuthManager.updateProfile(newName, newEmail)) {
-                                showEditProfileDialog = false
-                            } else {
-                                editError = "Error al actualizar (el correo puede estar en uso)"
-                            }
-                        } else {
-                            editError = "Datos inválidos"
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryAccent)
-                ) {
-                    Text("Guardar")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showEditProfileDialog = false }) {
-                    Text("Cancelar")
-                }
-            }
-        )
-    }
+        Spacer(Modifier.height(18.dp))
 
-    // Diálogo flotante para cambiar contraseña
-    if (showPasswordDialog) {
-        var currentPass by remember { mutableStateOf("") }
-        var newPass by remember { mutableStateOf("") }
-        var confirmPass by remember { mutableStateOf("") }
-        var passError by remember { mutableStateOf<String?>(null) }
-        
-        var currentPassVisible by remember { mutableStateOf(false) }
-        var newPassVisible by remember { mutableStateOf(false) }
-
-        AlertDialog(
-            onDismissRequest = { showPasswordDialog = false },
-            title = { Text("Cambiar Contraseña", fontWeight = FontWeight.Bold) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OutlinedTextField(
-                        value = currentPass,
-                        onValueChange = { currentPass = it },
-                        label = { Text("Contraseña Actual") },
-                        modifier = Modifier.fillMaxWidth(),
-                        visualTransformation = if (currentPassVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        trailingIcon = {
-                            IconButton(onClick = { currentPassVisible = !currentPassVisible }) {
-                                Icon(if (currentPassVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff, null)
-                            }
-                        }
-                    )
-                    OutlinedTextField(
-                        value = newPass,
-                        onValueChange = { newPass = it },
-                        label = { Text("Nueva Contraseña") },
-                        modifier = Modifier.fillMaxWidth(),
-                        visualTransformation = if (newPassVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        trailingIcon = {
-                            IconButton(onClick = { newPassVisible = !newPassVisible }) {
-                                Icon(if (newPassVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff, null)
-                            }
-                        }
-                    )
-                    OutlinedTextField(
-                        value = confirmPass,
-                        onValueChange = { confirmPass = it },
-                        label = { Text("Confirmar Nueva Contraseña") },
-                        modifier = Modifier.fillMaxWidth(),
-                        visualTransformation = PasswordVisualTransformation()
-                    )
-                    if (passError != null) {
-                        Text(passError!!, color = ImpulsiveColor, style = MaterialTheme.typography.labelSmall)
-                    }
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        if (newPass != confirmPass) {
-                            passError = "Las contraseñas nuevas no coinciden"
-                        } else {
-                            val error = AuthManager.updatePassword(currentPass, newPass)
-                            if (error == null) {
-                                showPasswordDialog = false
-                                dialogTitle = "Éxito"
-                                dialogMessage = "Tu contraseña ha sido actualizada correctamente."
-                                showDialog = true
-                            } else {
-                                passError = error
-                            }
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryAccent)
-                ) {
-                    Text("Actualizar")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showPasswordDialog = false }) {
-                    Text("Cancelar")
-                }
-            }
-        )
-    }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Text(
-                            "Ajustes",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
-                )
-            )
-        },
-        containerColor = MaterialTheme.colorScheme.background
-    ) { padding ->
-        Column(
+        // Profile card
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 24.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .background(Surface)
+                .background(
+                    Brush.linearGradient(
+                        listOf(PrimaryAccent.copy(alpha = 0.14f), PrimaryAccent.copy(alpha = 0.02f))
+                    )
+                )
+                .border(1.dp, PrimaryEdge, RoundedCornerShape(20.dp))
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Seguridad",
-                style = MaterialTheme.typography.labelSmall.copy(
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                )
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
-            SettingsItem(
-                icon = Icons.Default.VpnKey,
-                label = "Cambiar Contraseña",
-                onClick = { showPasswordDialog = true }
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Text(
-                text = "Preferencias",
-                style = MaterialTheme.typography.labelSmall.copy(
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                )
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Item de Tema
-            Row(
+            // Avatar with initials
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
-                    .clip(RoundedCornerShape(12.dp))
-                    .clickable { viewModel.toggleTheme() }
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        Brush.linearGradient(listOf(PrimaryAccent, SecondaryAccent))
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "DA",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 20.sp,
+                        color = Color.White,
+                        letterSpacing = (-0.5).sp
+                    )
+                )
+            }
+            Spacer(Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Daniela A.",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                        color = TextWhite
+                    )
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = "daniela@uam.edu.ni",
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = TextMuted,
+                        fontSize = 12.sp
+                    )
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(SurfaceVariant)
+                    .border(1.dp, BorderColor, RoundedCornerShape(10.dp))
+                    .clickable {},
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = if (isDarkMode) Icons.Default.DarkMode else Icons.Default.LightMode,
+                    imageVector = Icons.Filled.Edit,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = "Modo Oscuro",
-                    style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                    modifier = Modifier.weight(1f)
-                )
-                Switch(
-                    checked = isDarkMode,
-                    onCheckedChange = { viewModel.toggleTheme() },
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = PrimaryAccent,
-                        checkedTrackColor = PrimaryAccent.copy(alpha = 0.5f)
-                    )
+                    tint = TextSecondary,
+                    modifier = Modifier.size(18.dp)
                 )
             }
+        }
 
-            Spacer(modifier = Modifier.height(32.dp))
+        Spacer(Modifier.height(22.dp))
+        SectionLabel(text = "Preferencias")
+        Spacer(Modifier.height(10.dp))
 
-            SettingsItem(
-                icon = Icons.AutoMirrored.Filled.Logout,
-                label = "Cerrar Sesión",
-                onClick = { AuthManager.logout() }
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            Text(
-                text = "Versión 1.3.0",
-                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
-                style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        SettingsRow(
+            icon = Icons.Filled.DarkMode,
+            label = "Modo oscuro",
+            sub = "Activado siempre",
+            onClick = { viewModel.toggleTheme() }
+        ) {
+            Switch(
+                checked = isDarkMode,
+                onCheckedChange = { viewModel.toggleTheme() },
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = Color.White,
+                    checkedTrackColor = PrimaryAccent,
+                    uncheckedThumbColor = Color.White,
+                    uncheckedTrackColor = SurfaceElevated,
+                    uncheckedBorderColor = SurfaceElevated
+                )
             )
         }
+        Spacer(Modifier.height(8.dp))
+        SettingsRow(
+            icon = Icons.Outlined.Notifications,
+            label = "Notificaciones",
+            sub = "Recordatorios diarios",
+            onClick = { notificationsEnabled = !notificationsEnabled }
+        ) {
+            Switch(
+                checked = notificationsEnabled,
+                onCheckedChange = { notificationsEnabled = it },
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = Color.White,
+                    checkedTrackColor = PrimaryAccent,
+                    uncheckedThumbColor = Color.White,
+                    uncheckedTrackColor = SurfaceElevated,
+                    uncheckedBorderColor = SurfaceElevated
+                )
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        SettingsRow(
+            icon = Icons.Filled.Translate,
+            label = "Idioma",
+            sub = "Español",
+            onClick = {}
+        )
+
+        Spacer(Modifier.height(22.dp))
+        SectionLabel(text = "Cuenta y soporte")
+        Spacer(Modifier.height(10.dp))
+
+        SettingsRow(
+            icon = Icons.Outlined.Lock,
+            label = "Privacidad y seguridad",
+            onClick = {}
+        )
+        Spacer(Modifier.height(8.dp))
+        SettingsRow(
+            icon = Icons.AutoMirrored.Filled.HelpOutline,
+            label = "Ayuda y soporte",
+            onClick = {}
+        )
+        Spacer(Modifier.height(8.dp))
+        SettingsRow(
+            icon = Icons.Outlined.Info,
+            label = "Acerca de MindTrack",
+            sub = "Versión 1.0.0",
+            onClick = {}
+        )
+
+        Spacer(Modifier.height(18.dp))
+
+        MindTrackGhostButton(
+            text = "Cerrar sesión",
+            leadingIcon = Icons.AutoMirrored.Filled.Logout,
+            contentColor = ImpulsiveColor,
+            onClick = {}
+        )
     }
 }
 
 @Composable
-fun SettingsItem(icon: ImageVector, label: String, onClick: () -> Unit) {
+private fun SettingsRow(
+    icon: ImageVector,
+    label: String,
+    sub: String? = null,
+    onClick: () -> Unit,
+    trail: (@Composable () -> Unit)? = null
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(14.dp))
+            .background(Surface)
+            .border(1.dp, BorderColor, RoundedCornerShape(14.dp))
             .clickable(onClick = onClick)
-            .padding(16.dp),
+            .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(24.dp)
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-            modifier = Modifier.weight(1f)
-        )
-        Icon(
-            imageVector = Icons.Default.ChevronRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp)
-        )
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(SurfaceVariant),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = TextSecondary,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+        Spacer(Modifier.width(14.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp,
+                    color = TextWhite
+                )
+            )
+            if (sub != null) {
+                Spacer(Modifier.height(1.dp))
+                Text(
+                    text = sub,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = TextMuted,
+                        fontSize = 11.5.sp
+                    )
+                )
+            }
+        }
+        if (trail != null) {
+            trail()
+        } else {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = TextMuted,
+                modifier = Modifier.size(18.dp)
+            )
+        }
     }
 }
