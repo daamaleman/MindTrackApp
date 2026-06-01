@@ -23,6 +23,8 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     val currentRoute = navBackStackEntry?.destination?.route
     val onboardingCompleted by viewModel.onboardingCompleted.collectAsState()
 
+    if (onboardingCompleted == null) return
+
     fun isForwardNavigation(initial: String?, target: String?): Boolean {
         val order = listOf(
             Routes.Onboarding.route,
@@ -65,7 +67,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = if (onboardingCompleted) Routes.Login.route else Routes.Onboarding.route,
+            startDestination = if (onboardingCompleted == true) Routes.Login.route else Routes.Onboarding.route,
             modifier = Modifier.padding(innerPadding),
             enterTransition = {
                 val target = targetState.destination.route
@@ -122,6 +124,9 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                     },
                     onNavigateToRegister = {
                         navController.navigate(Routes.Register.route)
+                    },
+                    onNavigateToOnboarding = {
+                        navController.navigate(Routes.Onboarding.route)
                     }
                 )
             }

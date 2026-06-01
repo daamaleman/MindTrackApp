@@ -29,7 +29,8 @@ import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 fun AuthScreen(
     viewModel: MindTrackViewModel,
     initialIsLogin: Boolean = true,
-    onAuthSuccess: () -> Unit
+    onAuthSuccess: () -> Unit,
+    onNavigateToOnboarding: () -> Unit = {}
 ) {
     var isLogin by remember { mutableStateOf(initialIsLogin) }
 
@@ -107,7 +108,8 @@ fun AuthScreen(
                 if (targetIsLogin) {
                     LoginContent(
                         viewModel = viewModel,
-                        onLoginSuccess = onAuthSuccess
+                        onLoginSuccess = onAuthSuccess,
+                        onNavigateToOnboarding = onNavigateToOnboarding
                     )
                 } else {
                     RegisterContent(

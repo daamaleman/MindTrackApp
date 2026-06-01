@@ -33,19 +33,22 @@ import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 fun LoginScreen(
     viewModel: MindTrackViewModel,
     onLoginSuccess: () -> Unit,
-    onNavigateToRegister: () -> Unit
+    onNavigateToRegister: () -> Unit,
+    onNavigateToOnboarding: () -> Unit = {}
 ) {
     AuthScreen(
         viewModel = viewModel,
         initialIsLogin = true,
-        onAuthSuccess = onLoginSuccess
+        onAuthSuccess = onLoginSuccess,
+        onNavigateToOnboarding = onNavigateToOnboarding
     )
 }
 
 @Composable
 fun LoginContent(
     viewModel: MindTrackViewModel,
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: () -> Unit,
+    onNavigateToOnboarding: () -> Unit = {}
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -139,6 +142,21 @@ fun LoginContent(
                     error = validation
                 }
             }
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        Text(
+            text = "Ver tutorial de nuevo",
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .clickable(onClick = onNavigateToOnboarding)
+                .padding(8.dp),
+            style = MaterialTheme.typography.labelSmall.copy(
+                color = TextMuted,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium
+            )
         )
     }
 }

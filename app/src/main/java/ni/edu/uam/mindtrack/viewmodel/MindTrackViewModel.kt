@@ -38,8 +38,8 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
     val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
 
     // Onboarding persistence state
-    private val _onboardingCompleted = MutableStateFlow(false)
-    val onboardingCompleted: StateFlow<Boolean> = _onboardingCompleted.asStateFlow()
+    private val _onboardingCompleted = MutableStateFlow<Boolean?>(null)
+    val onboardingCompleted: StateFlow<Boolean?> = _onboardingCompleted.asStateFlow()
 
     private val _userProfile = MutableStateFlow(
         UserProfile(
