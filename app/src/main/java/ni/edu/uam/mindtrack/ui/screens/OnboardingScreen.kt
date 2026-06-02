@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
+import ni.edu.uam.mindtrack.ui.theme.MindTrackMotion
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 
 data class OnboardingSlide(val title: String, val subtitle: String, val emoji: String)
@@ -162,8 +163,7 @@ fun OnboardingScreen(
 
                     // emoji center with radial gradient glow
                     AnimatedContent(targetState = slide.emoji, transitionSpec = {
-                        (fadeIn(animationSpec = tween(300, delayMillis = 100)) + scaleIn(initialScale = 0.6f, animationSpec = tween(300, delayMillis = 100))) togetherWith
-                                (fadeOut(animationSpec = tween(200)) + scaleOut(targetScale = 0.6f, animationSpec = tween(200)))
+                        MindTrackMotion.onboardingEmojiTransition()
                     }) { emoji ->
                         Box(
                             modifier = Modifier

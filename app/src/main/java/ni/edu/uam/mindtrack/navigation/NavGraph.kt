@@ -1,7 +1,5 @@
 package ni.edu.uam.mindtrack.navigation
 
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -15,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import ni.edu.uam.mindtrack.engine.AuthManager
 import ni.edu.uam.mindtrack.ui.components.MindTrackBottomBar
 import ni.edu.uam.mindtrack.ui.screens.*
+import ni.edu.uam.mindtrack.ui.theme.MindTrackMotion
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 
 @Composable
@@ -76,38 +75,26 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
             },
             modifier = Modifier.padding(innerPadding),
             enterTransition = {
-                val target = targetState.destination.route
-                val initial = initialState.destination.route
-                val isForward = isForwardNavigation(initial, target)
-                
-                slideIntoContainer(
-                    if (isForward) AnimatedContentTransitionScope.SlideDirection.Left 
-                    else AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(500)
+                MindTrackMotion.navEnter(
+                    isForward = isForwardNavigation(
+                        initialState.destination.route,
+                        targetState.destination.route
+                    )
                 )
             },
             exitTransition = {
-                val target = targetState.destination.route
-                val initial = initialState.destination.route
-                val isForward = isForwardNavigation(initial, target)
-                
-                slideOutOfContainer(
-                    if (isForward) AnimatedContentTransitionScope.SlideDirection.Left 
-                    else AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(500)
+                MindTrackMotion.navExit(
+                    isForward = isForwardNavigation(
+                        initialState.destination.route,
+                        targetState.destination.route
+                    )
                 )
             },
             popEnterTransition = {
-                slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(500)
-                )
+                MindTrackMotion.navEnter(isForward = false)
             },
             popExitTransition = {
-                slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(500)
-                )
+                MindTrackMotion.navExit(isForward = false)
             }
         ) {
             composable(Routes.Onboarding.route) {

@@ -1,8 +1,6 @@
 package ni.edu.uam.mindtrack.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -26,6 +24,7 @@ import ni.edu.uam.mindtrack.model.Achievement
 import ni.edu.uam.mindtrack.model.SessionResult
 import ni.edu.uam.mindtrack.ui.components.MindTrackButton
 import ni.edu.uam.mindtrack.ui.components.StatCard
+import ni.edu.uam.mindtrack.ui.theme.MindTrackMotion
 import ni.edu.uam.mindtrack.ui.theme.*
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 
@@ -88,7 +87,7 @@ fun ProfileScreen(
         // Header with Avatar and Name
         AnimatedVisibility(
             visible = isVisible,
-            enter = fadeIn() + slideInVertically(initialOffsetY = { -40 })
+            enter = MindTrackMotion.sectionEnterTransition(fromTop = true)
         ) {
             ProfileHeader(
                 name = userProfile.name,
@@ -105,7 +104,7 @@ fun ProfileScreen(
         // Quick Stats
         AnimatedVisibility(
             visible = isVisible,
-            enter = fadeIn() + slideInVertically(initialOffsetY = { 40 })
+            enter = MindTrackMotion.sectionEnterTransition()
         ) {
             Column {
                 QuickStatsRow(sessionHistory, achievements)
