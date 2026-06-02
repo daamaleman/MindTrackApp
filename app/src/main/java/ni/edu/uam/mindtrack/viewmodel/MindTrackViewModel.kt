@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import ni.edu.uam.mindtrack.data.OnboardingPreferences
+import ni.edu.uam.mindtrack.engine.AuthManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -144,6 +145,9 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
     private var knownUnlockedAchievementIds: Set<String> = emptySet()
 
     init {
+        AuthManager.currentUser.value?.let { user ->
+            setUser(user, user.profileImageUri?.toString())
+        }
         recalculateStreaks()
         recalculateAchievements()
         // Leer el flag de DataStore y exponerlo
@@ -566,8 +570,17 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
         _avatarUri.value = profileImageUri?.let { Uri.parse(it) }
     }
 
-    fun updateProfile(newProfile: UserProfile) {
+    fun updateProfile(newProfile: UserProfile): Boolean {
+        val updated = AuthManager.updateProfile(
+            fullName = newProfile.name,
+            email = newProfile.email,
+            profileImageUri = newProfile.profileImageUri?.let(Uri::parse)
+        )
+        if (!updated) return false
+
         _userProfile.value = newProfile
+        _avatarUri.value = newProfile.profileImageUri?.let(Uri::parse)
+        return true
     }
 
     fun setAvatarUri(uri: Uri?) {

@@ -186,7 +186,7 @@ fun RegisterContent(
             onClick = {
                 val validation = AuthManager.validateUserRegistration(fullName, email, password)
                 if (validation == null) {
-                    val user = User(fullName, email, password)
+                    val user = User(fullName, email, password, profileImageUri)
                     if (AuthManager.register(user)) {
                         viewModel.setUser(user, profileImageUri?.toString())
                         onRegisterSuccess()

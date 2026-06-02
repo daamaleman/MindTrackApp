@@ -133,9 +133,12 @@ fun EditProfileScreen(
                                 dailyReminder = dailyReminder,
                                 profileImageUri = avatarUri?.toString()
                             )
-                            viewModel.updateProfile(newProfile)
-                            Toast.makeText(context, "Perfil actualizado", Toast.LENGTH_SHORT).show()
-                            onSaved()
+                            if (viewModel.updateProfile(newProfile)) {
+                                Toast.makeText(context, "Perfil actualizado", Toast.LENGTH_SHORT).show()
+                                onSaved()
+                            } else {
+                                Toast.makeText(context, "No se pudo guardar el perfil", Toast.LENGTH_SHORT).show()
+                            }
                         },
                         enabled = canSave
                     ) {
@@ -363,9 +366,12 @@ fun EditProfileScreen(
                         dailyReminder = dailyReminder,
                         profileImageUri = avatarUri?.toString()
                     )
-                    viewModel.updateProfile(newProfile)
-                    Toast.makeText(context, "Perfil actualizado", Toast.LENGTH_SHORT).show()
-                    onSaved()
+                    if (viewModel.updateProfile(newProfile)) {
+                        Toast.makeText(context, "Perfil actualizado", Toast.LENGTH_SHORT).show()
+                        onSaved()
+                    } else {
+                        Toast.makeText(context, "No se pudo guardar el perfil", Toast.LENGTH_SHORT).show()
+                    }
                 },
                 enabled = canSave
             )

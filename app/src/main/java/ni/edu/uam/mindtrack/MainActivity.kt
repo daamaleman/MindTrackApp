@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+import ni.edu.uam.mindtrack.engine.AuthManager
 import ni.edu.uam.mindtrack.data.OnboardingPreferences
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModelFactory
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
@@ -17,6 +18,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        AuthManager.initialize(applicationContext)
         setContent {
             val prefs = OnboardingPreferences(applicationContext)
             val factory = MindTrackViewModelFactory(prefs)

@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import ni.edu.uam.mindtrack.engine.AuthManager
 import ni.edu.uam.mindtrack.ui.components.MindTrackBottomBar
 import ni.edu.uam.mindtrack.ui.screens.*
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
@@ -22,6 +23,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val onboardingCompleted by viewModel.onboardingCompleted.collectAsState()
+    val currentUser by AuthManager.currentUser.collectAsState()
 
     if (onboardingCompleted == null) return
 
@@ -67,7 +69,11 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = if (onboardingCompleted == true) Routes.Login.route else Routes.Onboarding.route,
+            startDestination = when {
+                onboardingCompleted != true -> Routes.Onboarding.route
+                currentUser != null -> Routes.Home.route
+                else -> Routes.Login.route
+            },
             modifier = Modifier.padding(innerPadding),
             enterTransition = {
                 val target = targetState.destination.route
@@ -197,6 +203,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                     onOpenStatistics = { navController.navigate(Routes.Statistics.route) },
                     onOpenSettings = { navController.navigate(Routes.Settings.route) },
                     onLogout = {
+                        AuthManager.logout()
                         viewModel.logout()
                         navController.navigate(Routes.Login.route) {
                             popUpTo(0) { inclusive = true }
