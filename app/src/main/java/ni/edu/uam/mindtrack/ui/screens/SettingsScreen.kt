@@ -1,8 +1,5 @@
 package ni.edu.uam.mindtrack.ui.screens
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -14,9 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Notifications
@@ -31,11 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ni.edu.uam.mindtrack.ui.components.MindTrackGhostButton
 import ni.edu.uam.mindtrack.ui.components.SectionLabel
 import ni.edu.uam.mindtrack.ui.theme.*
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
@@ -119,22 +111,6 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
                     )
                 )
             }
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(SurfaceVariant)
-                    .border(1.dp, BorderColor, RoundedCornerShape(10.dp))
-                    .clickable {},
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Edit,
-                    contentDescription = null,
-                    tint = TextSecondary,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
         }
 
         Spacer(Modifier.height(22.dp))
@@ -145,7 +121,7 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
             icon = Icons.Filled.DarkMode,
             label = "Modo oscuro",
             sub = "Activado siempre",
-            onClick = { viewModel.toggleTheme() }
+            onClick = null
         ) {
             Switch(
                 checked = isDarkMode,
@@ -164,7 +140,7 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
             icon = Icons.Outlined.Notifications,
             label = "Notificaciones",
             sub = "Recordatorios diarios",
-            onClick = { notificationsEnabled = !notificationsEnabled }
+            onClick = null
         ) {
             Switch(
                 checked = notificationsEnabled,
@@ -183,7 +159,7 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
             icon = Icons.Filled.Translate,
             label = "Idioma",
             sub = "Español",
-            onClick = {}
+            onClick = null
         )
 
         Spacer(Modifier.height(22.dp))
@@ -193,29 +169,20 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
         SettingsRow(
             icon = Icons.Outlined.Lock,
             label = "Privacidad y seguridad",
-            onClick = {}
+            onClick = null
         )
         Spacer(Modifier.height(8.dp))
         SettingsRow(
             icon = Icons.AutoMirrored.Filled.HelpOutline,
             label = "Ayuda y soporte",
-            onClick = {}
+            onClick = null
         )
         Spacer(Modifier.height(8.dp))
         SettingsRow(
             icon = Icons.Outlined.Info,
             label = "Acerca de MindTrack",
             sub = "Versión 1.0.0",
-            onClick = {}
-        )
-
-        Spacer(Modifier.height(18.dp))
-
-        MindTrackGhostButton(
-            text = "Cerrar sesión",
-            leadingIcon = Icons.AutoMirrored.Filled.Logout,
-            contentColor = ImpulsiveColor,
-            onClick = {}
+            onClick = null
         )
     }
 }
@@ -225,16 +192,22 @@ private fun SettingsRow(
     icon: ImageVector,
     label: String,
     sub: String? = null,
-    onClick: () -> Unit,
+    onClick: (() -> Unit)? = null,
     trail: (@Composable () -> Unit)? = null
 ) {
+    val rowModifier = if (onClick != null) {
+        Modifier.clickable(onClick = onClick)
+    } else {
+        Modifier
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
             .background(Surface)
             .border(1.dp, BorderColor, RoundedCornerShape(14.dp))
-            .clickable(onClick = onClick)
+            .then(rowModifier)
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -275,7 +248,7 @@ private fun SettingsRow(
         }
         if (trail != null) {
             trail()
-        } else {
+        } else if (onClick != null) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
