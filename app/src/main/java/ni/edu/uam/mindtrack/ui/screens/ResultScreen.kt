@@ -203,7 +203,7 @@ fun ResultScreen(
                     modifier = Modifier.weight(1f)
                 )
                 MindTrackPrimaryButton(
-                    text = "Jugar de nuevo",
+                    text = "Reiniciar simulación",
                     leadingIcon = Icons.Filled.Refresh,
                     onClick = {
                         viewModel.resetSession()
