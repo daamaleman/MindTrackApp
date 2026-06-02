@@ -167,7 +167,7 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
     }
 
     fun selectOption(option: Option) {
-        // Prevenir selecciones si el juego ya terminó
+        // Prevenir selecciones si la simulación ya terminó
         if (_gameFinished.value) return
         
         // Validar que el escenario actual exista
@@ -375,7 +375,7 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
             achievement(
                 id = "curious",
                 name = "Curioso",
-                description = "Visita los 5 escenarios del juego.",
+                description = "Visita los 5 escenarios de la simulación.",
                 emoji = "",
                 category = AchievementCategory.EXPLORACION,
                 unlocked = distinctScenarios.size >= 5,
