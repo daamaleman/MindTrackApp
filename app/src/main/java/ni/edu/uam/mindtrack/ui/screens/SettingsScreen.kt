@@ -1,9 +1,5 @@
 package ni.edu.uam.mindtrack.ui.screens
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,28 +10,21 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ni.edu.uam.mindtrack.ui.components.MindTrackGhostButton
 import ni.edu.uam.mindtrack.ui.components.SectionLabel
 import ni.edu.uam.mindtrack.ui.theme.*
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
@@ -63,81 +52,7 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
             )
         )
 
-        Spacer(Modifier.height(18.dp))
-
-        // Profile card
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(20.dp))
-                .background(Surface)
-                .background(
-                    Brush.linearGradient(
-                        listOf(PrimaryAccent.copy(alpha = 0.14f), PrimaryAccent.copy(alpha = 0.02f))
-                    )
-                )
-                .border(1.dp, PrimaryEdge, RoundedCornerShape(20.dp))
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Avatar with initials
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
-                        Brush.linearGradient(listOf(PrimaryAccent, SecondaryAccent))
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "DA",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 20.sp,
-                        color = Color.White,
-                        letterSpacing = (-0.5).sp
-                    )
-                )
-            }
-            Spacer(Modifier.width(14.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Daniela A.",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp,
-                        color = TextWhite
-                    )
-                )
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = "daniela@uam.edu.ni",
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        color = TextMuted,
-                        fontSize = 12.sp
-                    )
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(SurfaceVariant)
-                    .border(1.dp, BorderColor, RoundedCornerShape(10.dp))
-                    .clickable {},
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Edit,
-                    contentDescription = null,
-                    tint = TextSecondary,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        }
-
-        Spacer(Modifier.height(22.dp))
+        Spacer(Modifier.height(24.dp))
         SectionLabel(text = "Preferencias")
         Spacer(Modifier.height(10.dp))
 
@@ -206,15 +121,6 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
             icon = Icons.Outlined.Info,
             label = "Acerca de MindTrack",
             sub = "Versión 1.0.0",
-            onClick = {}
-        )
-
-        Spacer(Modifier.height(18.dp))
-
-        MindTrackGhostButton(
-            text = "Cerrar sesión",
-            leadingIcon = Icons.AutoMirrored.Filled.Logout,
-            contentColor = ImpulsiveColor,
             onClick = {}
         )
     }
