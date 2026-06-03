@@ -51,6 +51,7 @@ class AuthPreferences(context: Context) {
 
     private fun User.toJson(): JSONObject {
         return JSONObject().apply {
+            put("id", id)
             put("fullName", fullName)
             put("email", email)
             put("password", password)
@@ -64,7 +65,9 @@ class AuthPreferences(context: Context) {
         } else {
             null
         }
+        val userId = if (has("id") && !isNull("id")) getLong("id") else null
         return User(
+            id = userId,
             fullName = getString("fullName"),
             email = getString("email"),
             password = getString("password"),

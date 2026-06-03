@@ -6,15 +6,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import ni.edu.uam.mindtrack.data.OnboardingPreferences
 import ni.edu.uam.mindtrack.engine.AuthManager
 import ni.edu.uam.mindtrack.ui.components.MindTrackBottomBar
 import ni.edu.uam.mindtrack.ui.screens.*
 import ni.edu.uam.mindtrack.ui.theme.MindTrackMotion
+import ni.edu.uam.mindtrack.viewmodel.EditProfileViewModel
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
+import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModelFactory
+import ni.edu.uam.mindtrack.viewmodel.ProfileViewModel
 
 @Composable
 fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
@@ -23,6 +29,8 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     val currentRoute = navBackStackEntry?.destination?.route
     val onboardingCompleted by viewModel.onboardingCompleted.collectAsState()
     val currentUser by AuthManager.currentUser.collectAsState()
+    val context = LocalContext.current
+    val factory = MindTrackViewModelFactory(OnboardingPreferences(context))
 
     if (onboardingCompleted == null) return
 
@@ -70,7 +78,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
             navController = navController,
             startDestination = when {
                 onboardingCompleted != true -> Routes.Onboarding.route
-                currentUser != null -> Routes.Home.route
+                currentUser != null && currentUser?.id != null -> Routes.Home.route
                 else -> Routes.Login.route
             },
             modifier = Modifier.padding(innerPadding),
@@ -183,8 +191,10 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                 )
             }
             composable(Routes.Profile.route) {
+                val profileViewModel: ProfileViewModel = viewModel(factory = factory)
                 ProfileScreen(
                     viewModel = viewModel,
+                    profileViewModel = profileViewModel,
                     onEditProfile = { navController.navigate(Routes.EditProfile.route) },
                     onOpenAchievements = { navController.navigate(Routes.Achievements.route) },
                     onOpenStatistics = { navController.navigate(Routes.Statistics.route) },
@@ -202,8 +212,11 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                 )
             }
             composable(Routes.EditProfile.route) {
+                val editProfileViewModel: EditProfileViewModel = viewModel(factory = factory)
+                val profileViewModel: ProfileViewModel = viewModel(factory = factory)
                 EditProfileScreen(
-                    viewModel = viewModel,
+                    editProfileViewModel = editProfileViewModel,
+                    profileViewModel = profileViewModel,
                     onBack = { navController.popBackStack() },
                     onSaved = { navController.popBackStack() }
                 )

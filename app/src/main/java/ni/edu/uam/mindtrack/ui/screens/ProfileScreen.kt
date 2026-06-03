@@ -27,10 +27,15 @@ import ni.edu.uam.mindtrack.ui.components.StatCard
 import ni.edu.uam.mindtrack.ui.theme.MindTrackMotion
 import ni.edu.uam.mindtrack.ui.theme.*
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
+import ni.edu.uam.mindtrack.viewmodel.ProfileViewModel
+import ni.edu.uam.mindtrack.data.repository.Result
+import ni.edu.uam.mindtrack.data.remote.UserDto
+import ni.edu.uam.mindtrack.engine.AuthManager
 
 @Composable
 fun ProfileScreen(
     viewModel: MindTrackViewModel,
+    profileViewModel: ProfileViewModel,
     onEditProfile: () -> Unit,
     onOpenAchievements: () -> Unit,
     onOpenStatistics: () -> Unit,
@@ -38,15 +43,18 @@ fun ProfileScreen(
     onLogout: () -> Unit,
     onStartFirstSimulation: () -> Unit
 ) {
-    val userProfile by viewModel.userProfile.collectAsState()
+    val uiState by profileViewModel.uiState.collectAsState()
     val sessionHistory by viewModel.sessionHistory.collectAsState()
     val achievements by viewModel.achievements.collectAsState()
     
     var isVisible by remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         isVisible = true
+        val currentUserId = AuthManager.currentUser.value?.id ?: 1L
+        profileViewModel.loadProfile(currentUserId)
     }
 
     if (showLogoutDialog) {
@@ -60,7 +68,7 @@ fun ProfileScreen(
                 ) 
             },
             text = { Text("¿Estás seguro de que deseas salir de tu cuenta?") },
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            containerColor = SurfaceVariant,
             shape = RoundedCornerShape(16.dp),
             confirmButton = {
                 TextButton(onClick = { 
@@ -72,72 +80,111 @@ fun ProfileScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showLogoutDialog = false }) {
-                    Text("Cancelar", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("Cancelar", color = TextMuted)
                 }
             }
         )
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(rememberScrollState())
-    ) {
-        // Header with Avatar and Name
-        AnimatedVisibility(
-            visible = isVisible,
-            enter = MindTrackMotion.sectionEnterTransition(fromTop = true)
-        ) {
-            ProfileHeader(
-                name = userProfile.name,
-                email = userProfile.email,
-                memberSince = userProfile.memberSince,
-                isPremium = userProfile.isPremium,
-                profileImageUri = userProfile.profileImageUri,
-                onOpenSettings = onOpenSettings
-            )
-        }
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = Background
+    ) { padding ->
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            when (val state = uiState) {
+                is Result.Loading -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = PrimaryAccent)
+                    }
+                }
+                is Result.Error -> {
+                    LaunchedEffect(state.message) {
+                        snackbarHostState.showSnackbar(state.message)
+                    }
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("Error al cargar perfil", color = ImpulsiveColor)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            MindTrackButton(text = "Reintentar", onClick = { profileViewModel.loadProfile(1L) })
+                        }
+                    }
+                }
+                is Result.Success -> {
+                    val user = state.data
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        // Header with Avatar and Name
+                        AnimatedVisibility(
+                            visible = isVisible,
+                            enter = MindTrackMotion.sectionEnterTransition(fromTop = true)
+                        ) {
+                            ProfileHeader(
+                                name = user.nombre,
+                                email = user.correo,
+                                memberSince = "Jun 2026", // Mocked as not in DTO
+                                isPremium = true,
+                                profileImageUri = user.fotoPerfil,
+                                onOpenSettings = onOpenSettings
+                            )
+                        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
 
-        // Quick Stats
-        AnimatedVisibility(
-            visible = isVisible,
-            enter = MindTrackMotion.sectionEnterTransition()
-        ) {
-            Column {
-                QuickStatsRow(sessionHistory, achievements)
-                
-                Spacer(modifier = Modifier.height(32.dp))
-                
-                // Dominant Profile Section
-                SectionHeader(title = "PERFIL DOMINANTE")
-                DominantProfileCard(
-                    sessionHistory = sessionHistory,
-                    onOpenStatistics = onOpenStatistics,
-                    onStartFirstSimulation = onStartFirstSimulation
-                )
+                        // Bio Section
+                        if (!user.biografia.isNullOrBlank()) {
+                            Text(
+                                text = user.biografia,
+                                modifier = Modifier.padding(horizontal = 24.dp),
+                                style = MaterialTheme.typography.bodyMedium.copy(color = TextSecondary),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(24.dp))
+                        }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                        // Quick Stats
+                        AnimatedVisibility(
+                            visible = isVisible,
+                            enter = MindTrackMotion.sectionEnterTransition()
+                        ) {
+                            Column {
+                                QuickStatsRow(sessionHistory, achievements)
+                                
+                                Spacer(modifier = Modifier.height(32.dp))
+                                
+                                // Dominant Profile Section
+                                SectionHeader(title = "PERFIL DOMINANTE")
+                                DominantProfileCard(
+                                    sessionHistory = sessionHistory,
+                                    onOpenStatistics = onOpenStatistics,
+                                    onStartFirstSimulation = onStartFirstSimulation
+                                )
 
-                // Recent Achievements
-                SectionHeader(
-                    title = "LOGROS RECIENTES",
-                    actionText = "Ver todos >",
-                    onActionClick = onOpenAchievements
-                )
-                RecentAchievementsRow(achievements)
+                                Spacer(modifier = Modifier.height(32.dp))
 
-                Spacer(modifier = Modifier.height(32.dp))
+                                // Recent Achievements
+                                SectionHeader(
+                                    title = "LOGROS RECIENTES",
+                                    actionText = "Ver todos >",
+                                    onActionClick = onOpenAchievements
+                                )
+                                RecentAchievementsRow(achievements)
 
-                // Account Actions
-                AccountActions(
-                    onEditProfile = onEditProfile,
-                    onLogout = { showLogoutDialog = true }
-                )
-                
-                Spacer(modifier = Modifier.height(40.dp))
+                                Spacer(modifier = Modifier.height(32.dp))
+
+                                // Account Actions
+                                AccountActions(
+                                    onEditProfile = onEditProfile,
+                                    onLogout = { showLogoutDialog = true }
+                                )
+                                
+                                Spacer(modifier = Modifier.height(40.dp))
+                            }
+                        }
+                    }
+                }
             }
         }
     }

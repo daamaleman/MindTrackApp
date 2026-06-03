@@ -71,6 +71,11 @@ object AuthManager {
         return user
     }
 
+    fun loginSilently(user: User) {
+        _currentUser.value = user
+        authPreferences.saveCurrentUser(user)
+    }
+
     fun updateProfile(fullName: String, email: String, profileImageUri: Uri? = null): Boolean {
         val current = _currentUser.value ?: return false
 
