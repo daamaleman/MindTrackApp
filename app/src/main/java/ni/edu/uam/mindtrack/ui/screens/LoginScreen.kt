@@ -1,7 +1,10 @@
 package ni.edu.uam.mindtrack.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -50,10 +53,12 @@ fun LoginContent(
     onLoginSuccess: () -> Unit,
     onNavigateToOnboarding: () -> Unit = {}
 ) {
+    val apiError by viewModel.apiConnectionError.collectAsState()
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -61,6 +66,38 @@ fun LoginContent(
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // API Error Alert (Minimalist)
+        if (apiError) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(ImpulsiveColor.copy(alpha = 0.1f))
+                    .border(1.dp, ImpulsiveColor.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                    .padding(vertical = 8.dp, horizontal = 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(6.dp)
+                            .clip(CircleShape)
+                            .background(ImpulsiveColor)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "Servidor no disponible. Reintenta más tarde.",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = ImpulsiveColor,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 11.sp
+                        )
+                    )
+                }
+            }
+        }
+
         Text(
             text = "Bienvenido",
             style = MaterialTheme.typography.headlineLarge.copy(
@@ -128,10 +165,14 @@ fun LoginContent(
         MindTrackPrimaryButton(
             text = "Iniciar sesión",
             trailingIcon = Icons.AutoMirrored.Filled.ArrowForward,
+            loading = isLoading,
+            enabled = !isLoading,
             onClick = {
                 val validation = AuthManager.validateUserLogin(email, password)
                 if (validation == null) {
+                    isLoading = true
                     viewModel.loginWithApi(email) { success, message ->
+                        isLoading = false
                         if (success) {
                             onLoginSuccess()
                         } else {
