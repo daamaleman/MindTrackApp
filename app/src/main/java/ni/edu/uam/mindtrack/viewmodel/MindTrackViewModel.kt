@@ -151,6 +151,9 @@ class MindTrackViewModel(
     private val _newlyUnlocked = MutableStateFlow<Set<String>>(emptySet())
     val newlyUnlocked: StateFlow<Set<String>> = _newlyUnlocked.asStateFlow()
 
+    private val _apiConnectionError = MutableStateFlow(false)
+    val apiConnectionError: StateFlow<Boolean> = _apiConnectionError.asStateFlow()
+
     private var knownUnlockedAchievementIds: Set<String> = emptySet()
 
     init {
@@ -172,6 +175,7 @@ class MindTrackViewModel(
         viewModelScope.launch {
             when (val result = sessionRepository.getSessions()) {
                 is Result.Success -> {
+                    _apiConnectionError.value = false
                     val apiSessions = result.data.map { dto ->
                         SessionResult(
                             id = dto.id.toString(),
@@ -185,6 +189,9 @@ class MindTrackViewModel(
                     _sessionHistory.value = apiSessions + _sessionHistory.value
                     recalculateStreaks()
                     recalculateAchievements()
+                }
+                is Result.Error -> {
+                    _apiConnectionError.value = true
                 }
                 else -> {}
             }
