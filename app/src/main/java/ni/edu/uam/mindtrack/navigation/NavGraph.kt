@@ -1,20 +1,26 @@
 package ni.edu.uam.mindtrack.navigation
 
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import ni.edu.uam.mindtrack.data.OnboardingPreferences
+import ni.edu.uam.mindtrack.engine.AuthManager
 import ni.edu.uam.mindtrack.ui.components.MindTrackBottomBar
 import ni.edu.uam.mindtrack.ui.screens.*
+import ni.edu.uam.mindtrack.ui.theme.MindTrackMotion
+import ni.edu.uam.mindtrack.viewmodel.EditProfileViewModel
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
+import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModelFactory
+import ni.edu.uam.mindtrack.viewmodel.ProfileViewModel
 
 @Composable
 fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
@@ -22,6 +28,9 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val onboardingCompleted by viewModel.onboardingCompleted.collectAsState()
+    val currentUser by AuthManager.currentUser.collectAsState()
+    val context = LocalContext.current
+    val factory = MindTrackViewModelFactory(OnboardingPreferences(context))
 
     if (onboardingCompleted == null) return
 
@@ -67,41 +76,33 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = if (onboardingCompleted == true) Routes.Login.route else Routes.Onboarding.route,
+            startDestination = when {
+                onboardingCompleted != true -> Routes.Onboarding.route
+                currentUser != null && currentUser?.id != null -> Routes.Home.route
+                else -> Routes.Login.route
+            },
             modifier = Modifier.padding(innerPadding),
             enterTransition = {
-                val target = targetState.destination.route
-                val initial = initialState.destination.route
-                val isForward = isForwardNavigation(initial, target)
-                
-                slideIntoContainer(
-                    if (isForward) AnimatedContentTransitionScope.SlideDirection.Left 
-                    else AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(500)
+                MindTrackMotion.navEnter(
+                    isForward = isForwardNavigation(
+                        initialState.destination.route,
+                        targetState.destination.route
+                    )
                 )
             },
             exitTransition = {
-                val target = targetState.destination.route
-                val initial = initialState.destination.route
-                val isForward = isForwardNavigation(initial, target)
-                
-                slideOutOfContainer(
-                    if (isForward) AnimatedContentTransitionScope.SlideDirection.Left 
-                    else AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(500)
+                MindTrackMotion.navExit(
+                    isForward = isForwardNavigation(
+                        initialState.destination.route,
+                        targetState.destination.route
+                    )
                 )
             },
             popEnterTransition = {
-                slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(500)
-                )
+                MindTrackMotion.navEnter(isForward = false)
             },
             popExitTransition = {
-                slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(500)
-                )
+                MindTrackMotion.navExit(isForward = false)
             }
         ) {
             composable(Routes.Onboarding.route) {
@@ -145,6 +146,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
             }
             composable(Routes.Home.route) {
                 HomeScreen(
+                    viewModel = viewModel,
                     onStartSimulation = {
                         viewModel.resetSession()
                         navController.navigate(Routes.Scenario.route)
@@ -189,13 +191,16 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                 )
             }
             composable(Routes.Profile.route) {
+                val profileViewModel: ProfileViewModel = viewModel(factory = factory)
                 ProfileScreen(
                     viewModel = viewModel,
+                    profileViewModel = profileViewModel,
                     onEditProfile = { navController.navigate(Routes.EditProfile.route) },
                     onOpenAchievements = { navController.navigate(Routes.Achievements.route) },
                     onOpenStatistics = { navController.navigate(Routes.Statistics.route) },
                     onOpenSettings = { navController.navigate(Routes.Settings.route) },
                     onLogout = {
+                        AuthManager.logout()
                         viewModel.logout()
                         navController.navigate(Routes.Login.route) {
                             popUpTo(0) { inclusive = true }
@@ -207,8 +212,11 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                 )
             }
             composable(Routes.EditProfile.route) {
+                val editProfileViewModel: EditProfileViewModel = viewModel(factory = factory)
+                val profileViewModel: ProfileViewModel = viewModel(factory = factory)
                 EditProfileScreen(
-                    viewModel = viewModel,
+                    editProfileViewModel = editProfileViewModel,
+                    profileViewModel = profileViewModel,
                     onBack = { navController.popBackStack() },
                     onSaved = { navController.popBackStack() }
                 )

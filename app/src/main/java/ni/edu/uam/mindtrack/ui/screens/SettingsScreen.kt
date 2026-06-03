@@ -11,10 +11,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -52,7 +52,7 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
             )
         )
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(18.dp))
         SectionLabel(text = "Preferencias")
         Spacer(Modifier.height(10.dp))
 
@@ -60,7 +60,7 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
             icon = Icons.Filled.DarkMode,
             label = "Modo oscuro",
             sub = "Activado siempre",
-            onClick = { viewModel.toggleTheme() }
+            onClick = null
         ) {
             Switch(
                 checked = isDarkMode,
@@ -79,7 +79,7 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
             icon = Icons.Outlined.Notifications,
             label = "Notificaciones",
             sub = "Recordatorios diarios",
-            onClick = { notificationsEnabled = !notificationsEnabled }
+            onClick = null
         ) {
             Switch(
                 checked = notificationsEnabled,
@@ -98,7 +98,7 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
             icon = Icons.Filled.Translate,
             label = "Idioma",
             sub = "Español",
-            onClick = {}
+            onClick = null
         )
 
         Spacer(Modifier.height(22.dp))
@@ -108,20 +108,20 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
         SettingsRow(
             icon = Icons.Outlined.Lock,
             label = "Privacidad y seguridad",
-            onClick = {}
+            onClick = null
         )
         Spacer(Modifier.height(8.dp))
         SettingsRow(
             icon = Icons.AutoMirrored.Filled.HelpOutline,
             label = "Ayuda y soporte",
-            onClick = {}
+            onClick = null
         )
         Spacer(Modifier.height(8.dp))
         SettingsRow(
             icon = Icons.Outlined.Info,
             label = "Acerca de MindTrack",
             sub = "Versión 1.0.0",
-            onClick = {}
+            onClick = null
         )
     }
 }
@@ -131,16 +131,22 @@ private fun SettingsRow(
     icon: ImageVector,
     label: String,
     sub: String? = null,
-    onClick: () -> Unit,
+    onClick: (() -> Unit)? = null,
     trail: (@Composable () -> Unit)? = null
 ) {
+    val rowModifier = if (onClick != null) {
+        Modifier.clickable(onClick = onClick)
+    } else {
+        Modifier
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
             .background(Surface)
             .border(1.dp, BorderColor, RoundedCornerShape(14.dp))
-            .clickable(onClick = onClick)
+            .then(rowModifier)
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -181,7 +187,7 @@ private fun SettingsRow(
         }
         if (trail != null) {
             trail()
-        } else {
+        } else if (onClick != null) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,

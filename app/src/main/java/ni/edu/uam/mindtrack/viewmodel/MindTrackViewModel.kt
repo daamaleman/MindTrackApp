@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import ni.edu.uam.mindtrack.data.OnboardingPreferences
+import ni.edu.uam.mindtrack.engine.AuthManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,6 +18,13 @@ import ni.edu.uam.mindtrack.model.Scenario
 import ni.edu.uam.mindtrack.model.PlayerState
 import ni.edu.uam.mindtrack.model.SessionResult
 import ni.edu.uam.mindtrack.model.UserProfile
+import ni.edu.uam.mindtrack.data.remote.TrackSessionDto
+import ni.edu.uam.mindtrack.data.remote.UserDto
+import ni.edu.uam.mindtrack.data.remote.EstadisticaDto
+import ni.edu.uam.mindtrack.data.remote.LogroDto
+import ni.edu.uam.mindtrack.data.repository.SessionRepository
+import ni.edu.uam.mindtrack.data.repository.UserRepository
+import ni.edu.uam.mindtrack.data.repository.Result
 import java.time.LocalDate
 import java.time.ZoneId
 import java.text.SimpleDateFormat
@@ -24,7 +32,11 @@ import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
-class MindTrackViewModel(private val onboardingPreferences: OnboardingPreferences) : ViewModel() {
+class MindTrackViewModel(
+    private val onboardingPreferences: OnboardingPreferences,
+    private val sessionRepository: SessionRepository,
+    private val userRepository: UserRepository
+) : ViewModel() {
     private val gameEngine = GameEngine()
 
     private val initialState = PlayerState(
@@ -141,15 +153,60 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
     private val _newlyUnlocked = MutableStateFlow<Set<String>>(emptySet())
     val newlyUnlocked: StateFlow<Set<String>> = _newlyUnlocked.asStateFlow()
 
+    private val _apiConnectionError = MutableStateFlow(false)
+    val apiConnectionError: StateFlow<Boolean> = _apiConnectionError.asStateFlow()
+
     private var knownUnlockedAchievementIds: Set<String> = emptySet()
 
     init {
+        AuthManager.currentUser.value?.let { user ->
+            setUser(user, user.profileImageUri?.toString())
+        }
         recalculateStreaks()
         recalculateAchievements()
         // Leer el flag de DataStore y exponerlo
         viewModelScope.launch {
             onboardingPreferences.onboardingCompletedFlow.collectLatest { completed ->
                 _onboardingCompleted.value = completed
+            }
+        }
+        loadSessionsFromApi()
+    }
+
+    fun loadSessionsFromApi() {
+        viewModelScope.launch {
+            val currentUserId = AuthManager.currentUser.value?.id ?: 1L
+            
+            // Cargar Historial
+            when (val result = sessionRepository.getSessions()) {
+                is Result.Success -> {
+                    _apiConnectionError.value = false
+                    val apiSessions = result.data.filter { it.idUsuario == currentUserId }.map { dto ->
+                        SessionResult(
+                            id = dto.id.toString(),
+                            finalResult = dto.estadoAnimo,
+                            date = dto.notas ?: "01/06/2026 12:00",
+                            finalState = initialState.copy(), // Mocked
+                            choicesMade = 5, // Mocked
+                            path = emptyList() // Mocked
+                        )
+                    }
+                    _sessionHistory.value = apiSessions
+                    recalculateStreaks()
+                    recalculateAchievements()
+                }
+                is Result.Error -> {
+                    _apiConnectionError.value = true
+                }
+                else -> {}
+            }
+
+            // Cargar Estadísticas Reales del API
+            when (val statsResult = userRepository.getEstadistica(currentUserId)) {
+                is Result.Success -> {
+                    _currentStreak.value = statsResult.data.rachaActual
+                }
+                else -> {}
             }
         }
     }
@@ -167,7 +224,7 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
     }
 
     fun selectOption(option: Option) {
-        // Prevenir selecciones si el juego ya terminó
+        // Prevenir selecciones si la simulación ya terminó
         if (_gameFinished.value) return
         
         // Validar que el escenario actual exista
@@ -200,10 +257,11 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
         _finalResult.value = result
         _gameFinished.value = true
 
+        val dateString = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
         val newResult = SessionResult(
             id = UUID.randomUUID().toString(),
             finalResult = result,
-            date = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date()),
+            date = dateString,
             finalState = _playerState.value.copy(),
             choicesMade = _decisionPath.value.size,
             path = _decisionPath.value
@@ -211,6 +269,40 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
         _sessionHistory.value = listOf(newResult) + _sessionHistory.value
         recalculateStreaks()
         recalculateAchievements()
+
+        // Guardar en la API
+        viewModelScope.launch {
+            val currentUserId = AuthManager.currentUser.value?.id ?: 1L
+            
+            // 1. Guardar Sesión
+            val sessionDto = TrackSessionDto(
+                id = null,
+                idUsuario = currentUserId,
+                estadoAnimo = result,
+                notas = dateString
+            )
+            sessionRepository.createSession(sessionDto)
+
+            // 2. Sincronizar Estadísticas
+            val statsDto = EstadisticaDto(
+                id = null,
+                idUsuario = currentUserId,
+                sesionesCompletadas = _sessionHistory.value.size,
+                rachaActual = _currentStreak.value
+            )
+            userRepository.updateEstadistica(statsDto)
+
+            // 3. Sincronizar Logros Desbloqueados
+            _achievements.value.filter { it.unlocked }.forEach { localAchievement ->
+                val logroDto = LogroDto(
+                    id = null,
+                    idUsuario = currentUserId,
+                    titulo = localAchievement.name,
+                    desbloqueado = true
+                )
+                userRepository.unlockLogro(logroDto)
+            }
+        }
     }
 
     fun filterSessionsByPeriod(period: String): List<SessionResult> {
@@ -375,7 +467,7 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
             achievement(
                 id = "curious",
                 name = "Curioso",
-                description = "Visita los 5 escenarios del juego.",
+                description = "Visita los 5 escenarios de la simulación.",
                 emoji = "",
                 category = AchievementCategory.EXPLORACION,
                 unlocked = distinctScenarios.size >= 5,
@@ -561,16 +653,77 @@ class MindTrackViewModel(private val onboardingPreferences: OnboardingPreference
             email = user.email,
             memberSince = SimpleDateFormat("MMM yyyy", Locale.getDefault()).format(Date()),
             isPremium = false,
-            profileImageUri = profileImageUri
+            profileImageUri = profileImageUri ?: user.profileImageUri?.toString()
         )
-        _avatarUri.value = profileImageUri?.let { Uri.parse(it) }
+        _avatarUri.value = (profileImageUri ?: user.profileImageUri?.toString())?.let { Uri.parse(it) }
     }
 
-    fun updateProfile(newProfile: UserProfile) {
+    fun updateProfile(newProfile: UserProfile): Boolean {
+        val currentUser = AuthManager.currentUser.value ?: return false
+        val updated = AuthManager.updateProfile(
+            fullName = newProfile.name,
+            email = newProfile.email,
+            profileImageUri = newProfile.profileImageUri?.let(Uri::parse)
+        )
+        if (!updated) return false
+
         _userProfile.value = newProfile
+        _avatarUri.value = newProfile.profileImageUri?.let(Uri::parse)
+        return true
     }
 
-    fun setAvatarUri(uri: Uri?) {
-        _avatarUri.value = uri
+    fun loginWithApi(email: String, onResult: (Boolean, String?) -> Unit) {
+        viewModelScope.launch {
+            // Buscamos al usuario por correo si hubiera un endpoint, 
+            // pero como no hay, simulamos con ID 1 o intentamos registrarlo.
+            val userIdToTry = 1L 
+            
+            when (val result = userRepository.getUsuario(userIdToTry)) {
+                is Result.Success -> {
+                    val userDto = result.data
+                    val localUser = ni.edu.uam.mindtrack.model.User(
+                        id = userDto.id,
+                        fullName = userDto.nombre,
+                        email = userDto.correo,
+                        password = "" 
+                    )
+                    AuthManager.loginSilently(localUser)
+                    setUser(localUser, userDto.fotoPerfil)
+                    onResult(true, null)
+                }
+                is Result.Error -> {
+                    registerWithApi("Usuario MindTrack", email, null, onResult)
+                }
+                else -> {}
+            }
+        }
+    }
+
+    fun registerWithApi(name: String, email: String, photoUri: Uri?, onResult: (Boolean, String?) -> Unit) {
+        viewModelScope.launch {
+            val newUserDto = UserDto(
+                id = null,
+                nombre = name,
+                correo = email,
+                fotoPerfil = photoUri?.toString(),
+                biografia = "Nueva cuenta"
+            )
+            when (val regResult = userRepository.registerUsuario(newUserDto)) {
+                is Result.Success -> {
+                    val registeredDto = regResult.data
+                    val localUser = ni.edu.uam.mindtrack.model.User(
+                        id = registeredDto.id,
+                        fullName = registeredDto.nombre,
+                        email = registeredDto.correo,
+                        password = ""
+                    )
+                    AuthManager.loginSilently(localUser)
+                    setUser(localUser, registeredDto.fotoPerfil)
+                    onResult(true, null)
+                }
+                is Result.Error -> onResult(false, regResult.message)
+                else -> {}
+            }
+        }
     }
 }

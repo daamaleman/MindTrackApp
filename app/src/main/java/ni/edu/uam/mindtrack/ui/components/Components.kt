@@ -59,12 +59,13 @@ fun MindTrackPrimaryButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    loading: Boolean = false,
     leadingIcon: ImageVector? = null,
     trailingIcon: ImageVector? = null,
     height: Dp = 52.dp
 ) {
     val shape = RoundedCornerShape(14.dp)
-    val bgModifier = if (enabled) {
+    val bgModifier = if (enabled && !loading) {
         Modifier.background(PrimaryGradient, shape)
     } else {
         Modifier.background(SurfaceElevated, shape)
@@ -75,38 +76,46 @@ fun MindTrackPrimaryButton(
             .height(height)
             .clip(shape)
             .then(bgModifier)
-            .clickable(enabled = enabled, onClick = onClick),
+            .clickable(enabled = enabled && !loading, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            if (leadingIcon != null) {
-                Icon(
-                    imageVector = leadingIcon,
-                    contentDescription = null,
-                    tint = if (enabled) Color.White else TextMuted,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(Modifier.width(8.dp))
-            }
-            Text(
-                text = text,
-                style = MaterialTheme.typography.labelLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp,
-                    color = if (enabled) Color.White else TextMuted
-                )
+        if (loading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                color = Color.White,
+                strokeWidth = 2.dp
             )
-            if (trailingIcon != null) {
-                Spacer(Modifier.width(8.dp))
-                Icon(
-                    imageVector = trailingIcon,
-                    contentDescription = null,
-                    tint = if (enabled) Color.White else TextMuted,
-                    modifier = Modifier.size(18.dp)
+        } else {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                if (leadingIcon != null) {
+                    Icon(
+                        imageVector = leadingIcon,
+                        contentDescription = null,
+                        tint = if (enabled) Color.White else TextMuted,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                }
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                        color = if (enabled) Color.White else TextMuted
+                    )
                 )
+                if (trailingIcon != null) {
+                    Spacer(Modifier.width(8.dp))
+                    Icon(
+                        imageVector = trailingIcon,
+                        contentDescription = null,
+                        tint = if (enabled) Color.White else TextMuted,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
         }
     }
@@ -201,12 +210,13 @@ fun MindTrackButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    loading: Boolean = false,
     isSecondary: Boolean = false
 ) {
     if (isSecondary) {
         MindTrackSecondaryButton(text = text, onClick = onClick, modifier = modifier)
     } else {
-        MindTrackPrimaryButton(text = text, onClick = onClick, modifier = modifier, enabled = enabled)
+        MindTrackPrimaryButton(text = text, onClick = onClick, modifier = modifier, enabled = enabled, loading = loading)
     }
 }
 

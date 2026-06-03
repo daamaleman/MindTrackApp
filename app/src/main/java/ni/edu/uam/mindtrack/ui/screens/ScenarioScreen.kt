@@ -52,7 +52,7 @@ fun ScenarioScreen(
         selectedOption = null
     }
 
-    // Navega a ResultScreen cuando el juego termina
+    // Navega a ResultScreen cuando la simulación termina
     LaunchedEffect(gameFinished) {
         if (gameFinished) {
             onFinish()

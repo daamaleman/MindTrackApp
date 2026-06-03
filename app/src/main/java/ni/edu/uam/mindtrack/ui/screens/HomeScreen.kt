@@ -24,17 +24,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import ni.edu.uam.mindtrack.ui.components.IconCircleButton
 import ni.edu.uam.mindtrack.ui.components.MindTrackPrimaryButton
 import ni.edu.uam.mindtrack.ui.components.Pill
 import ni.edu.uam.mindtrack.ui.components.SectionLabel
 import ni.edu.uam.mindtrack.ui.components.StatTile
 import ni.edu.uam.mindtrack.ui.theme.*
+import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 
 @Composable
 fun HomeScreen(
+    viewModel: MindTrackViewModel,
     onStartSimulation: () -> Unit
 ) {
+    val userProfile by viewModel.userProfile.collectAsState()
+    val apiError by viewModel.apiConnectionError.collectAsState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -53,6 +60,38 @@ fun HomeScreen(
                 .padding(horizontal = 20.dp)
                 .padding(top = 16.dp, bottom = 100.dp)
         ) {
+            // API Error Alert (Minimalist)
+            if (apiError) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(ImpulsiveColor.copy(alpha = 0.1f))
+                        .border(1.dp, ImpulsiveColor.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                        .padding(vertical = 8.dp, horizontal = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .clip(CircleShape)
+                                .background(ImpulsiveColor)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = "Problemas de conexión con el servidor",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = ImpulsiveColor,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 11.sp
+                            )
+                        )
+                    }
+                }
+            }
+
             // Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -70,7 +109,7 @@ fun HomeScreen(
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        text = "Daniela 👋",
+                        text = "${userProfile.name} 👋",
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
