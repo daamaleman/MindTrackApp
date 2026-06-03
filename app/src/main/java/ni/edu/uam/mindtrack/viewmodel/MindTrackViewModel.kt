@@ -25,6 +25,7 @@ import ni.edu.uam.mindtrack.data.remote.LogroDto
 import ni.edu.uam.mindtrack.data.repository.SessionRepository
 import ni.edu.uam.mindtrack.data.repository.UserRepository
 import ni.edu.uam.mindtrack.data.repository.Result
+import ni.edu.uam.mindtrack.util.NotificationHelper
 import java.time.LocalDate
 import java.time.ZoneId
 import java.text.SimpleDateFormat
@@ -35,7 +36,8 @@ import java.util.UUID
 class MindTrackViewModel(
     private val onboardingPreferences: OnboardingPreferences,
     private val sessionRepository: SessionRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val notificationHelper: NotificationHelper
 ) : ViewModel() {
     private val gameEngine = GameEngine()
 
@@ -270,6 +272,9 @@ class MindTrackViewModel(
         recalculateStreaks()
         recalculateAchievements()
 
+        // Enviar notificación de simulación terminada
+        notificationHelper.showSimulationFinishedNotification(result)
+
         // Guardar en la API
         viewModelScope.launch {
             val currentUserId = AuthManager.currentUser.value?.id ?: 1L
@@ -337,6 +342,13 @@ class MindTrackViewModel(
 
         if (newlyUnlockedIds.isNotEmpty()) {
             _newlyUnlocked.value = _newlyUnlocked.value + newlyUnlockedIds
+            
+            // Enviar notificaciones para nuevos logros
+            newlyUnlockedIds.forEach { id ->
+                achievements.find { it.id == id }?.let { achievement ->
+                    notificationHelper.showAchievementUnlockedNotification(achievement.name)
+                }
+            }
         }
 
         _achievements.value = achievements

@@ -30,7 +30,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     val onboardingCompleted by viewModel.onboardingCompleted.collectAsState()
     val currentUser by AuthManager.currentUser.collectAsState()
     val context = LocalContext.current
-    val factory = MindTrackViewModelFactory(OnboardingPreferences(context))
+    val factory = MindTrackViewModelFactory(OnboardingPreferences(context), context)
 
     if (onboardingCompleted == null) return
 
