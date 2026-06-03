@@ -23,7 +23,11 @@ object AuthManager {
         authPreferences = AuthPreferences(context.applicationContext)
         users.clear()
         users.addAll(loadUsers())
-        _currentUser.value = loadCurrentUser()
+        
+        // Requisito: Siempre cerrar sesión al iniciar la app (no persistencia)
+        _currentUser.value = null
+        authPreferences.saveCurrentUser(null)
+
         initialized = true
     }
 
@@ -136,17 +140,8 @@ object AuthManager {
         }
     }
 
-    private fun loadCurrentUser(): User? {
-        return try {
-            authPreferences.loadCurrentUser()
-        } catch (error: JSONException) {
-            null
-        }
-    }
-
     private fun persist() {
         if (!initialized) return
         authPreferences.saveUsers(users)
-        authPreferences.saveCurrentUser(_currentUser.value)
     }
 }
