@@ -1,10 +1,82 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
-    <!-- Cabeza con Engrane central (Representación fiel del logo) -->
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- MindTrack Logo Mejorado - Pulso Cardíaco/Mental con EEG suavizado -->
+
+    <!-- Silueta de perfil/cabeza muy sutil (fondo) -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M13,3C9.69,3 7,5.69 7,9V10C7,12.14 8.21,14.03 10,15.03V17H15V15.03C16.79,14.03 18,12.14 18,10V9C18,5.69 15.31,3 12,3H13M12.5,13A2.5,2.5 0 0,1 10,10.5A2.5,2.5 0 0,1 12.5,8A2.5,2.5 0 0,1 15,10.5A2.5,2.5 0 0,1 12.5,13M15.15,9.66L16,9.15L15.5,8.15L14.65,8.66C14.47,8.44 14.26,8.25 14.03,8.1L14.5,7.15L13.5,6.65L13.04,7.6C12.78,7.54 12.5,7.5 12.23,7.54L11.77,6.65L10.77,7.15L11.23,8.1C11,8.25 10.79,8.44 10.61,8.66L9.77,8.15L9.27,9.15L10.12,9.66C10.06,9.92 10.03,10.21 10.06,10.5C10.03,10.79 10.06,11.08 10.12,11.34L9.27,11.85L9.77,12.85L10.61,12.34C10.79,12.56 11,12.75 11.23,12.9L10.77,13.85L11.77,14.35L12.23,13.4C12.5,13.46 12.78,13.5 13.04,13.46L13.5,14.35L14.5,13.85L14.03,12.9C14.26,12.75 14.47,12.56 14.65,12.34L15.5,12.85L16,11.85L15.15,11.34C15.21,11.08 15.24,10.79 15.21,10.5C15.24,10.21 15.21,9.92 15.15,9.66Z" />
+        android:pathData="M54,18 C35,18 24,29 24,48 L24,90 C24,98 30,102 40,102 L54,102 L54,98 C42,98 28,94 28,90 L28,48 C28,35 38,26 54,26 C70,26 80,35 80,48 L80,90 C80,94 66,98 54,98 L54,102 L68,102 C78,102 84,98 84,90 L84,48 C84,29 73,18 54,18 Z"
+        android:alpha="0.08" />
+
+    <!-- Círculo blanco exterior -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,16 C32.9,16 16,32.9 16,54 C16,75.1 32.9,92 54,92 C75.1,92 92,75.1 92,54 C92,32.9 75.1,16 54,16 Z" />
+
+    <!-- Línea de onda SUAVIZADA - Pulso Cardíaco/Mental -->
+    <!-- Segmento 1: Línea base inicial -->
+    <path
+        android:strokeColor="#9B7FD9"
+        android:strokeWidth="2.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M20,54 Q28,52 36,54" />
+
+    <!-- Segmento 2: Primer pico pequeño (ondulación inicial) -->
+    <path
+        android:strokeColor="#9B7FD9"
+        android:strokeWidth="2.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M36,54 Q40,48 44,54" />
+
+    <!-- Segmento 3: Valle pequeño -->
+    <path
+        android:strokeColor="#9B7FD9"
+        android:strokeWidth="2.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M44,54 Q48,50 52,54" />
+
+    <!-- Segmento 4: Pico grande principal (corazón/mental) -->
+    <path
+        android:strokeColor="#6D4FA8"
+        android:strokeWidth="2.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M52,54 Q56,35 60,54" />
+
+    <!-- Segmento 5: Segunda ondulación -->
+    <path
+        android:strokeColor="#9B7FD9"
+        android:strokeWidth="2.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M60,54 Q64,50 68,54" />
+
+    <!-- Segmento 6: Línea base final -->
+    <path
+        android:strokeColor="#9B7FD9"
+        android:strokeWidth="2.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M68,54 Q76,52 84,54" />
+
+    <!-- Línea base de referencia sutil (opcional) -->
+    <path
+        android:strokeColor="#9B7FD9"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M20,54 L84,54"
+        android:alpha="0.15" />
 </vector>
