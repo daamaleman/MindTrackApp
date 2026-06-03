@@ -1,7 +1,6 @@
 package ni.edu.uam.mindtrack.ui.screens
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -19,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ni.edu.uam.mindtrack.ui.components.AuthToggle
+import ni.edu.uam.mindtrack.ui.theme.MindTrackMotion
 import ni.edu.uam.mindtrack.ui.theme.Background
 import ni.edu.uam.mindtrack.ui.theme.PrimaryAccent
 import ni.edu.uam.mindtrack.ui.theme.TextMuted
@@ -94,15 +94,7 @@ fun AuthScreen(
             // CONTENIDO ANIMADO (LOS FORMULARIOS)
             AnimatedContent(
                 targetState = isLogin,
-                transitionSpec = {
-                    if (targetState) {
-                        slideInHorizontally(animationSpec = tween(400)) { -it } + fadeIn() togetherWith
-                                slideOutHorizontally(animationSpec = tween(400)) { it } + fadeOut()
-                    } else {
-                        slideInHorizontally(animationSpec = tween(400)) { it } + fadeIn() togetherWith
-                                slideOutHorizontally(animationSpec = tween(400)) { -it } + fadeOut()
-                    }
-                },
+                transitionSpec = { MindTrackMotion.authContentTransition(targetState) },
                 label = "authTransition"
             ) { targetIsLogin ->
                 if (targetIsLogin) {

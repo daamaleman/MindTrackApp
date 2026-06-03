@@ -27,87 +27,74 @@ import ni.edu.uam.mindtrack.model.UserProfile
 import ni.edu.uam.mindtrack.ui.components.MindTrackButton
 import ni.edu.uam.mindtrack.ui.theme.*
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
+import ni.edu.uam.mindtrack.viewmodel.EditProfileViewModel
+import ni.edu.uam.mindtrack.viewmodel.ProfileViewModel
+import ni.edu.uam.mindtrack.data.repository.Result
+import ni.edu.uam.mindtrack.engine.AuthManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(
-    viewModel: MindTrackViewModel,
+    editProfileViewModel: EditProfileViewModel,
+    profileViewModel: ProfileViewModel,
     onBack: () -> Unit,
     onSaved: () -> Unit
 ) {
     val context = LocalContext.current
-    val originalProfile by viewModel.userProfile.collectAsState()
-    val avatarUri by viewModel.avatarUri.collectAsState()
+    val profileState by profileViewModel.uiState.collectAsState()
+    val updateState by editProfileViewModel.updateState.collectAsState()
+    val currentUserId = AuthManager.currentUser.value?.id ?: 1L
 
     // Local State
-    var name by remember { mutableStateOf(originalProfile.name) }
-    var email by remember { mutableStateOf(originalProfile.email) }
-    var age by remember { mutableStateOf(originalProfile.age) }
-    var gender by remember { mutableStateOf(originalProfile.gender) }
-    var bio by remember { mutableStateOf(originalProfile.bio) }
-    var dailyReminder by remember { mutableStateOf(originalProfile.dailyReminder) }
+    var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var bio by remember { mutableStateOf("") }
+    var photoUrl by remember { mutableStateOf("") }
 
-    var showDiscardDialog by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(profileState) {
+        if (profileState is Result.Success) {
+            val user = (profileState as Result.Success).data
+            name = user.nombre
+            email = user.correo
+            bio = user.biografia ?: ""
+            photoUrl = user.fotoPerfil ?: ""
+        }
+    }
+
+    LaunchedEffect(updateState) {
+        when (updateState) {
+            is Result.Success -> {
+                Toast.makeText(context, "Perfil actualizado", Toast.LENGTH_SHORT).show()
+                editProfileViewModel.clearUpdateState()
+                profileViewModel.loadProfile(currentUserId)
+                onSaved()
+            }
+            is Result.Error -> {
+                snackbarHostState.showSnackbar((updateState as Result.Error).message)
+            }
+            else -> {}
+        }
+    }
 
     // Validation States
     val isNameValid = name.trim().length in 2..50
     val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex()
     val isEmailValid = emailRegex.matches(email)
-    val isAgeValid = age.isEmpty() || (age.toIntOrNull() != null && age.toInt() in 13..99)
     
-    val canSave = isNameValid && isEmailValid && isAgeValid && name.trim().isNotEmpty()
-
-    val hasChanges = name != originalProfile.name || 
-                     email != originalProfile.email || 
-                     age != originalProfile.age || 
-                     gender != originalProfile.gender || 
-                     bio != originalProfile.bio || 
-                     dailyReminder != originalProfile.dailyReminder ||
-                     avatarUri?.toString() != originalProfile.profileImageUri
-
-    val photoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri ->
-            viewModel.setAvatarUri(uri)
-        }
-    )
+    val canSave = isNameValid && isEmailValid && name.trim().isNotEmpty() && updateState !is Result.Loading
 
     fun handleBack() {
-        if (hasChanges) {
-            showDiscardDialog = true
-        } else {
-            onBack()
-        }
+        onBack()
     }
 
     BackHandler {
         handleBack()
     }
 
-    if (showDiscardDialog) {
-        AlertDialog(
-            onDismissRequest = { showDiscardDialog = false },
-            title = { Text("¿Descartar cambios?", color = PrimaryAccent, fontWeight = FontWeight.Bold) },
-            text = { Text("Tienes cambios sin guardar. ¿Deseas salir sin guardar?") },
-            containerColor = SurfaceVariant,
-            shape = RoundedCornerShape(16.dp),
-            confirmButton = {
-                TextButton(onClick = { 
-                    showDiscardDialog = false
-                    onBack() 
-                }) {
-                    Text("Descartar", color = ImpulsiveColor, fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDiscardDialog = false }) {
-                    Text("Seguir editando", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
-        )
-    }
-
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = { 
@@ -122,28 +109,25 @@ fun EditProfileScreen(
                     }
                 },
                 actions = {
-                    TextButton(
-                        onClick = {
-                            val newProfile = originalProfile.copy(
-                                name = name,
-                                email = email,
-                                age = age,
-                                gender = gender,
-                                bio = bio,
-                                dailyReminder = dailyReminder,
-                                profileImageUri = avatarUri?.toString()
-                            )
-                            viewModel.updateProfile(newProfile)
-                            Toast.makeText(context, "Perfil actualizado", Toast.LENGTH_SHORT).show()
-                            onSaved()
-                        },
-                        enabled = canSave
-                    ) {
-                        Text(
-                            "Guardar",
-                            color = if (canSave) PrimaryAccent else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                            fontWeight = FontWeight.Bold
+                    if (updateState is Result.Loading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp).padding(end = 16.dp),
+                            color = PrimaryAccent,
+                            strokeWidth = 2.dp
                         )
+                    } else {
+                        TextButton(
+                            onClick = {
+                                editProfileViewModel.updateProfile(currentUserId, name, email, photoUrl, bio)
+                            },
+                            enabled = canSave
+                        ) {
+                            Text(
+                                "Guardar",
+                                color = if (canSave) PrimaryAccent else TextMuted,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -166,27 +150,14 @@ fun EditProfileScreen(
             // Avatar Section
             Box(contentAlignment = Alignment.BottomEnd) {
                 Surface(
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clickable { 
-                            photoPickerLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                            ) 
-                        },
+                    modifier = Modifier.size(120.dp),
                     shape = CircleShape,
                     color = PrimaryAccent.copy(alpha = 0.6f)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        if (avatarUri != null) {
+                        if (photoUrl.isNotEmpty()) {
                             AsyncImage(
-                                model = avatarUri,
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                        } else if (originalProfile.profileImageUri != null) {
-                             AsyncImage(
-                                model = originalProfile.profileImageUri,
+                                model = photoUrl,
                                 contentDescription = null,
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
@@ -202,44 +173,7 @@ fun EditProfileScreen(
                         }
                     }
                 }
-                Surface(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .offset(x = (-4).dp, y = (-4).dp)
-                        .clickable { 
-                            photoPickerLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                            ) 
-                        },
-                    shape = CircleShape,
-                    color = SurfaceVariant,
-                    border = BorderStroke(2.dp, Background)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            Icons.Default.PhotoCamera,
-                            contentDescription = "Cambiar foto",
-                            tint = PrimaryAccent,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
             }
-
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            Text(
-                text = "Cambiar foto de perfil",
-                modifier = Modifier.clickable { 
-                    photoPickerLauncher.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                    ) 
-                },
-                style = MaterialTheme.typography.labelMedium.copy(
-                    color = PrimaryAccent,
-                    fontWeight = FontWeight.Bold
-                )
-            )
 
             Spacer(modifier = Modifier.height(40.dp))
 
@@ -254,7 +188,7 @@ fun EditProfileScreen(
                 value = name,
                 onValueChange = { name = it },
                 icon = Icons.Default.Person,
-                error = if (!isNameValid && name.isNotEmpty()) "Nombre debe tener entre 2 y 50 caracteres" else null
+                error = if (!isNameValid && name.isNotEmpty()) "Nombre inválido" else null
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -270,27 +204,13 @@ fun EditProfileScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Row(modifier = Modifier.fillMaxWidth()) {
-                // Age Field
-                Box(modifier = Modifier.weight(1f)) {
-                    EditProfileField(
-                        label = "Edad",
-                        value = age,
-                        onValueChange = { if (it.all { char -> char.isDigit() }) age = it },
-                        error = if (!isAgeValid) "Edad inválida (13-99)" else null
-                    )
-                }
-                
-                Spacer(modifier = Modifier.width(16.dp))
-
-                // Gender Field
-                Box(modifier = Modifier.weight(1.2f)) {
-                    GenderDropdown(
-                        selectedGender = gender,
-                        onGenderSelected = { gender = it }
-                    )
-                }
-            }
+            // Photo URL Field
+            EditProfileField(
+                label = "URL de Foto de Perfil",
+                value = photoUrl,
+                onValueChange = { photoUrl = it },
+                icon = Icons.Default.Link
+            )
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -307,67 +227,13 @@ fun EditProfileScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            SectionLabel("PREFERENCIAS DE SIMULACIÓN")
-            
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Preferences Card
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                color = SurfaceVariant,
-                border = BorderStroke(1.dp, BorderColor.copy(alpha = 0.5f))
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            "Recordatorio diario",
-                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
-                        )
-                        Text(
-                            "Recibe una notificación a las 7 PM",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = dailyReminder,
-                        onCheckedChange = { dailyReminder = it },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
-                            checkedTrackColor = PrimaryAccent,
-                            uncheckedThumbColor = Color.White,
-                            uncheckedTrackColor = Color.Gray.copy(alpha = 0.5f)
-                        )
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(40.dp))
-
             MindTrackButton(
                 text = "Guardar cambios",
                 onClick = {
-                    val newProfile = originalProfile.copy(
-                        name = name,
-                        email = email,
-                        age = age,
-                        gender = gender,
-                        bio = bio,
-                        dailyReminder = dailyReminder,
-                        profileImageUri = avatarUri?.toString()
-                    )
-                    viewModel.updateProfile(newProfile)
-                    Toast.makeText(context, "Perfil actualizado", Toast.LENGTH_SHORT).show()
-                    onSaved()
+                    editProfileViewModel.updateProfile(currentUserId, name, email, photoUrl, bio)
                 },
-                enabled = canSave
+                enabled = canSave,
+                loading = updateState is Result.Loading
             )
             
             Spacer(modifier = Modifier.height(12.dp))
@@ -457,63 +323,6 @@ fun EditProfileField(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                 )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun GenderDropdown(
-    selectedGender: String,
-    onGenderSelected: (String) -> Unit
-) {
-    val genders = listOf("Femenino", "Masculino", "No binario", "Prefiero no decir")
-    var expanded by remember { mutableStateOf(false) }
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "Género",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = !expanded }
-        ) {
-            OutlinedTextField(
-                value = selectedGender,
-                onValueChange = {},
-                readOnly = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, true),
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                shape = RoundedCornerShape(14.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = PrimaryAccent,
-                    unfocusedBorderColor = BorderColor,
-                    focusedContainerColor = SurfaceVariant.copy(alpha = 0.5f),
-                    unfocusedContainerColor = SurfaceVariant.copy(alpha = 0.5f),
-                    focusedTextColor = TextWhite,
-                    unfocusedTextColor = TextWhite,
-                )
-            )
-            ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.background(SurfaceVariant)
-            ) {
-                genders.forEach { option ->
-                    DropdownMenuItem(
-                        text = { Text(option, color = TextWhite) },
-                        onClick = {
-                            onGenderSelected(option)
-                            expanded = false
-                        }
-                    )
-                }
             }
         }
     }

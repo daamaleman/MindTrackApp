@@ -40,6 +40,7 @@ fun HomeScreen(
     onStartSimulation: () -> Unit
 ) {
     val userProfile by viewModel.userProfile.collectAsState()
+    val apiError by viewModel.apiConnectionError.collectAsState()
 
     Box(
         modifier = Modifier
@@ -59,6 +60,38 @@ fun HomeScreen(
                 .padding(horizontal = 20.dp)
                 .padding(top = 16.dp, bottom = 100.dp)
         ) {
+            // API Error Alert (Minimalist)
+            if (apiError) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(ImpulsiveColor.copy(alpha = 0.1f))
+                        .border(1.dp, ImpulsiveColor.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                        .padding(vertical = 8.dp, horizontal = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .clip(CircleShape)
+                                .background(ImpulsiveColor)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = "Problemas de conexión con el servidor",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = ImpulsiveColor,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 11.sp
+                            )
+                        )
+                    }
+                }
+            }
+
             // Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
