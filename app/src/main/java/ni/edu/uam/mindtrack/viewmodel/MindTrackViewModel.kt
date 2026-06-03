@@ -20,6 +20,8 @@ import ni.edu.uam.mindtrack.model.SessionResult
 import ni.edu.uam.mindtrack.model.UserProfile
 import ni.edu.uam.mindtrack.data.remote.TrackSessionDto
 import ni.edu.uam.mindtrack.data.remote.UserDto
+import ni.edu.uam.mindtrack.data.remote.EstadisticaDto
+import ni.edu.uam.mindtrack.data.remote.LogroDto
 import ni.edu.uam.mindtrack.data.repository.SessionRepository
 import ni.edu.uam.mindtrack.data.repository.UserRepository
 import ni.edu.uam.mindtrack.data.repository.Result
@@ -173,10 +175,13 @@ class MindTrackViewModel(
 
     fun loadSessionsFromApi() {
         viewModelScope.launch {
+            val currentUserId = AuthManager.currentUser.value?.id ?: 1L
+            
+            // Cargar Historial
             when (val result = sessionRepository.getSessions()) {
                 is Result.Success -> {
                     _apiConnectionError.value = false
-                    val apiSessions = result.data.map { dto ->
+                    val apiSessions = result.data.filter { it.idUsuario == currentUserId }.map { dto ->
                         SessionResult(
                             id = dto.id.toString(),
                             finalResult = dto.estadoAnimo,
@@ -186,12 +191,20 @@ class MindTrackViewModel(
                             path = emptyList() // Mocked
                         )
                     }
-                    _sessionHistory.value = apiSessions + _sessionHistory.value
+                    _sessionHistory.value = apiSessions
                     recalculateStreaks()
                     recalculateAchievements()
                 }
                 is Result.Error -> {
                     _apiConnectionError.value = true
+                }
+                else -> {}
+            }
+
+            // Cargar Estadísticas Reales del API
+            when (val statsResult = userRepository.getEstadistica(currentUserId)) {
+                is Result.Success -> {
+                    _currentStreak.value = statsResult.data.rachaActual
                 }
                 else -> {}
             }
@@ -260,13 +273,35 @@ class MindTrackViewModel(
         // Guardar en la API
         viewModelScope.launch {
             val currentUserId = AuthManager.currentUser.value?.id ?: 1L
+            
+            // 1. Guardar Sesión
             val sessionDto = TrackSessionDto(
-                id = null, // El ID suele ser generado por el servidor
+                id = null,
                 idUsuario = currentUserId,
                 estadoAnimo = result,
                 notas = dateString
             )
             sessionRepository.createSession(sessionDto)
+
+            // 2. Sincronizar Estadísticas
+            val statsDto = EstadisticaDto(
+                id = null,
+                idUsuario = currentUserId,
+                sesionesCompletadas = _sessionHistory.value.size,
+                rachaActual = _currentStreak.value
+            )
+            userRepository.updateEstadistica(statsDto)
+
+            // 3. Sincronizar Logros Desbloqueados
+            _achievements.value.filter { it.unlocked }.forEach { localAchievement ->
+                val logroDto = LogroDto(
+                    id = null,
+                    idUsuario = currentUserId,
+                    titulo = localAchievement.name,
+                    desbloqueado = true
+                )
+                userRepository.unlockLogro(logroDto)
+            }
         }
     }
 

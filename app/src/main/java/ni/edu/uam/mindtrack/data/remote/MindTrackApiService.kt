@@ -19,4 +19,18 @@ interface MindTrackApiService {
 
     @POST("api/sessions")
     suspend fun createSession(@Body session: TrackSessionDto): Response<TrackSessionDto>
+
+    // Estadísticas
+    @GET("api/estadistica/usuario/{idUsuario}")
+    suspend fun getEstadistica(@Path("idUsuario") idUsuario: Long): Response<EstadisticaDto>
+
+    @POST("api/estadistica")
+    suspend fun updateEstadistica(@Body estadistica: EstadisticaDto): Response<EstadisticaDto>
+
+    // Logros
+    @GET("api/logros/usuario/{idUsuario}")
+    suspend fun getLogros(@Path("idUsuario") idUsuario: Long): Response<List<LogroDto>>
+
+    @POST("api/logros")
+    suspend fun unlockLogro(@Body logro: LogroDto): Response<LogroDto>
 }
