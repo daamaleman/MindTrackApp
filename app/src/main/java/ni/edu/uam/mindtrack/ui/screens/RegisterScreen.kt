@@ -186,12 +186,14 @@ fun RegisterContent(
             onClick = {
                 val validation = AuthManager.validateUserRegistration(fullName, email, password)
                 if (validation == null) {
-                    viewModel.registerWithApi(fullName, email, profileImageUri) { success, message ->
-                        if (success) {
-                            onRegisterSuccess()
-                        } else {
-                            error = message ?: "Error al registrar en la API"
-                        }
+                    val user = User(fullName = fullName, email = email, password = password)
+                    if (AuthManager.register(user)) {
+                        viewModel.setUser(user, profileImageUri?.toString())
+                        // Intentar registrar en API en segundo plano sin bloquear la UI
+                        viewModel.registerWithApi(fullName, email, profileImageUri) { _, _ -> }
+                        onRegisterSuccess()
+                    } else {
+                        error = "El correo ya está registrado"
                     }
                 } else {
                     error = validation
