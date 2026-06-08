@@ -131,12 +131,14 @@ fun LoginContent(
             onClick = {
                 val validation = AuthManager.validateUserLogin(email, password)
                 if (validation == null) {
-                    viewModel.loginWithApi(email) { success, message ->
-                        if (success) {
-                            onLoginSuccess()
-                        } else {
-                            error = message ?: "Error al conectar con la API"
-                        }
+                    val user = AuthManager.login(email, password)
+                    if (user != null) {
+                        viewModel.setUser(user)
+                        // Intentar login/sincronizar con API en segundo plano
+                        viewModel.loginWithApi(email) { _, _ -> }
+                        onLoginSuccess()
+                    } else {
+                        error = "Credenciales incorrectas"
                     }
                 } else {
                     error = validation

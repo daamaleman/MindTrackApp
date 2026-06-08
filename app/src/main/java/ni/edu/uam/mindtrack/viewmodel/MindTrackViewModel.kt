@@ -70,7 +70,8 @@ class MindTrackViewModel(
         _isDarkMode.value = !_isDarkMode.value
     }
 
-    val scenarios = listOf(
+    // Piscina completa de escenarios
+    private val scenarioPool = listOf(
         Scenario(
             id = 1,
             title = "Trabajo",
@@ -120,14 +121,67 @@ class MindTrackViewModel(
                 Option("Tomar unas vacaciones merecidas", null, 30, -25, 0, -40),
                 Option("Seguir trabajando duro", null, -20, 15, 15, 20)
             )
+        ),
+        Scenario(
+            id = 6,
+            title = "Inversión",
+            question = "Tienes unos ahorros extra. ¿Qué haces con ellos?",
+            options = listOf(
+                Option("Invertir en criptomonedas (alto riesgo)", 5, -5, 15, 10, -50),
+                Option("Ahorrar en un fondo seguro", 5, 5, -5, 5, 20),
+                Option("Gastar en un capricho hoy", 5, 20, -10, 0, -30)
+            )
+        ),
+        Scenario(
+            id = 7,
+            title = "Salud",
+            question = "Te sientes un poco enfermo, pero tienes mucho trabajo acumulado.",
+            options = listOf(
+                Option("Tomar un descanso y recuperarte", 5, 25, -20, -5, 0),
+                Option("Trabajar desde la cama", 5, -10, 10, 5, 0),
+                Option("Ignorarlo y seguir normal", 5, -25, 25, 10, 0)
+            )
+        ),
+        Scenario(
+            id = 8,
+            title = "Hobby",
+            question = "Quieres empezar un nuevo pasatiempo que requiere tiempo y dinero.",
+            options = listOf(
+                Option("Comprometerte y practicar a diario", 5, -10, 15, 20, -40),
+                Option("Hacerlo solo ocasionalmente", 5, 5, -5, 5, -10),
+                Option("Mejor no empezar para no gastar", 5, 0, 0, -5, 10)
+            )
+        ),
+        Scenario(
+            id = 9,
+            title = "Conflictos",
+            question = "Un compañero de equipo no está cumpliendo con su parte.",
+            options = listOf(
+                Option("Hablarlo calmadamente con él", 5, -5, 5, 15, 0),
+                Option("Reportarlo directamente al jefe", 5, -10, 15, 10, 0),
+                Option("Hacer su trabajo tú mismo", 5, -30, 20, 25, 0)
+            )
+        ),
+        Scenario(
+            id = 10,
+            title = "Tiempo Libre",
+            question = "Tienes una tarde libre inesperada. ¿Cómo la aprovechas?",
+            options = listOf(
+                Option("Dormir una siesta reparadora", 5, 30, -20, 0, 0),
+                Option("Adelantar tareas pendientes", 5, -15, 10, 20, 0),
+                Option("Salir a caminar y despejarte", 5, 15, -15, 5, 0)
+            )
         )
     )
+
+    private val _currentScenarios = MutableStateFlow<List<Scenario>>(emptyList())
+    val currentScenarios: StateFlow<List<Scenario>> = _currentScenarios.asStateFlow()
 
     private val _playerState = MutableStateFlow(initialState)
     val playerState: StateFlow<PlayerState> = _playerState.asStateFlow()
 
-    private val _currentScenarioId = MutableStateFlow(1)
-    val currentScenarioId: StateFlow<Int> = _currentScenarioId.asStateFlow()
+    private val _currentStepIndex = MutableStateFlow(0)
+    val currentStepIndex: StateFlow<Int> = _currentStepIndex.asStateFlow()
 
     private val _gameFinished = MutableStateFlow(false)
     val gameFinished: StateFlow<Boolean> = _gameFinished.asStateFlow()
@@ -171,6 +225,17 @@ class MindTrackViewModel(
             }
         }
         loadSessionsFromApi()
+        generateRandomScenarios()
+    }
+
+    private fun generateRandomScenarios() {
+        // Seleccionamos 3 escenarios al azar de la piscina
+        // El último siempre será el ID 5 (Decisión Final) para cerrar el ciclo, 
+        // o podemos dejar que sea cualquiera. Por consistencia con la lógica de GameEngine,
+        // vamos a elegir 2 aleatorios + el de "Decisión Final".
+        val randomPool = scenarioPool.filter { it.id != 5 }.shuffled()
+        val selected = randomPool.take(2) + scenarioPool.first { it.id == 5 }
+        _currentScenarios.value = selected
     }
 
     fun loadSessionsFromApi() {
@@ -213,10 +278,11 @@ class MindTrackViewModel(
 
     fun resetSession() {
         _playerState.value = initialState
-        _currentScenarioId.value = 1  // Asegurar que empieza en el escenario 1
+        _currentStepIndex.value = 0
         _gameFinished.value = false
         _finalResult.value = ""
         _decisionPath.value = emptyList()
+        generateRandomScenarios()
     }
 
     fun consumeNewlyUnlocked(id: String) {
@@ -224,31 +290,23 @@ class MindTrackViewModel(
     }
 
     fun selectOption(option: Option) {
-        // Prevenir selecciones si la simulación ya terminó
         if (_gameFinished.value) return
         
-        // Validar que el escenario actual exista
-        val currentScenario = getCurrentScenario() ?: return
+        val scenarios = _currentScenarios.value
+        val currentScenario = scenarios.getOrNull(_currentStepIndex.value) ?: return
 
         // Aplicar los efectos de la opción
         _playerState.value = gameEngine.applyOption(_playerState.value, option)
         
         // Registrar la decisión tomada
-        _decisionPath.value = _decisionPath.value + (_currentScenarioId.value)
+        _decisionPath.value = _decisionPath.value + (currentScenario.id)
 
         // Determinar siguiente acción
-        if (option.nextScenarioId == null) {
-            // La opción no tiene siguiente escenario, terminar simulación
-            finishSimulation()
+        val nextStep = _currentStepIndex.value + 1
+        if (nextStep < scenarios.size && option.nextScenarioId != null) {
+            _currentStepIndex.value = nextStep
         } else {
-            // Validar que el siguiente escenario existe antes de navegar
-            val nextScenario = scenarios.find { it.id == option.nextScenarioId }
-            if (nextScenario != null) {
-                _currentScenarioId.value = option.nextScenarioId
-            } else {
-                // Si el siguiente escenario no existe, terminar también
-                finishSimulation()
-            }
+            finishSimulation()
         }
     }
 
@@ -274,7 +332,6 @@ class MindTrackViewModel(
         viewModelScope.launch {
             val currentUserId = AuthManager.currentUser.value?.id ?: 1L
             
-            // 1. Guardar Sesión
             val sessionDto = TrackSessionDto(
                 id = null,
                 idUsuario = currentUserId,
@@ -283,7 +340,6 @@ class MindTrackViewModel(
             )
             sessionRepository.createSession(sessionDto)
 
-            // 2. Sincronizar Estadísticas
             val statsDto = EstadisticaDto(
                 id = null,
                 idUsuario = currentUserId,
@@ -292,7 +348,6 @@ class MindTrackViewModel(
             )
             userRepository.updateEstadistica(statsDto)
 
-            // 3. Sincronizar Logros Desbloqueados
             _achievements.value.filter { it.unlocked }.forEach { localAchievement ->
                 val logroDto = LogroDto(
                     id = null,
@@ -626,11 +681,11 @@ class MindTrackViewModel(
     }
 
     fun getCurrentScenario(): Scenario? {
-        return scenarios.find { it.id == _currentScenarioId.value }
+        return _currentScenarios.value.getOrNull(_currentStepIndex.value)
     }
 
     fun getScenarioProgress(): Float {
-        val totalSteps = scenarios.size.toFloat()
+        val totalSteps = _currentScenarios.value.size.toFloat()
         val stepsTaken = _decisionPath.value.size.toFloat()
         return (stepsTaken + 1) / (totalSteps + 1)
     }
@@ -643,7 +698,6 @@ class MindTrackViewModel(
     }
 
     fun logout() {
-        // En una app real limpiaríamos tokens, etc.
         resetSession()
     }
 
@@ -674,8 +728,6 @@ class MindTrackViewModel(
 
     fun loginWithApi(email: String, onResult: (Boolean, String?) -> Unit) {
         viewModelScope.launch {
-            // Buscamos al usuario por correo si hubiera un endpoint, 
-            // pero como no hay, simulamos con ID 1 o intentamos registrarlo.
             val userIdToTry = 1L 
             
             when (val result = userRepository.getUsuario(userIdToTry)) {
