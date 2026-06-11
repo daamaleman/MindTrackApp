@@ -10,20 +10,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
-import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Payments
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Psychology
-import androidx.compose.material.icons.filled.SelfImprovement
-import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.outlined.BarChart
-import androidx.compose.material.icons.outlined.History
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,13 +22,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -162,49 +147,6 @@ fun MindTrackSecondaryButton(
 }
 
 @Composable
-fun MindTrackGhostButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    leadingIcon: ImageVector? = null,
-    contentColor: Color = TextWhite,
-    height: Dp = 48.dp
-) {
-    val shape = RoundedCornerShape(14.dp)
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(height)
-            .clip(shape)
-            .background(Surface, shape)
-            .border(1.dp, BorderColor, shape)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            if (leadingIcon != null) {
-                Icon(
-                    imageVector = leadingIcon,
-                    contentDescription = null,
-                    tint = contentColor,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(Modifier.width(8.dp))
-            }
-            Text(
-                text = text,
-                style = MaterialTheme.typography.labelLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp,
-                    color = contentColor
-                )
-            )
-        }
-    }
-}
-
-// Backwards-compat wrapper around old name.
-@Composable
 fun MindTrackButton(
     text: String,
     onClick: () -> Unit,
@@ -298,7 +240,6 @@ fun MindTrackInput(
                 cursorColor = PrimaryAccent
             )
         )
-        // Floating label overlap with bg=Background
         Box(
             modifier = Modifier
                 .offset(x = 12.dp, y = (-7).dp)
@@ -454,47 +395,6 @@ fun StatMini(
 }
 
 @Composable
-fun EffectChip(
-    icon: ImageVector,
-    value: Int,
-    color: Color,
-    inverted: Boolean = false
-) {
-    val effective = if (inverted) -value else value
-    val tone = when {
-        effective > 0 -> RationalColor
-        effective < 0 -> ImpulsiveColor
-        else -> TextMuted
-    }
-    val display = if (value > 0) "+$value" else "$value"
-    Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(color.copy(alpha = 0.10f))
-            .border(1.dp, color.copy(alpha = 0.20f), RoundedCornerShape(8.dp))
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = color,
-            modifier = Modifier.size(13.dp)
-        )
-        Spacer(Modifier.width(4.dp))
-        Text(
-            text = display,
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 11.sp,
-                color = tone,
-                letterSpacing = 0.2.sp
-            )
-        )
-    }
-}
-
-@Composable
 fun OptionCard(
     option: Option,
     isSelected: Boolean,
@@ -519,7 +419,6 @@ fun OptionCard(
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.Top
     ) {
-        // Radio
         Box(
             modifier = Modifier
                 .padding(top = 1.dp)
@@ -553,16 +452,6 @@ fun OptionCard(
                     color = TextWhite
                 )
             )
-            Spacer(Modifier.height(8.dp))
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                EffectChip(Icons.Filled.Bolt, option.energyEffect, EnergyColor)
-                EffectChip(Icons.Filled.SelfImprovement, option.stressEffect, StressColor, inverted = true)
-                EffectChip(Icons.AutoMirrored.Filled.TrendingUp, option.progressEffect, ProgressColor)
-                EffectChip(Icons.Filled.Payments, option.moneyEffect, MoneyColor)
-            }
         }
     }
 }
@@ -636,33 +525,6 @@ fun IconCircleButton(
 }
 
 @Composable
-fun ResultBadge(result: String) {
-    val color = when {
-        result.contains("racional", ignoreCase = true) || result.contains("exitoso", ignoreCase = true) -> RationalColor
-        result.contains("equilibr", ignoreCase = true) || result.contains("estratégico", ignoreCase = true) -> BalancedColor
-        result.contains("impulsiv", ignoreCase = true) || result.contains("crítico", ignoreCase = true) -> ImpulsiveColor
-        else -> SecondaryAccent
-    }
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(100.dp))
-            .background(color.copy(alpha = 0.10f))
-            .border(1.dp, color.copy(alpha = 0.40f), RoundedCornerShape(100.dp))
-            .padding(horizontal = 10.dp, vertical = 4.dp)
-    ) {
-        Text(
-            text = result,
-            style = MaterialTheme.typography.labelSmall.copy(
-                color = color,
-                fontWeight = FontWeight.Bold,
-                fontSize = 10.sp,
-                letterSpacing = 0.4.sp
-            )
-        )
-    }
-}
-
-@Composable
 fun HistoryItemCard(session: SessionResult) {
     val (icon, color) = when {
         session.finalResult.contains("racional", ignoreCase = true) ||
@@ -704,32 +566,19 @@ fun HistoryItemCard(session: SessionResult) {
             )
             Spacer(Modifier.height(2.dp))
             Text(
-                text = "${session.date} · ${session.choicesMade} decisiones",
+                text = session.date,
                 style = MaterialTheme.typography.bodySmall.copy(
                     color = TextMuted,
                     fontSize = 11.5.sp
                 )
             )
         }
-        Spacer(Modifier.width(8.dp))
-        ResultBadge(result = session.finalResult)
     }
 }
-
-// Backwards-compat wrappers
 
 @Composable
 fun StatCard(number: String, label: String) {
     StatTile(number = number, label = label, modifier = Modifier.width(100.dp))
-}
-
-@Composable
-fun ScenarioOptionCard(
-    option: Option,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    OptionCard(option = option, isSelected = isSelected, onClick = onClick)
 }
 
 @Composable
@@ -739,60 +588,59 @@ fun MindTrackBottomBar(
 ) {
     val items = listOf(
         Triple(Routes.Home.route, Triple(Icons.Filled.Home, Icons.Outlined.Home, "Inicio"), null),
-        Triple(Routes.Statistics.route, Triple(Icons.Filled.BarChart, Icons.Outlined.BarChart, "Estadísticas"), null),
+        Triple(Routes.Statistics.route, Triple(Icons.Filled.BarChart, Icons.Outlined.BarChart, "Stats"), null),
         Triple(Routes.Profile.route, Triple(Icons.Filled.Person, Icons.Outlined.Person, "Perfil"), null),
         Triple(Routes.Settings.route, Triple(Icons.Filled.Tune, Icons.Outlined.Tune, "Ajustes"), null)
     )
-    val shape = RoundedCornerShape(20.dp)
+    val shape = RoundedCornerShape(24.dp)
+    
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 16.dp)
+            .windowInsetsPadding(WindowInsets.navigationBars)
+            .padding(horizontal = 20.dp, vertical = 12.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(64.dp)
+                .height(68.dp)
+                .shadow(12.dp, shape)
                 .clip(shape)
-                .background(Surface.copy(alpha = 0.92f))
+                .background(Surface.copy(alpha = 0.95f))
                 .border(1.dp, BorderColor, shape)
-                .padding(horizontal = 8.dp),
+                .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             items.forEach { (route, iconLabel, _) ->
                 val (filledIcon, outlinedIcon, label) = iconLabel
                 val isSelected = currentRoute == route
-                Column(
+                
+                Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(14.dp))
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(16.dp))
                         .clickable { onNavigate(route) },
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = if (isSelected) filledIcon else outlinedIcon,
-                        contentDescription = label,
-                        tint = if (isSelected) SecondaryAccent else TextMuted,
-                        modifier = Modifier.size(22.dp)
-                    )
-                    Spacer(Modifier.height(2.dp))
-                    if (isSelected) {
-                        Box(
-                            modifier = Modifier
-                                .size(4.dp)
-                                .clip(CircleShape)
-                                .background(PrimaryAccent)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = if (isSelected) filledIcon else outlinedIcon,
+                            contentDescription = label,
+                            tint = if (isSelected) SecondaryAccent else TextMuted,
+                            modifier = Modifier.size(24.dp)
                         )
-                    } else {
+                        Spacer(Modifier.height(4.dp))
                         Text(
                             text = label,
                             style = MaterialTheme.typography.labelSmall.copy(
-                                color = TextMuted,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 10.5.sp,
+                                color = if (isSelected) SecondaryAccent else TextMuted,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                fontSize = 10.sp,
                                 letterSpacing = 0.sp
                             )
                         )

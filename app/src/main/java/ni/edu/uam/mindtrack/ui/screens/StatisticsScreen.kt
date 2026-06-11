@@ -6,38 +6,18 @@ import android.net.Uri
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,11 +36,7 @@ import androidx.core.view.drawToBitmap
 import ni.edu.uam.mindtrack.model.PlayerState
 import ni.edu.uam.mindtrack.model.SessionResult
 import ni.edu.uam.mindtrack.ui.components.MindTrackButton
-import ni.edu.uam.mindtrack.ui.theme.BalancedColor
-import ni.edu.uam.mindtrack.ui.theme.ImpulsiveColor
-import ni.edu.uam.mindtrack.ui.theme.PrimaryAccent
-import ni.edu.uam.mindtrack.ui.theme.RationalColor
-import ni.edu.uam.mindtrack.ui.theme.SecondaryAccent
+import ni.edu.uam.mindtrack.ui.theme.*
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 import java.io.File
 import java.io.FileOutputStream
@@ -83,10 +59,11 @@ fun StatisticsScreen(
     var selectedPeriod by rememberSaveable { mutableStateOf("Mes") }
 
     if (history.isEmpty()) {
-        Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
+        Scaffold(containerColor = Background) { padding ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .windowInsetsPadding(WindowInsets.statusBars)
                     .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
@@ -94,7 +71,7 @@ fun StatisticsScreen(
                     Text(
                         text = "Aún no hay datos para mostrar",
                         style = MaterialTheme.typography.titleMedium.copy(
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = TextWhite,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
                         )
@@ -137,7 +114,7 @@ fun StatisticsScreen(
                             text = "Estadísticas",
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = TextWhite
                             )
                         )
                     }
@@ -145,9 +122,9 @@ fun StatisticsScreen(
                 actions = {
                     IconButton(onClick = onOpenHistory) {
                         Icon(
-                            imageVector = Icons.Filled.History,
+                            imageVector = Icons.Default.History,
                             contentDescription = "Ver historial",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = TextMuted
                         )
                     }
                     IconButton(
@@ -173,9 +150,9 @@ fun StatisticsScreen(
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.Share,
+                            imageVector = Icons.Default.Share,
                             contentDescription = "Compartir",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = TextMuted
                         )
                     }
                 },
@@ -184,13 +161,16 @@ fun StatisticsScreen(
                 )
             )
         },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Background,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp)
+                .padding(top = 16.dp, bottom = padding.calculateBottomPadding() + 24.dp)
         ) {
             PeriodSelector(
                 selectedPeriod = selectedPeriod,
@@ -235,7 +215,7 @@ private fun PeriodSelector(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f), RoundedCornerShape(18.dp))
+            .background(SurfaceVariant.copy(alpha = 0.45f), RoundedCornerShape(18.dp))
             .padding(4.dp)
     ) {
         StatisticsPeriods.forEach { period ->
@@ -253,7 +233,7 @@ private fun PeriodSelector(
                 Text(
                     text = period,
                     style = MaterialTheme.typography.labelLarge.copy(
-                        color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (isSelected) Color.White else TextMuted,
                         fontWeight = FontWeight.Bold
                     )
                 )
@@ -276,8 +256,8 @@ private fun HeroMetricCard(
             .background(
                 brush = Brush.linearGradient(
                     colors = listOf(
-                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
+                        SurfaceVariant.copy(alpha = 0.8f),
+                        Surface.copy(alpha = 0.95f)
                     )
                 ),
                 shape = RoundedCornerShape(20.dp)
@@ -287,7 +267,7 @@ private fun HeroMetricCard(
         Text(
             text = "DECISIONES TOMADAS",
             style = MaterialTheme.typography.labelSmall.copy(
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                color = TextMuted.copy(alpha = 0.6f),
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.sp
             )
@@ -297,7 +277,7 @@ private fun HeroMetricCard(
             Text(
                 text = totalDecisions.toString(),
                 style = MaterialTheme.typography.displaySmall.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = TextWhite,
                     fontWeight = FontWeight.ExtraBold
                 )
             )
@@ -314,7 +294,7 @@ private fun HeroMetricCard(
         Text(
             text = "vs. período anterior · $sessionsCount sesiones completadas",
             style = MaterialTheme.typography.bodySmall.copy(
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = TextMuted
             )
         )
         Spacer(modifier = Modifier.height(18.dp))
@@ -382,13 +362,13 @@ private fun DistributionCard(shares: List<ProfileShare>) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f), RoundedCornerShape(20.dp))
+            .background(SurfaceVariant.copy(alpha = 0.42f), RoundedCornerShape(20.dp))
             .padding(18.dp)
     ) {
         Text(
             text = "DISTRIBUCIÓN DE PERFIL",
             style = MaterialTheme.typography.labelSmall.copy(
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                color = TextMuted.copy(alpha = 0.6f),
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.sp
             )
@@ -398,7 +378,7 @@ private fun DistributionCard(shares: List<ProfileShare>) {
             Box(
                 modifier = Modifier
                     .size(124.dp)
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.45f), CircleShape),
+                    .background(Surface.copy(alpha = 0.45f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 ProfileDonutChart(shares)
@@ -410,14 +390,14 @@ private fun DistributionCard(shares: List<ProfileShare>) {
                             "0%"
                         },
                         style = MaterialTheme.typography.headlineMedium.copy(
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = TextWhite,
                             fontWeight = FontWeight.ExtraBold
                         )
                     )
                     Text(
                         text = "dominante",
                         style = MaterialTheme.typography.labelSmall.copy(
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = TextMuted
                         )
                     )
                 }
@@ -437,7 +417,7 @@ private fun DistributionCard(shares: List<ProfileShare>) {
 
 @Composable
 private fun ProfileDonutChart(shares: List<ProfileShare>) {
-    val outlineColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+    val outlineColor = BorderColor.copy(alpha = 0.2f)
     Canvas(modifier = Modifier.size(124.dp)) {
         val stroke = 16.dp.toPx()
         var startAngle = -90f
@@ -478,14 +458,14 @@ private fun ProfileLegendRow(share: ProfileShare, total: Int) {
             Text(
                 text = share.label,
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = TextWhite,
                     fontWeight = FontWeight.SemiBold
                 )
             )
             Text(
                 text = "${share.count} sesiones",
                 style = MaterialTheme.typography.labelSmall.copy(
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = TextMuted
                 )
             )
         }
@@ -504,13 +484,13 @@ private fun AverageStateCard(averageState: PlayerState?) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f), RoundedCornerShape(20.dp))
+            .background(SurfaceVariant.copy(alpha = 0.42f), RoundedCornerShape(20.dp))
             .padding(18.dp)
     ) {
         Text(
             text = "PROMEDIO DE ESTADO FINAL",
             style = MaterialTheme.typography.labelSmall.copy(
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                color = TextMuted.copy(alpha = 0.6f),
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.sp
             )
@@ -553,7 +533,7 @@ private fun StateAverageBar(label: String, value: Int, color: Color) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = TextWhite,
                     fontWeight = FontWeight.SemiBold
                 )
             )
@@ -570,7 +550,7 @@ private fun StateAverageBar(label: String, value: Int, color: Color) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(6.dp)
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f), RoundedCornerShape(50))
+                .background(Surface.copy(alpha = 0.8f), RoundedCornerShape(50))
         ) {
             Box(
                 modifier = Modifier
@@ -587,13 +567,13 @@ private fun StreakCard(currentStreak: Int, bestStreak: Int) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f), RoundedCornerShape(20.dp))
+            .background(SurfaceVariant.copy(alpha = 0.42f), RoundedCornerShape(20.dp))
             .padding(18.dp)
     ) {
         Text(
             text = "RACHA",
             style = MaterialTheme.typography.labelSmall.copy(
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                color = TextMuted.copy(alpha = 0.6f),
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.sp
             )
@@ -618,7 +598,7 @@ private fun RowScope.StreakChip(label: String, value: Int, color: Color) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium.copy(
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = TextMuted
             )
         )
         Spacer(modifier = Modifier.height(4.dp))
@@ -749,9 +729,3 @@ private fun parseSessionMillis(date: String): Long {
     val format = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
     return runCatching { format.parse(date)?.time ?: 0L }.getOrDefault(0L)
 }
-
-
-
-
-
-
