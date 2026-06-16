@@ -72,6 +72,46 @@ class MindTrackViewModel(
         _isDarkMode.value = !_isDarkMode.value
     }
 
+    // Último informe del cuestionario (para mostrar pantalla de resultados)
+    private val _lastQuestionnaireReport = MutableStateFlow<ni.edu.uam.mindtrack.viewmodel.ProfileReport?>(null)
+    val lastQuestionnaireReport: StateFlow<ni.edu.uam.mindtrack.viewmodel.ProfileReport?> = _lastQuestionnaireReport.asStateFlow()
+
+    // Guardar un informe de cuestionario adaptativo como una sesión en el historial
+    fun addQuestionnaireSession(report: ni.edu.uam.mindtrack.viewmodel.ProfileReport) {
+        val dateString = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
+        val summary = "${report.mainLabel} • Confianza ${(report.globalConfidence * 100).toInt()}%"
+        val newResult = SessionResult(
+            id = UUID.randomUUID().toString(),
+            finalResult = summary,
+            date = dateString,
+            finalState = initialState.copy(),
+            choicesMade = report.traitScores.size,
+            path = emptyList()
+        )
+
+        _sessionHistory.value = listOf(newResult) + _sessionHistory.value
+        // Guardar también el último informe para presentarlo en pantalla dedicada
+        _lastQuestionnaireReport.value = report
+        recalculateStreaks()
+        recalculateAchievements()
+
+        // Intentar guardar en API (no bloqueante)
+        viewModelScope.launch {
+            val currentUserId = AuthManager.currentUser.value?.id ?: 1L
+            val sessionDto = TrackSessionDto(
+                id = null,
+                idUsuario = currentUserId,
+                estadoAnimo = summary,
+                notas = dateString
+            )
+            try {
+                sessionRepository.createSession(sessionDto)
+            } catch (e: Exception) {
+                // Silencioso: si falla la red, ya quedó en memoria local
+            }
+        }
+    }
+
     // Piscina completa de escenarios
     private val scenarioPool = listOf(
         Scenario(

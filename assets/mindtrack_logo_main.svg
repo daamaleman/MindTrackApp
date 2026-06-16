@@ -5,36 +5,35 @@
       <stop offset="0%" style="stop-color:#9b7fd9;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#6d4fa8;stop-opacity:1" />
     </linearGradient>
-
+    
     <!-- Gradiente para el círculo de brillo -->
     <radialGradient id="glossGradient" cx="35%" cy="35%">
       <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.3" />
       <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
     </radialGradient>
   </defs>
-
+  
   <!-- Fondo púrpura principal (opcional, puede ser transparente) -->
   <rect width="200" height="200" fill="#7C5CFF" rx="40"/>
-
+  
   <!-- Silueta de perfil/cabeza sutil (parte trasera) -->
-  <path d="M 100 40 C 75 40 60 55 60 75 L 60 130 C 60 140 68 145 80 145 L 100 145 L 100 140 C 85 140 70 135 70 130 L 70 75 C 70 60 80 50 100 50 C 120 50 130 60 130 75 L 130 130 C 130 135 115 140 100 140 L 100 145 L 120 145 C 132 145 140 140 140 130 L 140 75 C 140 55 125 40 100 40 Z"
+  <path d="M 100 40 C 75 40 60 55 60 75 L 60 130 C 60 140 68 145 80 145 L 100 145 L 100 140 C 85 140 70 135 70 130 L 70 75 C 70 60 80 50 100 50 C 120 50 130 60 130 75 L 130 130 C 130 135 115 140 100 140 L 100 145 L 120 145 C 132 145 140 140 140 130 L 140 75 C 140 55 125 40 100 40 Z" 
     fill="#ffffff" opacity="0.05"/>
-
+  
   <!-- Círculo blanco exterior -->
   <circle cx="100" cy="100" r="65" fill="#ffffff"/>
-
+  
   <!-- Efecto de brillo en el círculo -->
   <circle cx="70" cy="70" r="65" fill="url(#glossGradient)"/>
-
+  
   <!-- Línea de onda EEG/Pulso cardíaco suavizada -->
   <path d="M 35 100 Q 45 95 55 100 T 75 100 Q 85 85 95 100 Q 105 115 115 100 Q 125 90 135 100 T 160 100"
     stroke="url(#purpleGradient)" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-
+  
   <!-- Puntos de énfasis en los picos principales (opcional) -->
   <circle cx="95" cy="100" r="1.5" fill="url(#purpleGradient)" opacity="0.6"/>
   <circle cx="115" cy="100" r="1.5" fill="url(#purpleGradient)" opacity="0.6"/>
-
+  
   <!-- Línea base sutil -->
   <line x1="35" y1="100" x2="160" y2="100" stroke="url(#purpleGradient)" stroke-width="2" opacity="0.2" stroke-linecap="round"/>
 </svg>
-

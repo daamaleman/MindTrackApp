@@ -40,6 +40,7 @@ fun ProfileScreen(
     onOpenAchievements: () -> Unit,
     onOpenStatistics: () -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenQuestionnaire: () -> Unit,
     onLogout: () -> Unit,
     onStartFirstSimulation: () -> Unit
 ) {
@@ -174,12 +175,13 @@ fun ProfileScreen(
 
                                 Spacer(modifier = Modifier.height(32.dp))
 
-                                // Account Actions
-                                AccountActions(
-                                    onEditProfile = onEditProfile,
-                                    onLogout = { showLogoutDialog = true }
-                                )
-                                
+                                 // Account Actions
+                                 AccountActions(
+                                     onEditProfile = onEditProfile,
+                                     onOpenQuestionnaire = onOpenQuestionnaire,
+                                     onLogout = { showLogoutDialog = true }
+                                 )
+
                                 Spacer(modifier = Modifier.height(40.dp))
                             }
                         }
@@ -529,6 +531,7 @@ fun RecentAchievementsRow(achievements: List<Achievement>) {
 @Composable
 fun AccountActions(
     onEditProfile: () -> Unit,
+    onOpenQuestionnaire: () -> Unit,
     onLogout: () -> Unit
 ) {
     Column(modifier = Modifier.padding(horizontal = 24.dp)) {
@@ -536,6 +539,12 @@ fun AccountActions(
             text = "Editar Perfil",
             icon = Icons.Default.Edit,
             onClick = onEditProfile
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        ActionButton(
+            text = "Evaluación de personalidad",
+            icon = Icons.Default.Analytics,
+            onClick = onOpenQuestionnaire
         )
         Spacer(modifier = Modifier.height(12.dp))
         ActionButton(

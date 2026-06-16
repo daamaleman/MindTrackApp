@@ -22,6 +22,8 @@ import ni.edu.uam.mindtrack.viewmodel.EditProfileViewModel
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModelFactory
 import ni.edu.uam.mindtrack.viewmodel.ProfileViewModel
+import ni.edu.uam.mindtrack.viewmodel.AdaptiveQuestionnaireViewModel
+import ni.edu.uam.mindtrack.ui.screens.QuestionnaireScreen
 
 @Composable
 fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
@@ -201,6 +203,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                     onOpenAchievements = { navController.navigate(Routes.Achievements.route) },
                     onOpenStatistics = { navController.navigate(Routes.Statistics.route) },
                     onOpenSettings = { navController.navigate(Routes.Settings.route) },
+                    onOpenQuestionnaire = { navController.navigate(Routes.Questionnaire.route) },
                     onLogout = {
                         AuthManager.logout()
                         viewModel.logout()
@@ -212,6 +215,27 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                         navController.navigate(Routes.Home.route)
                     }
                 )
+            }
+            composable(Routes.Questionnaire.route) {
+                // ViewModel local para el cuestionario adaptativo
+                val questionnaireVm: AdaptiveQuestionnaireViewModel = viewModel()
+                QuestionnaireScreen(viewModel = questionnaireVm, onFinish = { report ->
+                    // Guardar el informe como sesión y mostrar pantalla de resultados dedicada
+                    viewModel.addQuestionnaireSession(report)
+                    navController.navigate(Routes.QuestionnaireResult.route) {
+                        popUpTo(Routes.Home.route)
+                    }
+                })
+            }
+
+            composable(Routes.QuestionnaireResult.route) {
+                // Mostrar el informe guardado en MindTrackViewModel
+                val report by viewModel.lastQuestionnaireReport.collectAsState()
+                QuestionnaireResultScreen(report = report, onBack = {
+                    navController.navigate(Routes.Profile.route) {
+                        popUpTo(Routes.Home.route)
+                    }
+                })
             }
             composable(Routes.EditProfile.route) {
                 val editProfileViewModel: EditProfileViewModel = viewModel(factory = factory)
