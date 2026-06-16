@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ni.edu.uam.mindtrack.R
 import ni.edu.uam.mindtrack.engine.AuthManager
 import ni.edu.uam.mindtrack.ui.components.MindTrackInput
 import ni.edu.uam.mindtrack.ui.components.MindTrackPrimaryButton
@@ -87,7 +89,7 @@ fun LoginContent(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "Servidor no disponible. Reintenta más tarde.",
+                        text = stringResource(R.string.api_unavailable_error),
                         style = MaterialTheme.typography.labelSmall.copy(
                             color = ImpulsiveColor,
                             fontWeight = FontWeight.Medium,
@@ -99,7 +101,7 @@ fun LoginContent(
         }
 
         Text(
-            text = "Bienvenido",
+            text = stringResource(R.string.login_welcome),
             style = MaterialTheme.typography.headlineLarge.copy(
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 28.sp,
@@ -109,7 +111,7 @@ fun LoginContent(
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "Inicia sesión para continuar",
+            text = stringResource(R.string.login_subtitle),
             style = MaterialTheme.typography.bodyMedium.copy(
                 color = TextMuted,
                 fontSize = 14.sp
@@ -121,8 +123,8 @@ fun LoginContent(
         MindTrackInput(
             value = email,
             onValueChange = { email = it; error = null },
-            label = "Correo electrónico",
-            placeholder = "tu@correo.com",
+            label = stringResource(R.string.email_label),
+            placeholder = stringResource(R.string.email_placeholder),
             leadingIcon = Icons.Outlined.MailOutline,
             keyboardType = KeyboardType.Email
         )
@@ -130,8 +132,8 @@ fun LoginContent(
         MindTrackInput(
             value = password,
             onValueChange = { password = it; error = null },
-            label = "Contraseña",
-            placeholder = "••••••••",
+            label = stringResource(R.string.password_label),
+            placeholder = stringResource(R.string.password_placeholder),
             leadingIcon = Icons.Outlined.Lock,
             trailingIcon = if (passwordVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff,
             onTrailingClick = { passwordVisible = !passwordVisible },
@@ -142,7 +144,7 @@ fun LoginContent(
         Spacer(Modifier.height(10.dp))
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
             Text(
-                text = "¿Olvidaste tu contraseña?",
+                text = stringResource(R.string.forgot_password),
                 style = MaterialTheme.typography.labelLarge.copy(
                     color = SecondaryAccent,
                     fontWeight = FontWeight.SemiBold,
@@ -163,7 +165,7 @@ fun LoginContent(
         Spacer(Modifier.height(28.dp))
 
         MindTrackPrimaryButton(
-            text = "Iniciar sesión",
+            text = stringResource(R.string.login_button),
             trailingIcon = Icons.AutoMirrored.Filled.ArrowForward,
             loading = isLoading,
             enabled = !isLoading,
@@ -188,7 +190,7 @@ fun LoginContent(
         Spacer(Modifier.height(16.dp))
 
         Text(
-            text = "Ver tutorial de nuevo",
+            text = stringResource(R.string.view_tutorial_again),
             modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
                 .clickable(onClick = onNavigateToOnboarding)

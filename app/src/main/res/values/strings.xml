@@ -1,3 +1,38 @@
 <resources>
     <string name="app_name">MindTrack</string>
+
+    <!-- Dashboard / Home Screen -->
+    <string name="api_error_message">El API no responde</string>
+    <string name="home_greeting">Hola,</string>
+    <string name="new_session_pill">NUEVA SESIÓN</string>
+    <string name="hero_title">Descubre tu perfil de\ntoma de decisiones</string>
+    <string name="hero_subtitle">3 escenarios · ~3 minutos</string>
+    <string name="start_simulation_button">Iniciar simulación</string>
+    <string name="stat_scenarios_label">Escenarios</string>
+    <string name="stat_duration_label">Duración</string>
+    <string name="stat_profiles_label">Perfiles</string>
+    <string name="last_session_label">Última sesión</string>
+    <string name="view_all_button">VER TODO</string>
+    <string name="default_rational_thinker">Pensador Racional</string>
+    <string name="last_session_time_mock">Hace 2 días · 3 decisiones</string>
+
+    <!-- Login Screen -->
+    <string name="login_welcome">Bienvenido</string>
+    <string name="login_subtitle">Inicia sesión para continuar</string>
+    <string name="email_label">Correo electrónico</string>
+    <string name="email_placeholder">tu@correo.com</string>
+    <string name="password_label">Contraseña</string>
+    <string name="password_placeholder">••••••••</string>
+    <string name="forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="login_button">Iniciar sesión</string>
+    <string name="view_tutorial_again">Ver tutorial de nuevo</string>
+    <string name="api_unavailable_error">Servidor no disponible. Reintenta más tarde.</string>
+
+    <!-- Register Screen -->
+    <string name="register_title">Crea tu cuenta</string>
+    <string name="register_subtitle">Empieza tu primera simulación</string>
+    <string name="name_label">Nombre completo</string>
+    <string name="name_placeholder">Tu nombre</string>
+    <string name="register_button">Crear cuenta</string>
+    <string name="terms_policy_text">Al registrarte aceptas nuestros Términos y Política de privacidad</string>
 </resources>

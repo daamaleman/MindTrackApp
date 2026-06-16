@@ -161,8 +161,20 @@ class MindTrackViewModel(
     private var knownUnlockedAchievementIds: Set<String> = emptySet()
 
     init {
-        AuthManager.currentUser.value?.let { user ->
-            setUser(user, user.profileImageUri?.toString())
+        viewModelScope.launch {
+            AuthManager.currentUser.collect { user ->
+                if (user != null) {
+                    setUser(user, user.profileImageUri?.toString())
+                } else {
+                    // Limpiar el perfil al cerrar sesión
+                    _userProfile.value = UserProfile(
+                        name = "Invitado",
+                        email = "invitado@mindtrack.ni",
+                        memberSince = SimpleDateFormat("MMM yyyy", Locale.getDefault()).format(Date()),
+                        isPremium = false
+                    )
+                }
+            }
         }
         recalculateStreaks()
         recalculateAchievements()

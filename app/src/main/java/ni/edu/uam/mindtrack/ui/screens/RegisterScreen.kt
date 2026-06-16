@@ -23,12 +23,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import ni.edu.uam.mindtrack.R
 import ni.edu.uam.mindtrack.engine.AuthManager
 import ni.edu.uam.mindtrack.model.User
 import ni.edu.uam.mindtrack.ui.components.MindTrackInput
@@ -123,7 +125,7 @@ fun RegisterContent(
 
         Spacer(Modifier.height(14.dp))
         Text(
-            text = "Crea tu cuenta",
+            text = stringResource(R.string.register_title),
             style = MaterialTheme.typography.headlineLarge.copy(
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 24.sp,
@@ -133,7 +135,7 @@ fun RegisterContent(
         )
         Spacer(Modifier.height(2.dp))
         Text(
-            text = "Empieza tu primera simulación",
+            text = stringResource(R.string.register_subtitle),
             style = MaterialTheme.typography.bodyMedium.copy(
                 color = TextMuted,
                 fontSize = 13.sp
@@ -145,16 +147,16 @@ fun RegisterContent(
         MindTrackInput(
             value = fullName,
             onValueChange = { fullName = it; error = null },
-            label = "Nombre completo",
-            placeholder = "Tu nombre",
+            label = stringResource(R.string.name_label),
+            placeholder = stringResource(R.string.name_placeholder),
             leadingIcon = Icons.Outlined.Person
         )
         Spacer(Modifier.height(16.dp))
         MindTrackInput(
             value = email,
             onValueChange = { email = it; error = null },
-            label = "Correo electrónico",
-            placeholder = "tu@correo.com",
+            label = stringResource(R.string.email_label),
+            placeholder = stringResource(R.string.email_placeholder),
             leadingIcon = Icons.Outlined.MailOutline,
             keyboardType = KeyboardType.Email
         )
@@ -162,8 +164,8 @@ fun RegisterContent(
         MindTrackInput(
             value = password,
             onValueChange = { password = it; error = null },
-            label = "Contraseña",
-            placeholder = "••••••••",
+            label = stringResource(R.string.password_label),
+            placeholder = stringResource(R.string.password_placeholder),
             leadingIcon = Icons.Outlined.Lock,
             trailingIcon = Icons.Outlined.VisibilityOff,
             isPassword = true,
@@ -182,7 +184,7 @@ fun RegisterContent(
         Spacer(Modifier.height(18.dp))
 
         MindTrackPrimaryButton(
-            text = "Crear cuenta",
+            text = stringResource(R.string.register_button),
             onClick = {
                 val validation = AuthManager.validateUserRegistration(fullName, email, password)
                 if (validation == null) {
@@ -201,7 +203,7 @@ fun RegisterContent(
 
         Spacer(Modifier.height(14.dp))
         Text(
-            text = "Al registrarte aceptas nuestros Términos y Política de privacidad",
+            text = stringResource(R.string.terms_policy_text),
             style = MaterialTheme.typography.bodySmall.copy(
                 color = TextFaint,
                 fontSize = 11.sp,
