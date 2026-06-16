@@ -1,5 +1,6 @@
 package ni.edu.uam.mindtrack.navigation
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -56,6 +57,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (currentRoute == Routes.Home.route || currentRoute == Routes.Statistics.route ||
                 currentRoute == Routes.Profile.route || currentRoute == Routes.Settings.route) {
@@ -81,7 +83,7 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                 currentUser != null && currentUser?.id != null -> Routes.Home.route
                 else -> Routes.Login.route
             },
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding()),
             enterTransition = {
                 MindTrackMotion.navEnter(
                     isForward = isForwardNavigation(
