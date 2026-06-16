@@ -34,95 +34,101 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
     val isDarkMode by viewModel.isDarkMode.collectAsState()
     var notificationsEnabled by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Background)
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp)
-            .padding(top = 16.dp, bottom = 100.dp)
-    ) {
-        Text(
-            text = "Ajustes",
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 22.sp,
-                letterSpacing = (-0.6).sp,
-                color = TextWhite
-            )
-        )
-
-        Spacer(Modifier.height(18.dp))
-        SectionLabel(text = "Preferencias")
-        Spacer(Modifier.height(10.dp))
-
-        SettingsRow(
-            icon = Icons.Filled.DarkMode,
-            label = "Modo oscuro",
-            sub = "Activado siempre",
-            onClick = null
+    Scaffold(
+        containerColor = Color.Transparent,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Background)
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+                .padding(top = 16.dp, bottom = innerPadding.calculateBottomPadding() + 24.dp)
         ) {
-            Switch(
-                checked = isDarkMode,
-                onCheckedChange = { viewModel.toggleTheme() },
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color.White,
-                    checkedTrackColor = PrimaryAccent,
-                    uncheckedThumbColor = Color.White,
-                    uncheckedTrackColor = SurfaceElevated,
-                    uncheckedBorderColor = SurfaceElevated
+            Text(
+                text = "Ajustes",
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 22.sp,
+                    letterSpacing = (-0.6).sp,
+                    color = TextWhite
                 )
             )
-        }
-        Spacer(Modifier.height(8.dp))
-        SettingsRow(
-            icon = Icons.Outlined.Notifications,
-            label = "Notificaciones",
-            sub = "Recordatorios diarios",
-            onClick = null
-        ) {
-            Switch(
-                checked = notificationsEnabled,
-                onCheckedChange = { notificationsEnabled = it },
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color.White,
-                    checkedTrackColor = PrimaryAccent,
-                    uncheckedThumbColor = Color.White,
-                    uncheckedTrackColor = SurfaceElevated,
-                    uncheckedBorderColor = SurfaceElevated
+
+            Spacer(Modifier.height(18.dp))
+            SectionLabel(text = "Preferencias")
+            Spacer(Modifier.height(10.dp))
+
+            SettingsRow(
+                icon = Icons.Filled.DarkMode,
+                label = "Modo oscuro",
+                sub = "Activado siempre",
+                onClick = null
+            ) {
+                Switch(
+                    checked = isDarkMode,
+                    onCheckedChange = { viewModel.toggleTheme() },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = PrimaryAccent,
+                        uncheckedThumbColor = Color.White,
+                        uncheckedTrackColor = SurfaceElevated,
+                        uncheckedBorderColor = SurfaceElevated
+                    )
                 )
+            }
+            Spacer(Modifier.height(8.dp))
+            SettingsRow(
+                icon = Icons.Outlined.Notifications,
+                label = "Notificaciones",
+                sub = "Recordatorios diarios",
+                onClick = null
+            ) {
+                Switch(
+                    checked = notificationsEnabled,
+                    onCheckedChange = { notificationsEnabled = it },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = PrimaryAccent,
+                        uncheckedThumbColor = Color.White,
+                        uncheckedTrackColor = SurfaceElevated,
+                        uncheckedBorderColor = SurfaceElevated
+                    )
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            SettingsRow(
+                icon = Icons.Filled.Translate,
+                label = "Idioma",
+                sub = "Español",
+                onClick = null
+            )
+
+            Spacer(Modifier.height(22.dp))
+            SectionLabel(text = "Cuenta y soporte")
+            Spacer(Modifier.height(10.dp))
+
+            SettingsRow(
+                icon = Icons.Outlined.Lock,
+                label = "Privacidad y seguridad",
+                onClick = null
+            )
+            Spacer(Modifier.height(8.dp))
+            SettingsRow(
+                icon = Icons.AutoMirrored.Filled.HelpOutline,
+                label = "Ayuda y soporte",
+                onClick = null
+            )
+            Spacer(Modifier.height(8.dp))
+            SettingsRow(
+                icon = Icons.Outlined.Info,
+                label = "Acerca de MindTrack",
+                sub = "Versión 1.0.0",
+                onClick = null
             )
         }
-        Spacer(Modifier.height(8.dp))
-        SettingsRow(
-            icon = Icons.Filled.Translate,
-            label = "Idioma",
-            sub = "Español",
-            onClick = null
-        )
-
-        Spacer(Modifier.height(22.dp))
-        SectionLabel(text = "Cuenta y soporte")
-        Spacer(Modifier.height(10.dp))
-
-        SettingsRow(
-            icon = Icons.Outlined.Lock,
-            label = "Privacidad y seguridad",
-            onClick = null
-        )
-        Spacer(Modifier.height(8.dp))
-        SettingsRow(
-            icon = Icons.AutoMirrored.Filled.HelpOutline,
-            label = "Ayuda y soporte",
-            onClick = null
-        )
-        Spacer(Modifier.height(8.dp))
-        SettingsRow(
-            icon = Icons.Outlined.Info,
-            label = "Acerca de MindTrack",
-            sub = "Versión 1.0.0",
-            onClick = null
-        )
     }
 }
 
