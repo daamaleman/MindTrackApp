@@ -107,17 +107,15 @@ fun StatisticsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = "Estadísticas",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = TextWhite
-                            )
+                    Text(
+                        text = "Estadísticas",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = TextWhite
                         )
-                    }
+                    )
                 },
                 actions = {
                     IconButton(onClick = onOpenHistory) {
@@ -157,7 +155,8 @@ fun StatisticsScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
+                    containerColor = Color.Transparent,
+                    titleContentColor = TextWhite
                 )
             )
         },
@@ -167,10 +166,10 @@ fun StatisticsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .windowInsetsPadding(WindowInsets.statusBars)
+                .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp)
-                .padding(top = 16.dp, bottom = padding.calculateBottomPadding() + 24.dp)
+                .padding(bottom = 24.dp)
         ) {
             PeriodSelector(
                 selectedPeriod = selectedPeriod,
