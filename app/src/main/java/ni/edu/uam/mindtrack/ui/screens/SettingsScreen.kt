@@ -27,18 +27,30 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import ni.edu.uam.mindtrack.R
 import ni.edu.uam.mindtrack.ui.components.SectionLabel
 import ni.edu.uam.mindtrack.ui.theme.*
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 
 @Composable
 fun SettingsScreen(viewModel: MindTrackViewModel) {
     val isDarkMode by viewModel.isDarkMode.collectAsState()
-    var notificationsEnabled by remember { mutableStateOf(false) }
+    val notificationsEnabled by viewModel.notificationsEnabled.collectAsState()
+    val context = LocalContext.current
     
+    // Verificar si el sistema ha otorgado el permiso
+    val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+    } else {
+        true
+    }
+
     // Obtener idioma actual
     val currentLocale = AppCompatDelegate.getApplicationLocales().get(0)?.language ?: "es"
     val languageLabel = if (currentLocale == "en") "English" else "Español"
@@ -96,14 +108,17 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
                 onClick = null
             ) {
                 Switch(
-                    checked = notificationsEnabled,
-                    onCheckedChange = { notificationsEnabled = it },
+                    checked = notificationsEnabled && hasPermission,
+                    onCheckedChange = { viewModel.setNotificationsEnabled(it) },
+                    enabled = hasPermission,
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
                         checkedTrackColor = PrimaryAccent,
                         uncheckedThumbColor = Color.White,
                         uncheckedTrackColor = SurfaceElevated,
-                        uncheckedBorderColor = SurfaceElevated
+                        uncheckedBorderColor = SurfaceElevated,
+                        disabledCheckedThumbColor = Color.White.copy(alpha = 0.5f),
+                        disabledCheckedTrackColor = PrimaryAccent.copy(alpha = 0.5f)
                     )
                 )
             }

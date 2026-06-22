@@ -55,6 +55,9 @@ class MindTrackViewModel(
     private val _onboardingCompleted = MutableStateFlow<Boolean?>(null)
     val onboardingCompleted: StateFlow<Boolean?> = _onboardingCompleted.asStateFlow()
 
+    private val _notificationsEnabled = MutableStateFlow(true)
+    val notificationsEnabled: StateFlow<Boolean> = _notificationsEnabled.asStateFlow()
+
     private val _userProfile = MutableStateFlow(
         UserProfile(
             name = "Invitado",
@@ -192,6 +195,11 @@ class MindTrackViewModel(
         viewModelScope.launch {
             onboardingPreferences.onboardingCompletedFlow.collectLatest { completed ->
                 _onboardingCompleted.value = completed
+            }
+        }
+        viewModelScope.launch {
+            onboardingPreferences.notificationsEnabledFlow.collectLatest { enabled ->
+                _notificationsEnabled.value = enabled
             }
         }
         loadSessionsFromApi()
@@ -656,6 +664,13 @@ class MindTrackViewModel(
         viewModelScope.launch {
             onboardingPreferences.setOnboardingCompleted(true)
             _onboardingCompleted.value = true
+        }
+    }
+
+    fun setNotificationsEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            onboardingPreferences.setNotificationsEnabled(enabled)
+            _notificationsEnabled.value = enabled
         }
     }
 
