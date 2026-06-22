@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import android.content.Intent
+import android.net.Uri
 import ni.edu.uam.mindtrack.R
 import ni.edu.uam.mindtrack.ui.components.SectionLabel
 import ni.edu.uam.mindtrack.ui.theme.*
@@ -147,7 +149,15 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
             SettingsRow(
                 icon = Icons.AutoMirrored.Filled.HelpOutline,
                 label = stringResource(R.string.help_support_label),
-                onClick = null
+                onClick = {
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("mailto:")
+                        putExtra(Intent.EXTRA_EMAIL, arrayOf("diedereicha@uamv.edu.ni"))
+                        putExtra(Intent.EXTRA_CC, arrayOf("eamarin@uamv.edu.ni"))
+                        putExtra(Intent.EXTRA_SUBJECT, "Soporte MindTrack")
+                    }
+                    context.startActivity(Intent.createChooser(intent, "Enviar correo de soporte"))
+                }
             )
             Spacer(Modifier.height(8.dp))
             SettingsRow(
