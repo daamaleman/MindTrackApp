@@ -217,8 +217,14 @@ fun MindTrackNavGraph(viewModel: MindTrackViewModel) {
                 )
             }
             composable(Routes.Questionnaire.route) {
-                // ViewModel local para el cuestionario adaptativo
-                val questionnaireVm: AdaptiveQuestionnaireViewModel = viewModel()
+                // ViewModel local para el cuestionario adaptativo con Factory para pasar context
+                val questionnaireVm: AdaptiveQuestionnaireViewModel = viewModel(
+                    factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                        override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                            return AdaptiveQuestionnaireViewModel(context) as T
+                        }
+                    }
+                )
                 QuestionnaireScreen(viewModel = questionnaireVm, onFinish = { report ->
                     // Guardar el informe como sesión y mostrar pantalla de resultados dedicada
                     viewModel.addQuestionnaireSession(report)

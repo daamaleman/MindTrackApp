@@ -15,6 +15,8 @@
     <string name="view_all_button">VIEW ALL</string>
     <string name="default_rational_thinker">Rational Thinker</string>
     <string name="last_session_time_mock">2 days ago · 3 decisions</string>
+    <string name="no_sessions_registered">No sessions registered</string>
+    <string name="guest_user_name">Guest</string>
 
     <!-- Login Screen -->
     <string name="login_welcome">Welcome</string>
@@ -49,4 +51,214 @@
     <string name="help_support_label">Help and support</string>
     <string name="about_app_label">About MindTrack</string>
     <string name="version_label">Version 1.0.0</string>
+
+    <!-- Statistics Screen -->
+    <string name="stats_title">Statistics</string>
+    <string name="no_data_to_show">No data to show yet</string>
+    <string name="share_stats_title">Share statistics</string>
+    <string name="decisions_taken_label">DECISIONS TAKEN</string>
+    <string name="vs_previous_period">vs. previous period</string>
+    <string name="sessions_completed_suffix">sessions completed</string>
+    <string name="new_delta">New</string>
+    <string name="profile_distribution_label">PROFILE DISTRIBUTION</string>
+    <string name="dominant_suffix">dominant</string>
+    <string name="average_final_state_label">AVERAGE FINAL STATE</string>
+    <string name="energy_label">Energy</string>
+    <string name="stress_label">Stress</string>
+    <string name="progress_label">Progress</string>
+    <string name="money_label">Money</string>
+    <string name="streak_label">STREAK</string>
+    <string name="current_streak_label">Current</string>
+    <string name="best_streak_label">Best</string>
+    <string name="days_suffix">days</string>
+    <string name="rational_profile">Rational</string>
+    <string name="balanced_profile">Balanced</string>
+    <string name="impulsive_profile">Impulsive</string>
+    <string name="sessions_unit_suffix">sessions</string>
+
+    <!-- History Screen -->
+    <string name="history_title">History</string>
+    <string name="history_subtitle">Your previous sessions</string>
+    <string name="total_label">Total</string>
+    <string name="this_week_label">This week</string>
+    <string name="back_button_desc">Back</string>
+
+    <!-- Profile Screen -->
+    <string name="profile_tab_label">Profile</string>
+    <string name="logout_title">Logout</string>
+    <string name="logout_message">Are you sure you want to log out of your account?</string>
+    <string name="confirm_button">Confirm</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="profile_load_error">Error loading profile</string>
+    <string name="retry_button">Retry</string>
+    <string name="premium_member_since">PREMIUM - Member since %1$s</string>
+    <string name="sessions_label">Sessions</string>
+    <string name="active_days_label">Active days</string>
+    <string name="achievements_label">Achievements</string>
+    <string name="dominant_profile_section">DOMINANT PROFILE</string>
+    <string name="recent_achievements_section">RECENT ACHIEVEMENTS</string>
+    <string name="view_all_action">View all ></string>
+    <string name="edit_profile_action">Edit Profile</string>
+    <string name="not_enough_data">Not enough data</string>
+    <string name="start_first_sim_desc">Complete your first simulation to discover your profile</string>
+    <string name="profile_strategic_thinker">Strategic Thinker</string>
+    <string name="profile_successful_analyst">Successful Analyst</string>
+    <string name="profile_impulsive_profile">Impulsive Profile</string>
+    <string name="profile_strategic_desc">You balance intuition and analysis</string>
+    <string name="profile_successful_desc">You prioritize logic and results</string>
+    <string name="profile_impulsive_desc">You act fast under pressure</string>
+    <string name="profile_sessions_count">%1$d of %2$d sessions</string>
+
+    <!-- Result Screen -->
+    <string name="your_profile_label">YOUR PROFILE</string>
+    <string name="rational_profile_desc">You make decisions by analyzing long-term consequences and prioritize the balance between stability and progress.</string>
+    <string name="final_state_label">FINAL STATE</string>
+    <string name="restart_simulation_button">Restart simulation</string>
+
+    <!-- Scenario Screen -->
+    <string name="scenario_label">SCENARIO</string>
+    <string name="of_label">OF</string>
+    <string name="select_option_label">SELECT AN OPTION</string>
+    <string name="confirm_choice_button">Confirm choice</string>
+
+    <!-- Onboarding Screen -->
+    <string name="onboarding_title_1">Welcome</string>
+    <string name="onboarding_subtitle_1">Know how you think</string>
+    <string name="onboarding_title_2">Decisions</string>
+    <string name="onboarding_subtitle_2">Practice daily decisions</string>
+    <string name="onboarding_title_3">Progress</string>
+    <string name="onboarding_subtitle_3">See your evolution over time</string>
+    <string name="skip_button">Skip</string>
+    <string name="step_format">STEP %1$02d</string>
+    <string name="dot_description">Point %1$d of %2$d</string>
+    <string name="next_button">Next</string>
+    <string name="begin_button">Begin</string>
+
+    <!-- Achievements Screen -->
+    <string name="achievements_title">Achievements</string>
+    <string name="level_label">LEVEL</string>
+    <string name="achievements_unit_suffix">achievements</string>
+    <string name="recent_unlocked_label">RECENTLY UNLOCKED</string>
+    <string name="no_recent_achievements">No recent achievements yet.</string>
+    <string name="keep_completing_simulations">Keep completing simulations to unlock more.</string>
+    <string name="unlocked_on_prefix">Unlocked on</string>
+    <string name="remaining_to_unlock_prefix">You need</string>
+    <string name="remaining_to_unlock_suffix">to unlock it</string>
+    <string name="close_button">Close</string>
+    <string name="share_achievement_title">Share achievement</string>
+    <string name="unlocked_message_share">I unlocked the \'%1$s\' achievement on MindTrack! %2$s</string>
+
+    <!-- Achievement Levels -->
+    <string name="level_name_1">Beginner</string>
+    <string name="level_name_2">Apprentice</string>
+    <string name="level_name_3">Strategist</string>
+    <string name="level_name_4">Master</string>
+    <string name="level_name_5">Visionary</string>
+
+    <!-- Achievement Categories -->
+    <string name="cat_consistency">Consistency</string>
+    <string name="cat_mastery">Mastery</string>
+    <string name="cat_exploration">Exploration</string>
+
+    <!-- Achievements Names -->
+    <string name="ach_first_step_name">First step</string>
+    <string name="ach_steady_3_name">Steady 3</string>
+    <string name="ach_streak_7_name">7-day streak</string>
+    <string name="ach_unstoppable_name">Unstoppable</string>
+    <string name="ach_thinker_name">Thinker</string>
+    <string name="ach_strategist_name">Strategist</string>
+    <string name="ach_master_name">Master</string>
+    <string name="ach_visionary_name">Visionary</string>
+    <string name="ach_explorer_name">Explorer</string>
+    <string name="ach_cartographer_name">Cartographer</string>
+    <string name="ach_curious_name">Curious</string>
+    <string name="ach_chronicle_name">Chronicle</string>
+
+    <!-- Achievements Descriptions -->
+    <string name="ach_first_step_desc">Complete your first simulation.</string>
+    <string name="ach_steady_3_desc">Keep three simulations completed.</string>
+    <string name="ach_streak_7_desc">Get 7 consecutive days with activity.</string>
+    <string name="ach_unstoppable_desc">Reach 14 consecutive days of consistency.</string>
+    <string name="ach_thinker_desc">Achieve balanced Success results.</string>
+    <string name="ach_strategist_desc">Complete sessions with high progress.</string>
+    <string name="ach_master_desc">Maintain high progress with low stress.</string>
+    <string name="ach_visionary_desc">Accumulate 25 decisions in total.</string>
+    <string name="ach_explorer_desc">Travel through at least 3 different routes.</string>
+    <string name="ach_cartographer_desc">Discover 5 different routes.</string>
+    <string name="ach_curious_desc">Visit the 5 simulation scenarios.</string>
+    <string name="ach_chronicle_desc">Complete 12 simulations.</string>
+
+    <!-- Simulation / Scenario Data -->
+    <string name="sc_work_title">Work</string>
+    <string name="sc_work_q">You are offered a high-priority project with a very short deadline. How do you proceed?</string>
+    <string name="sc_work_opt1">Accept and work overtime</string>
+    <string name="sc_work_opt2">Negotiate longer deadlines</string>
+    <string name="sc_work_opt3">Reject to avoid stress</string>
+
+    <string name="sc_crisis_title">Crisis</string>
+    <string name="sc_crisis_q">The project has critical errors halfway through. What do you do?</string>
+    <string name="sc_crisis_opt1">Solve it alone without sleep</string>
+    <string name="sc_crisis_opt2">Ask the team for help</string>
+    <string name="sc_crisis_opt3">Ignore it and hope no one notices</string>
+
+    <string name="sc_study_title">Study</string>
+    <string name="sc_study_q">You have an important exam tomorrow but you are exhausted.</string>
+    <string name="sc_study_opt1">Study all night</string>
+    <string name="sc_study_opt2">Review and sleep early</string>
+    <string name="sc_study_opt3">Don\'t study and trust luck</string>
+
+    <string name="sc_social_title">Social</string>
+    <string name="sc_social_q">Your friends invite you out, but you have pending expenses.</string>
+    <string name="sc_social_opt1">Go and spend big</string>
+    <string name="sc_social_opt2">Go and control spending</string>
+    <string name="sc_social_opt3">Stay home saving</string>
+
+    <string name="sc_final_title">Final Decision</string>
+    <string name="sc_final_q">How do you want to close this cycle?</string>
+    <string name="sc_final_opt1">Invest in personal growth</string>
+    <string name="sc_final_opt2">Take a well-deserved vacation</string>
+    <string name="sc_final_opt3">Keep working hard</string>
+
+    <!-- Adaptive Questionnaire -->
+    <string name="trait_extravert">Extrovert</string>
+    <string name="trait_analytical">Analytical</string>
+    <string name="trait_empathic">Empathic</string>
+    <string name="trait_leader">Leader</string>
+    <string name="trait_creative">Creative</string>
+    <string name="trait_balanced">Balanced Profile</string>
+    <string name="pattern_impulsive">Tendency for quick decisions with low contextual empathy</string>
+    <string name="pattern_anxiety">Sensitivity to anxiety in uncertain situations</string>
+    <string name="pattern_leadership">Takes leadership roles in groups</string>
+
+    <string name="q_title">Adaptive Questionnaire</string>
+    <string name="q_final_result">Final Result: %1$s</string>
+    <string name="q_global_confidence">Global Confidence: %1$d%%</string>
+    <string name="q_score">Score: %1$d</string>
+    <string name="q_confidence">Confidence: %1$d%%</string>
+    <string name="q_strengths">Strengths:</string>
+    <string name="q_growth_areas">Growth Areas:</string>
+    <string name="q_detected_patterns">Detected Patterns:</string>
+    <string name="q_reset">Reset Questionnaire</string>
+    <string name="q_finish">Finish and back to profile</string>
+    <string name="q_placeholder">Write your answer here...</string>
+    <string name="q_send">Send</string>
+
+    <!-- Questionnaire Questions -->
+    <string name="q001_text">In social gatherings I feel comfortable starting conversations.</string>
+    <string name="q002_text">When facing a complex problem, I prefer thinking alone until I have a solution.</string>
+    <string name="q004_text">In general, I feel calm in new situations.</string>
+    <string name="q011_text">I enjoy working on projects where I am responsible for coordinating the team.</string>
+    <string name="q021_text">It is easy for me to regain calm after negative news.</string>
+    <string name="q031_text">You have a risky investment opportunity with high gain:</string>
+    <string name="q031_opt1">Try it</string>
+    <string name="q031_opt2">Prefer safety</string>
+    <string name="q032_text">I tend to act without thinking when I am excited.</string>
+    <string name="q041_text">When you solve a problem, what describes your style best?</string>
+    <string name="q041_opt1">Look for patterns</string>
+    <string name="q041_opt2">Step by step</string>
+    <string name="q041_opt3">Combine ideas</string>
+    <string name="q041_opt4">Trust intuition</string>
+    <string name="q051_text">It is easy for me to put myself in others\' shoes and understand how they feel.</string>
+    <string name="q061_text">I consider myself capable of overcoming new challenges.</string>
+    <string name="q091_text">What motivates you more: impact on others, personal growth, recognition or security? Explain it.</string>
 </resources>

@@ -1,5 +1,6 @@
 package ni.edu.uam.mindtrack.viewmodel
 
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,6 +11,7 @@ import ni.edu.uam.mindtrack.engine.AuthManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import ni.edu.uam.mindtrack.R
 import ni.edu.uam.mindtrack.engine.GameEngine
 import ni.edu.uam.mindtrack.model.Achievement
 import ni.edu.uam.mindtrack.model.AchievementCategory
@@ -37,7 +39,8 @@ class MindTrackViewModel(
     private val onboardingPreferences: OnboardingPreferences,
     private val sessionRepository: SessionRepository,
     private val userRepository: UserRepository,
-    private val notificationHelper: NotificationHelper
+    private val notificationHelper: NotificationHelper,
+    private val context: Context
 ) : ViewModel() {
     private val gameEngine = GameEngine()
 
@@ -60,7 +63,7 @@ class MindTrackViewModel(
 
     private val _userProfile = MutableStateFlow(
         UserProfile(
-            name = "Invitado",
+            name = context.getString(R.string.guest_user_name),
             email = "invitado@mindtrack.ni",
             memberSince = SimpleDateFormat("MMM yyyy", Locale.getDefault()).format(Date()),
             isPremium = false
@@ -76,11 +79,11 @@ class MindTrackViewModel(
     }
 
     // Último informe del cuestionario (para mostrar pantalla de resultados)
-    private val _lastQuestionnaireReport = MutableStateFlow<ni.edu.uam.mindtrack.viewmodel.ProfileReport?>(null)
-    val lastQuestionnaireReport: StateFlow<ni.edu.uam.mindtrack.viewmodel.ProfileReport?> = _lastQuestionnaireReport.asStateFlow()
+    private val _lastQuestionnaireReport = MutableStateFlow<ProfileReport?>(null)
+    val lastQuestionnaireReport: StateFlow<ProfileReport?> = _lastQuestionnaireReport.asStateFlow()
 
     // Guardar un informe de cuestionario adaptativo como una sesión en el historial
-    fun addQuestionnaireSession(report: ni.edu.uam.mindtrack.viewmodel.ProfileReport) {
+    fun addQuestionnaireSession(report: ProfileReport) {
         val dateString = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
         val summary = "${report.mainLabel} • Confianza ${(report.globalConfidence * 100).toInt()}%"
         val newResult = SessionResult(
@@ -115,109 +118,60 @@ class MindTrackViewModel(
         }
     }
 
-    // Piscina completa de escenarios
-    private val scenarioPool = listOf(
-        Scenario(
-            id = 1,
-            title = "Trabajo",
-            question = "Te ofrecen un proyecto de alta prioridad con un plazo muy corto. ¿Cómo procedes?",
-            options = listOf(
-                Option("Aceptar y trabajar horas extra", 2, -20, 15, 25, 30),
-                Option("Negociar plazos más largos", 3, -5, 5, 10, 10),
-                Option("Rechazar para evitar estrés", 4, 10, -10, 0, -5)
-            )
-        ),
-        Scenario(
-            id = 2,
-            title = "Crisis",
-            question = "El proyecto tiene errores críticos a mitad de camino. ¿Qué haces?",
-            options = listOf(
-                Option("Resolverlo solo sin dormir", 5, -30, 25, 30, 0),
-                Option("Pedir ayuda al equipo", 5, -10, 10, 20, -10),
-                Option("Ignorar y esperar que no se note", null, -5, 20, -20, -20)
-            )
-        ),
-        Scenario(
-            id = 3,
-            title = "Estudio",
-            question = "Tienes un examen importante mañana pero estás agotado.",
-            options = listOf(
-                Option("Estudiar toda la noche", 5, -25, 20, 25, 0),
-                Option("Repasar y dormir temprano", 5, 10, -10, 15, 0),
-                Option("No estudiar y confiar en la suerte", null, 15, -15, -10, 0)
-            )
-        ),
-        Scenario(
-            id = 4,
-            title = "Social",
-            question = "Tus amigos te invitan a salir, pero tienes gastos pendientes.",
-            options = listOf(
-                Option("Ir y gastar en grande", 5, 15, -10, -5, -40),
-                Option("Ir y controlar el gasto", 5, 5, -5, 0, -15),
-                Option("Quedarte en casa ahorrando", 5, 10, -5, 5, 0)
-            )
-        ),
-        Scenario(
-            id = 5,
-            title = "Decisión Final",
-            question = "¿Cómo quieres cerrar este ciclo?",
-            options = listOf(
-                Option("Invertir en crecimiento personal", null, -10, 5, 20, -30),
-                Option("Tomar unas vacaciones merecidas", null, 30, -25, 0, -40),
-                Option("Seguir trabajando duro", null, -20, 15, 15, 20)
-            )
-        ),
-        Scenario(
-            id = 6,
-            title = "Inversión",
-            question = "Tienes unos ahorros extra. ¿Qué haces con ellos?",
-            options = listOf(
-                Option("Invertir en criptomonedas (alto riesgo)", 5, -5, 15, 10, -50),
-                Option("Ahorrar en un fondo seguro", 5, 5, -5, 5, 20),
-                Option("Gastar en un capricho hoy", 5, 20, -10, 0, -30)
-            )
-        ),
-        Scenario(
-            id = 7,
-            title = "Salud",
-            question = "Te sientes un poco enfermo, pero tienes mucho trabajo acumulado.",
-            options = listOf(
-                Option("Tomar un descanso y recuperarte", 5, 25, -20, -5, 0),
-                Option("Trabajar desde la cama", 5, -10, 10, 5, 0),
-                Option("Ignorarlo y seguir normal", 5, -25, 25, 10, 0)
-            )
-        ),
-        Scenario(
-            id = 8,
-            title = "Hobby",
-            question = "Quieres empezar un nuevo pasatiempo que requiere tiempo y dinero.",
-            options = listOf(
-                Option("Comprometerte y practicar a diario", 5, -10, 15, 20, -40),
-                Option("Hacerlo solo ocasionalmente", 5, 5, -5, 5, -10),
-                Option("Mejor no empezar para no gastar", 5, 0, 0, -5, 10)
-            )
-        ),
-        Scenario(
-            id = 9,
-            title = "Conflictos",
-            question = "Un compañero de equipo no está cumpliendo con su parte.",
-            options = listOf(
-                Option("Hablarlo calmadamente con él", 5, -5, 5, 15, 0),
-                Option("Reportarlo directamente al jefe", 5, -10, 15, 10, 0),
-                Option("Hacer su trabajo tú mismo", 5, -30, 20, 25, 0)
-            )
-        ),
-        Scenario(
-            id = 10,
-            title = "Tiempo Libre",
-            question = "Tienes una tarde libre inesperada. ¿Cómo la aprovechas?",
-            options = listOf(
-                Option("Dormir una siesta reparadora", 5, 30, -20, 0, 0),
-                Option("Adelantar tareas pendientes", 5, -15, 10, 20, 0),
-                Option("Salir a caminar y despejarte", 5, 15, -15, 5, 0)
+    // Piscina completa de escenarios (Localizados)
+    private val scenarioPool: List<Scenario>
+        get() = listOf(
+            Scenario(
+                id = 1,
+                title = context.getString(R.string.sc_work_title),
+                question = context.getString(R.string.sc_work_q),
+                options = listOf(
+                    Option(context.getString(R.string.sc_work_opt1), 2, -20, 15, 25, 30),
+                    Option(context.getString(R.string.sc_work_opt2), 3, -5, 5, 10, 10),
+                    Option(context.getString(R.string.sc_work_opt3), 4, 10, -10, 0, -5)
+                )
+            ),
+            Scenario(
+                id = 2,
+                title = context.getString(R.string.sc_crisis_title),
+                question = context.getString(R.string.sc_crisis_q),
+                options = listOf(
+                    Option(context.getString(R.string.sc_crisis_opt1), 5, -30, 25, 30, 0),
+                    Option(context.getString(R.string.sc_crisis_opt2), 5, -10, 10, 20, -10),
+                    Option(context.getString(R.string.sc_crisis_opt3), null, -5, 20, -20, -20)
+                )
+            ),
+            Scenario(
+                id = 3,
+                title = context.getString(R.string.sc_study_title),
+                question = context.getString(R.string.sc_study_q),
+                options = listOf(
+                    Option(context.getString(R.string.sc_study_opt1), 5, -25, 20, 25, 0),
+                    Option(context.getString(R.string.sc_study_opt2), 5, 10, -10, 15, 0),
+                    Option(context.getString(R.string.sc_study_opt3), null, 15, -15, -10, 0)
+                )
+            ),
+            Scenario(
+                id = 4,
+                title = context.getString(R.string.sc_social_title),
+                question = context.getString(R.string.sc_social_q),
+                options = listOf(
+                    Option(context.getString(R.string.sc_social_opt1), 5, 15, -10, -5, -40),
+                    Option(context.getString(R.string.sc_social_opt2), 5, 5, -5, 0, -15),
+                    Option(context.getString(R.string.sc_social_opt3), 5, 10, -5, 5, 0)
+                )
+            ),
+            Scenario(
+                id = 5,
+                title = context.getString(R.string.sc_final_title),
+                question = context.getString(R.string.sc_final_q),
+                options = listOf(
+                    Option(context.getString(R.string.sc_final_opt1), null, -10, 5, 20, -30),
+                    Option(context.getString(R.string.sc_final_opt2), null, 30, -25, 0, -40),
+                    Option(context.getString(R.string.sc_final_opt3), null, -20, 15, 15, 20)
+                )
             )
         )
-    )
 
     private val _currentScenarios = MutableStateFlow<List<Scenario>>(emptyList())
     val currentScenarios: StateFlow<List<Scenario>> = _currentScenarios.asStateFlow()
@@ -267,7 +221,7 @@ class MindTrackViewModel(
                 } else {
                     // Limpiar el perfil al cerrar sesión
                     _userProfile.value = UserProfile(
-                        name = "Invitado",
+                        name = context.getString(R.string.guest_user_name),
                         email = "invitado@mindtrack.ni",
                         memberSince = SimpleDateFormat("MMM yyyy", Locale.getDefault()).format(Date()),
                         isPremium = false
@@ -301,10 +255,6 @@ class MindTrackViewModel(
     }
 
     private fun generateRandomScenarios() {
-        // Seleccionamos 3 escenarios al azar de la piscina
-        // El último siempre será el ID 5 (Decisión Final) para cerrar el ciclo, 
-        // o podemos dejar que sea cualquiera. Por consistencia con la lógica de GameEngine,
-        // vamos a elegir 2 aleatorios + el de "Decisión Final".
         val randomPool = scenarioPool.filter { it.id != 5 }.shuffled()
         val selected = randomPool.take(2) + scenarioPool.first { it.id == 5 }
         _currentScenarios.value = selected
@@ -377,9 +327,6 @@ class MindTrackViewModel(
             path = _decisionPath.value
         )
         
-        // No es necesario añadir a _sessionHistory manualmente porque Room lo notificará por el Flow
-        // _sessionHistory.value = listOf(newResult) + _sessionHistory.value
-
         // Enviar notificación de simulación terminada
         notificationHelper.showSimulationFinishedNotification(result)
 
@@ -387,13 +334,10 @@ class MindTrackViewModel(
         viewModelScope.launch {
             val currentUserId = AuthManager.currentUser.value?.id ?: 1L
             
-<<<<<<< HEAD
-=======
             // 1. Guardar localmente en Room (CRUD: Create)
             sessionRepository.insertLocalSession(newResult)
 
             // 2. Guardar en API
->>>>>>> diedereich
             val sessionDto = TrackSessionDto(
                 id = null,
                 idUsuario = currentUserId,
@@ -471,7 +415,7 @@ class MindTrackViewModel(
         val totalSessions = history.size
         val totalDecisions = history.sumOf { it.choicesMade }
         val bestStreakValue = _bestStreak.value
-        val successSessions = history.count { it.finalResult.contains("Éxito", ignoreCase = true) }
+        val successSessions = history.count { it.finalResult.contains("Éxito", ignoreCase = true) || it.finalResult.contains("Success", ignoreCase = true) }
         val highProgressSessions = history.count { it.finalState.progress >= 80 }
         val masterySessions = history.count { it.finalState.progress >= 70 && it.finalState.stress <= 40 }
         val distinctPaths = history.map { it.path.joinToString(separator = "-") }.toSet().size
@@ -490,8 +434,8 @@ class MindTrackViewModel(
         return listOf(
             achievement(
                 id = "first_step",
-                name = "Primer paso",
-                description = "Completa tu primera simulación.",
+                name = context.getString(R.string.ach_first_step_name),
+                description = context.getString(R.string.ach_first_step_desc),
                 emoji = "🚀",
                 category = AchievementCategory.CONSTANCIA,
                 unlocked = totalSessions >= 1,
@@ -500,8 +444,8 @@ class MindTrackViewModel(
             ),
             achievement(
                 id = "steady_3",
-                name = "Ritmo de 3",
-                description = "Mantén tres simulaciones completadas.",
+                name = context.getString(R.string.ach_steady_3_name),
+                description = context.getString(R.string.ach_steady_3_desc),
                 emoji = "🎯",
                 category = AchievementCategory.CONSTANCIA,
                 unlocked = totalSessions >= 3,
@@ -510,8 +454,8 @@ class MindTrackViewModel(
             ),
             achievement(
                 id = "streak_7",
-                name = "Racha de 7",
-                description = "Consigue 7 días seguidos con actividad.",
+                name = context.getString(R.string.ach_streak_7_name),
+                description = context.getString(R.string.ach_streak_7_desc),
                 emoji = "⚡",
                 category = AchievementCategory.CONSTANCIA,
                 unlocked = bestStreakValue >= 7,
@@ -520,8 +464,8 @@ class MindTrackViewModel(
             ),
             achievement(
                 id = "unstoppable",
-                name = "Imparable",
-                description = "Alcanza 14 días seguidos de constancia.",
+                name = context.getString(R.string.ach_unstoppable_name),
+                description = context.getString(R.string.ach_unstoppable_desc),
                 emoji = "🔥",
                 category = AchievementCategory.CONSTANCIA,
                 unlocked = bestStreakValue >= 14,
@@ -530,18 +474,18 @@ class MindTrackViewModel(
             ),
             achievement(
                 id = "thinker",
-                name = "Pensador",
-                description = "Consigue resultados de Éxito equilibrado.",
+                name = context.getString(R.string.ach_thinker_name),
+                description = context.getString(R.string.ach_thinker_desc),
                 emoji = "🧠",
                 category = AchievementCategory.MAESTRIA,
                 unlocked = successSessions >= 2,
                 progress = progressPercent(successSessions, 2),
-                unlockedDate = firstDateWhenCountReached(history, 2) { it.finalResult.contains("Éxito", ignoreCase = true) }
+                unlockedDate = firstDateWhenCountReached(history, 2) { it.finalResult.contains("Éxito", ignoreCase = true) || it.finalResult.contains("Success", ignoreCase = true) }
             ),
             achievement(
                 id = "strategist",
-                name = "Estratega",
-                description = "Completa sesiones con progreso alto.",
+                name = context.getString(R.string.ach_strategist_name),
+                description = context.getString(R.string.ach_strategist_desc),
                 emoji = "♟️",
                 category = AchievementCategory.MAESTRIA,
                 unlocked = highProgressSessions >= 3,
@@ -550,8 +494,8 @@ class MindTrackViewModel(
             ),
             achievement(
                 id = "master",
-                name = "Maestro",
-                description = "Mantén el progreso alto con poco estrés.",
+                name = context.getString(R.string.ach_master_name),
+                description = context.getString(R.string.ach_master_desc),
                 emoji = "🏆",
                 category = AchievementCategory.MAESTRIA,
                 unlocked = masterySessions >= 5,
@@ -560,8 +504,8 @@ class MindTrackViewModel(
             ),
             achievement(
                 id = "visionary",
-                name = "Visionario",
-                description = "Acumula 25 decisiones en total.",
+                name = context.getString(R.string.ach_visionary_name),
+                description = context.getString(R.string.ach_visionary_desc),
                 emoji = "✨",
                 category = AchievementCategory.MAESTRIA,
                 unlocked = totalDecisions >= 25,
@@ -570,8 +514,8 @@ class MindTrackViewModel(
             ),
             achievement(
                 id = "explorer",
-                name = "Explorador",
-                description = "Recorre al menos 3 rutas distintas.",
+                name = context.getString(R.string.ach_explorer_name),
+                description = context.getString(R.string.ach_explorer_desc),
                 emoji = "🗺️",
                 category = AchievementCategory.EXPLORACION,
                 unlocked = distinctPaths >= 3,
@@ -580,8 +524,8 @@ class MindTrackViewModel(
             ),
             achievement(
                 id = "cartographer",
-                name = "Cartógrafo",
-                description = "Descubre 5 rutas distintas.",
+                name = context.getString(R.string.ach_cartographer_name),
+                description = context.getString(R.string.ach_cartographer_desc),
                 emoji = "🧭",
                 category = AchievementCategory.EXPLORACION,
                 unlocked = distinctPaths >= 5,
@@ -590,8 +534,8 @@ class MindTrackViewModel(
             ),
             achievement(
                 id = "curious",
-                name = "Curioso",
-                description = "Visita los 5 escenarios de la simulación.",
+                name = context.getString(R.string.ach_curious_name),
+                description = context.getString(R.string.ach_curious_desc),
                 emoji = "🔍",
                 category = AchievementCategory.EXPLORACION,
                 unlocked = distinctScenarios.size >= 5,
@@ -600,8 +544,8 @@ class MindTrackViewModel(
             ),
             achievement(
                 id = "chronicle",
-                name = "Cronista",
-                description = "Completa 12 simulaciones.",
+                name = context.getString(R.string.ach_chronicle_name),
+                description = context.getString(R.string.ach_chronicle_desc),
                 emoji = "📖",
                 category = AchievementCategory.EXPLORACION,
                 unlocked = totalSessions >= 12,

@@ -1,7 +1,10 @@
 package ni.edu.uam.mindtrack.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -16,12 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ni.edu.uam.mindtrack.R
@@ -52,10 +51,12 @@ fun LoginContent(
     onLoginSuccess: () -> Unit,
     onNavigateToOnboarding: () -> Unit = {}
 ) {
+    val apiError by viewModel.apiConnectionError.collectAsState()
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -63,8 +64,6 @@ fun LoginContent(
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-<<<<<<< HEAD
-=======
         // API Error Alert (Minimalist)
         if (apiError) {
             Box(
@@ -97,7 +96,6 @@ fun LoginContent(
             }
         }
 
->>>>>>> diedereich
         Text(
             text = stringResource(R.string.login_welcome),
             style = MaterialTheme.typography.headlineLarge.copy(
@@ -165,10 +163,14 @@ fun LoginContent(
         MindTrackPrimaryButton(
             text = stringResource(R.string.login_button),
             trailingIcon = Icons.AutoMirrored.Filled.ArrowForward,
+            loading = isLoading,
+            enabled = !isLoading,
             onClick = {
                 val validation = AuthManager.validateUserLogin(email, password)
                 if (validation == null) {
+                    isLoading = true
                     viewModel.loginWithApi(email) { success, message ->
+                        isLoading = false
                         if (success) {
                             onLoginSuccess()
                         } else {

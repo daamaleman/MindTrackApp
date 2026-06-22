@@ -15,6 +15,8 @@
     <string name="view_all_button">VER TODO</string>
     <string name="default_rational_thinker">Pensador Racional</string>
     <string name="last_session_time_mock">Hace 2 días · 3 decisiones</string>
+    <string name="no_sessions_registered">No hay sesiones registradas</string>
+    <string name="guest_user_name">Invitado</string>
 
     <!-- Login Screen -->
     <string name="login_welcome">Bienvenido</string>
@@ -49,4 +51,214 @@
     <string name="help_support_label">Ayuda y soporte</string>
     <string name="about_app_label">Acerca de MindTrack</string>
     <string name="version_label">Versión 1.0.0</string>
+
+    <!-- Statistics Screen -->
+    <string name="stats_title">Estadísticas</string>
+    <string name="no_data_to_show">Aún no hay datos para mostrar</string>
+    <string name="share_stats_title">Compartir estadísticas</string>
+    <string name="decisions_taken_label">DECISIONES TOMADAS</string>
+    <string name="vs_previous_period">vs. período anterior</string>
+    <string name="sessions_completed_suffix">sesiones completadas</string>
+    <string name="new_delta">Nuevo</string>
+    <string name="profile_distribution_label">DISTRIBUCIÓN DE PERFIL</string>
+    <string name="dominant_suffix">dominante</string>
+    <string name="average_final_state_label">PROMEDIO DE ESTADO FINAL</string>
+    <string name="energy_label">Energía</string>
+    <string name="stress_label">Estrés</string>
+    <string name="progress_label">Progreso</string>
+    <string name="money_label">Dinero</string>
+    <string name="streak_label">RACHA</string>
+    <string name="current_streak_label">Actual</string>
+    <string name="best_streak_label">Mejor</string>
+    <string name="days_suffix">días</string>
+    <string name="rational_profile">Racional</string>
+    <string name="balanced_profile">Equilibrado</string>
+    <string name="impulsive_profile">Impulsivo</string>
+    <string name="sessions_unit_suffix">sesiones</string>
+
+    <!-- History Screen -->
+    <string name="history_title">Historial</string>
+    <string name="history_subtitle">Tus sesiones anteriores</string>
+    <string name="total_label">Total</string>
+    <string name="this_week_label">Esta semana</string>
+    <string name="back_button_desc">Volver</string>
+
+    <!-- Profile Screen -->
+    <string name="profile_tab_label">Perfil</string>
+    <string name="logout_title">Cerrar Sesión</string>
+    <string name="logout_message">¿Estás seguro de que deseas salir de tu cuenta?</string>
+    <string name="confirm_button">Confirmar</string>
+    <string name="cancel_button">Cancelar</string>
+    <string name="profile_load_error">Error al cargar perfil</string>
+    <string name="retry_button">Reintentar</string>
+    <string name="premium_member_since">PREMIUM - Miembro desde %1$s</string>
+    <string name="sessions_label">Sesiones</string>
+    <string name="active_days_label">Días activo</string>
+    <string name="achievements_label">Logros</string>
+    <string name="dominant_profile_section">PERFIL DOMINANTE</string>
+    <string name="recent_achievements_section">LOGROS RECIENTES</string>
+    <string name="view_all_action">Ver todos ></string>
+    <string name="edit_profile_action">Editar Perfil</string>
+    <string name="not_enough_data">No hay datos suficientes</string>
+    <string name="start_first_sim_desc">Realiza tu primera simulación para descubrir tu perfil</string>
+    <string name="profile_strategic_thinker">Pensador Estratégico</string>
+    <string name="profile_successful_analyst">Analista Exitoso</string>
+    <string name="profile_impulsive_profile">Perfil Impulsivo</string>
+    <string name="profile_strategic_desc">Equilibras intuición y análisis</string>
+    <string name="profile_successful_desc">Priorizas la lógica y resultados</string>
+    <string name="profile_impulsive_desc">Actúas rápido bajo presión</string>
+    <string name="profile_sessions_count">%1$d de %2$d sesiones</string>
+
+    <!-- Result Screen -->
+    <string name="your_profile_label">TU PERFIL</string>
+    <string name="rational_profile_desc">Tomas decisiones analizando consecuencias a largo plazo y priorizas el equilibrio entre estabilidad y progreso.</string>
+    <string name="final_state_label">ESTADO FINAL</string>
+    <string name="restart_simulation_button">Reiniciar simulación</string>
+
+    <!-- Scenario Screen -->
+    <string name="scenario_label">ESCENARIO</string>
+    <string name="of_label">DE</string>
+    <string name="select_option_label">SELECCIONA UNA OPCIÓN</string>
+    <string name="confirm_choice_button">Confirmar elección</string>
+
+    <!-- Onboarding Screen -->
+    <string name="onboarding_title_1">Bienvenido</string>
+    <string name="onboarding_subtitle_1">Conoce cómo piensas</string>
+    <string name="onboarding_title_2">Decisiones</string>
+    <string name="onboarding_subtitle_2">Practica decisiones cotidianas</string>
+    <string name="onboarding_title_3">Progreso</string>
+    <string name="onboarding_subtitle_3">Ve tu evolución en el tiempo</string>
+    <string name="skip_button">Saltar</string>
+    <string name="step_format">PASO %1$02d</string>
+    <string name="dot_description">Punto %1$d de %2$d</string>
+    <string name="next_button">Siguiente</string>
+    <string name="begin_button">Comenzar</string>
+
+    <!-- Achievements Screen -->
+    <string name="achievements_title">Logros</string>
+    <string name="level_label">NIVEL</string>
+    <string name="achievements_unit_suffix">logros</string>
+    <string name="recent_unlocked_label">DESBLOQUEADOS RECIENTES</string>
+    <string name="no_recent_achievements">Aún no hay logros recientes.</string>
+    <string name="keep_completing_simulations">Sigue completando simulaciones para desbloquear más.</string>
+    <string name="unlocked_on_prefix">Desbloqueado el</string>
+    <string name="remaining_to_unlock_prefix">Te falta</string>
+    <string name="remaining_to_unlock_suffix">para desbloquearlo</string>
+    <string name="close_button">Cerrar</string>
+    <string name="share_achievement_title">Compartir logro</string>
+    <string name="unlocked_message_share">¡Desbloqueé el logro \'%1$s\' en MindTrack! %2$s</string>
+
+    <!-- Achievement Levels -->
+    <string name="level_name_1">Iniciado</string>
+    <string name="level_name_2">Aprendiz</string>
+    <string name="level_name_3">Estratega</string>
+    <string name="level_name_4">Maestro</string>
+    <string name="level_name_5">Visionario</string>
+
+    <!-- Achievement Categories -->
+    <string name="cat_consistency">Constancia</string>
+    <string name="cat_mastery">Maestría</string>
+    <string name="cat_exploration">Exploración</string>
+
+    <!-- Achievements Names -->
+    <string name="ach_first_step_name">Primer paso</string>
+    <string name="ach_steady_3_name">Ritmo de 3</string>
+    <string name="ach_streak_7_name">Racha de 7</string>
+    <string name="ach_unstoppable_name">Imparable</string>
+    <string name="ach_thinker_name">Pensador</string>
+    <string name="ach_strategist_name">Estratega</string>
+    <string name="ach_master_name">Maestro</string>
+    <string name="ach_visionary_name">Visionario</string>
+    <string name="ach_explorer_name">Explorador</string>
+    <string name="ach_cartographer_name">Cartógrafo</string>
+    <string name="ach_curious_name">Curioso</string>
+    <string name="ach_chronicle_name">Cronista</string>
+
+    <!-- Achievements Descriptions -->
+    <string name="ach_first_step_desc">Completa tu primera simulación.</string>
+    <string name="ach_steady_3_desc">Mantén tres simulaciones completadas.</string>
+    <string name="ach_streak_7_desc">Consigue 7 días seguidos con actividad.</string>
+    <string name="ach_unstoppable_desc">Alcanza 14 días seguidos de constancia.</string>
+    <string name="ach_thinker_desc">Consigue resultados de Éxito equilibrado.</string>
+    <string name="ach_strategist_desc">Completa sesiones con progreso alto.</string>
+    <string name="ach_master_desc">Mantén el progreso alto con poco estrés.</string>
+    <string name="ach_visionary_desc">Acumula 25 decisiones en total.</string>
+    <string name="ach_explorer_desc">Recorre al menos 3 rutas distintas.</string>
+    <string name="ach_cartographer_desc">Descubre 5 rutas distintas.</string>
+    <string name="ach_curious_desc">Visita los 5 escenarios de la simulación.</string>
+    <string name="ach_chronicle_desc">Completa 12 simulaciones.</string>
+
+    <!-- Simulation / Scenario Data -->
+    <string name="sc_work_title">Trabajo</string>
+    <string name="sc_work_q">Te ofrecen un proyecto de alta prioridad con un plazo muy corto. ¿Cómo procedes?</string>
+    <string name="sc_work_opt1">Aceptar y trabajar horas extra</string>
+    <string name="sc_work_opt2">Negociar plazos más largos</string>
+    <string name="sc_work_opt3">Rechazar para evitar estrés</string>
+
+    <string name="sc_crisis_title">Crisis</string>
+    <string name="sc_crisis_q">El proyecto tiene errores críticos a mitad de camino. ¿Qué haces?</string>
+    <string name="sc_crisis_opt1">Resolverlo solo sin dormir</string>
+    <string name="sc_crisis_opt2">Pedir ayuda al equipo</string>
+    <string name="sc_crisis_opt3">Ignorar y esperar que no se note</string>
+
+    <string name="sc_study_title">Estudio</string>
+    <string name="sc_study_q">Tienes un examen importante mañana pero estás agotado.</string>
+    <string name="sc_study_opt1">Estudiar toda la noche</string>
+    <string name="sc_study_opt2">Repasar y dormir temprano</string>
+    <string name="sc_study_opt3">No estudiar y confiar en la suerte</string>
+
+    <string name="sc_social_title">Social</string>
+    <string name="sc_social_q">Tus amigos te invitan a salir, pero tienes gastos pendientes.</string>
+    <string name="sc_social_opt1">Ir y gastar en grande</string>
+    <string name="sc_social_opt2">Ir y controlar el gasto</string>
+    <string name="sc_social_opt3">Quedarte en casa ahorrando</string>
+
+    <string name="sc_final_title">Decisión Final</string>
+    <string name="sc_final_q">¿Cómo quieres cerrar este ciclo?</string>
+    <string name="sc_final_opt1">Invertir en crecimiento personal</string>
+    <string name="sc_final_opt2">Tomar unas vacaciones merecidas</string>
+    <string name="sc_final_opt3">Seguir trabajando duro</string>
+
+    <!-- Adaptive Questionnaire -->
+    <string name="trait_extravert">Extravertido</string>
+    <string name="trait_analytical">Analítico</string>
+    <string name="trait_empathic">Empático</string>
+    <string name="trait_leader">Líder</string>
+    <string name="trait_creative">Creativo</string>
+    <string name="trait_balanced">Perfil equilibrado</string>
+    <string name="pattern_impulsive">Tendencia a decisiones rápidas con baja empatía contextual</string>
+    <string name="pattern_anxiety">Sensibilidad a la ansiedad en situaciones inciertas</string>
+    <string name="pattern_leadership">Toma de roles de liderazgo en grupos</string>
+
+    <string name="q_title">Cuestionario adaptativo</string>
+    <string name="q_final_result">Resultado final: %1$s</string>
+    <string name="q_global_confidence">Confianza global: %1$d%%</string>
+    <string name="q_score">Puntaje: %1$d</string>
+    <string name="q_confidence">Confianza: %1$d%%</string>
+    <string name="q_strengths">Fortalezas:</string>
+    <string name="q_growth_areas">Áreas de crecimiento:</string>
+    <string name="q_detected_patterns">Patrones detectados:</string>
+    <string name="q_reset">Reiniciar cuestionario</string>
+    <string name="q_finish">Finalizar y volver al perfil</string>
+    <string name="q_placeholder">Escribe tu respuesta...</string>
+    <string name="q_send">Enviar</string>
+
+    <!-- Questionnaire Questions -->
+    <string name="q001_text">En reuniones sociales me siento cómodo iniciando conversaciones.</string>
+    <string name="q002_text">Cuando me enfrento a un problema complejo, prefiero pensar solo hasta tener una solución.</string>
+    <string name="q004_text">En general, me siento tranquilo/a ante situaciones nuevas.</string>
+    <string name="q011_text">Disfruto trabajar en proyectos donde soy responsable de coordinar al equipo.</string>
+    <string name="q021_text">Me es fácil recuperar la calma después de una noticia negativa.</string>
+    <string name="q031_text">Tienes una oportunidad de inversión arriesgada con alta ganancia:</string>
+    <string name="q031_opt1">Intento</string>
+    <string name="q031_opt2">Prefiero seguro</string>
+    <string name="q032_text">Tiendo a actuar sin pensar cuando estoy emocionado/a.</string>
+    <string name="q041_text">Cuando resuelves un problema, ¿qué describe mejor tu estilo?</string>
+    <string name="q041_opt1">Busco patrones</string>
+    <string name="q041_opt2">Paso a paso</string>
+    <string name="q041_opt3">Combino ideas</string>
+    <string name="q041_opt4">Confío en intuición</string>
+    <string name="q051_text">Me resulta sencillo ponerme en el lugar de otros y entender cómo se sienten.</string>
+    <string name="q061_text">Me considero capaz de superar nuevos retos.</string>
+    <string name="q091_text">¿Qué te motiva más: impacto en otros, crecimiento personal, reconocimiento o seguridad? Explícalo.</string>
 </resources>

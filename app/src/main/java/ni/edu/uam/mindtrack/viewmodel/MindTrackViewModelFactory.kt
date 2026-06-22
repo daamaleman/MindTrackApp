@@ -21,7 +21,7 @@ class MindTrackViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(MindTrackViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return MindTrackViewModel(onboardingPreferences, sessionRepository, userRepository, notificationHelper) as T
+            return MindTrackViewModel(onboardingPreferences, sessionRepository, userRepository, notificationHelper, context) as T
         }
         if (modelClass.isAssignableFrom(ProfileViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
