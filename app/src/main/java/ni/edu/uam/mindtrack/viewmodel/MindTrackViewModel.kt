@@ -165,6 +165,8 @@ class MindTrackViewModel(
             AuthManager.currentUser.collect { user ->
                 if (user != null) {
                     setUser(user, user.profileImageUri?.toString())
+                    // Al cambiar de usuario, sincronizar
+                    loadSessionsFromApi()
                 } else {
                     // Limpiar el perfil al cerrar sesión
                     _userProfile.value = UserProfile(
@@ -176,8 +178,16 @@ class MindTrackViewModel(
                 }
             }
         }
-        recalculateStreaks()
-        recalculateAchievements()
+
+        // Observar base de datos local (Room) reactivamente
+        viewModelScope.launch {
+            sessionRepository.allSessions.collect { localSessions ->
+                _sessionHistory.value = localSessions
+                recalculateStreaks()
+                recalculateAchievements()
+            }
+        }
+
         // Leer el flag de DataStore y exponerlo
         viewModelScope.launch {
             onboardingPreferences.onboardingCompletedFlow.collectLatest { completed ->
@@ -191,29 +201,9 @@ class MindTrackViewModel(
         viewModelScope.launch {
             val currentUserId = AuthManager.currentUser.value?.id ?: 1L
             
-            // Cargar Historial
-            when (val result = sessionRepository.getSessions()) {
-                is Result.Success -> {
-                    _apiConnectionError.value = false
-                    val apiSessions = result.data.filter { it.idUsuario == currentUserId }.map { dto ->
-                        SessionResult(
-                            id = dto.id.toString(),
-                            finalResult = dto.estadoAnimo,
-                            date = dto.notas ?: "01/06/2026 12:00",
-                            finalState = initialState.copy(), // Mocked
-                            choicesMade = 5, // Mocked
-                            path = emptyList() // Mocked
-                        )
-                    }
-                    _sessionHistory.value = apiSessions
-                    recalculateStreaks()
-                    recalculateAchievements()
-                }
-                is Result.Error -> {
-                    _apiConnectionError.value = true
-                }
-                else -> {}
-            }
+            // Sincronizar API -> Room
+            val syncResult = sessionRepository.syncSessions(currentUserId)
+            _apiConnectionError.value = syncResult is Result.Error
 
             // Cargar Estadísticas Reales del API
             when (val statsResult = userRepository.getEstadistica(currentUserId)) {
@@ -280,18 +270,21 @@ class MindTrackViewModel(
             choicesMade = _decisionPath.value.size,
             path = _decisionPath.value
         )
-        _sessionHistory.value = listOf(newResult) + _sessionHistory.value
-        recalculateStreaks()
-        recalculateAchievements()
+        
+        // No es necesario añadir a _sessionHistory manualmente porque Room lo notificará por el Flow
+        // _sessionHistory.value = listOf(newResult) + _sessionHistory.value
 
         // Enviar notificación de simulación terminada
         notificationHelper.showSimulationFinishedNotification(result)
 
-        // Guardar en la API
+        // Guardar en la API y en Room
         viewModelScope.launch {
             val currentUserId = AuthManager.currentUser.value?.id ?: 1L
             
-            // 1. Guardar Sesión
+            // 1. Guardar localmente en Room (CRUD: Create)
+            sessionRepository.insertLocalSession(newResult)
+
+            // 2. Guardar en API
             val sessionDto = TrackSessionDto(
                 id = null,
                 idUsuario = currentUserId,
@@ -669,6 +662,12 @@ class MindTrackViewModel(
     fun logout() {
         // En una app real limpiaríamos tokens, etc.
         resetSession()
+    }
+
+    fun deleteSession(session: SessionResult) {
+        viewModelScope.launch {
+            sessionRepository.deleteLocalSession(session)
+        }
     }
 
     fun setUser(user: ni.edu.uam.mindtrack.model.User, profileImageUri: String? = null) {
