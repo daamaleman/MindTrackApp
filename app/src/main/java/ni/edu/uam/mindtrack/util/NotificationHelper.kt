@@ -9,11 +9,18 @@ import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 class NotificationHelper(private val context: Context) {
+    private val prefs = ni.edu.uam.mindtrack.data.OnboardingPreferences(context)
 
     init {
         createNotificationChannel()
+    }
+
+    private fun isUserEnabled(): Boolean {
+        return runBlocking { prefs.notificationsEnabledFlow.first() }
     }
 
     private fun createNotificationChannel() {
@@ -31,6 +38,8 @@ class NotificationHelper(private val context: Context) {
     }
 
     fun showSimulationFinishedNotification(result: String) {
+        if (!isUserEnabled()) return
+        
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             return
         }
@@ -48,6 +57,8 @@ class NotificationHelper(private val context: Context) {
     }
 
     fun showAchievementUnlockedNotification(achievementName: String) {
+        if (!isUserEnabled()) return
+
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             return
         }

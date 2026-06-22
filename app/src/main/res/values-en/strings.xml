@@ -1,0 +1,52 @@
+<resources>
+    <string name="app_name">MindTrack</string>
+
+    <!-- Dashboard / Home Screen -->
+    <string name="api_error_message">API is not responding</string>
+    <string name="home_greeting">Hello,</string>
+    <string name="new_session_pill">NEW SESSION</string>
+    <string name="hero_title">Discover your decision\nmaking profile</string>
+    <string name="hero_subtitle">3 scenarios · ~3 minutes</string>
+    <string name="start_simulation_button">Start simulation</string>
+    <string name="stat_scenarios_label">Scenarios</string>
+    <string name="stat_duration_label">Duration</string>
+    <string name="stat_profiles_label">Profiles</string>
+    <string name="last_session_label">Last session</string>
+    <string name="view_all_button">VIEW ALL</string>
+    <string name="default_rational_thinker">Rational Thinker</string>
+    <string name="last_session_time_mock">2 days ago · 3 decisions</string>
+
+    <!-- Login Screen -->
+    <string name="login_welcome">Welcome</string>
+    <string name="login_subtitle">Login to continue</string>
+    <string name="email_label">Email address</string>
+    <string name="email_placeholder">you@email.com</string>
+    <string name="password_label">Password</string>
+    <string name="password_placeholder">••••••••</string>
+    <string name="forgot_password">Forgot your password?</string>
+    <string name="login_button">Login</string>
+    <string name="view_tutorial_again">View tutorial again</string>
+    <string name="api_unavailable_error">Server unavailable. Try again later.</string>
+
+    <!-- Register Screen -->
+    <string name="register_title">Create your account</string>
+    <string name="register_subtitle">Start your first simulation</string>
+    <string name="name_label">Full name</string>
+    <string name="name_placeholder">Your name</string>
+    <string name="register_button">Create account</string>
+    <string name="terms_policy_text">By registering you accept our Terms and Privacy Policy</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings</string>
+    <string name="preferences_section">Preferences</string>
+    <string name="dark_mode_label">Dark mode</string>
+    <string name="dark_mode_sub">Always on</string>
+    <string name="notifications_label">Notifications</string>
+    <string name="notifications_sub">Daily reminders</string>
+    <string name="language_label">Language</string>
+    <string name="account_support_section">Account and support</string>
+    <string name="privacy_security_label">Privacy and security</string>
+    <string name="help_support_label">Help and support</string>
+    <string name="about_app_label">About MindTrack</string>
+    <string name="version_label">Version 1.0.0</string>
+</resources>

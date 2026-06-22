@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import ni.edu.uam.mindtrack.data.remote.UserDto
 import ni.edu.uam.mindtrack.data.repository.Result
 import ni.edu.uam.mindtrack.data.repository.UserRepository
+import ni.edu.uam.mindtrack.engine.AuthManager
 
 class EditProfileViewModel(private val userRepository: UserRepository) : ViewModel() {
 
@@ -19,7 +20,15 @@ class EditProfileViewModel(private val userRepository: UserRepository) : ViewMod
         viewModelScope.launch {
             _updateState.value = Result.Loading
             val userDto = UserDto(id, name, email, photoUrl, bio)
-            _updateState.value = userRepository.updateUsuario(id, userDto)
+            val result = userRepository.updateUsuario(id, userDto)
+            
+            if (result is Result.Success) {
+                // Sincronizar con el AuthManager local para que el dashboard se actualice
+                val photoUri = if (photoUrl.isNotEmpty()) android.net.Uri.parse(photoUrl) else null
+                AuthManager.updateProfile(name, email, photoUri)
+            }
+            
+            _updateState.value = result
         }
     }
 

@@ -55,6 +55,9 @@ class MindTrackViewModel(
     private val _onboardingCompleted = MutableStateFlow<Boolean?>(null)
     val onboardingCompleted: StateFlow<Boolean?> = _onboardingCompleted.asStateFlow()
 
+    private val _notificationsEnabled = MutableStateFlow(true)
+    val notificationsEnabled: StateFlow<Boolean> = _notificationsEnabled.asStateFlow()
+
     private val _userProfile = MutableStateFlow(
         UserProfile(
             name = "Invitado",
@@ -255,15 +258,42 @@ class MindTrackViewModel(
     private var knownUnlockedAchievementIds: Set<String> = emptySet()
 
     init {
-        AuthManager.currentUser.value?.let { user ->
-            setUser(user, user.profileImageUri?.toString())
+        viewModelScope.launch {
+            AuthManager.currentUser.collect { user ->
+                if (user != null) {
+                    setUser(user, user.profileImageUri?.toString())
+                    // Al cambiar de usuario, sincronizar
+                    loadSessionsFromApi()
+                } else {
+                    // Limpiar el perfil al cerrar sesión
+                    _userProfile.value = UserProfile(
+                        name = "Invitado",
+                        email = "invitado@mindtrack.ni",
+                        memberSince = SimpleDateFormat("MMM yyyy", Locale.getDefault()).format(Date()),
+                        isPremium = false
+                    )
+                }
+            }
         }
-        recalculateStreaks()
-        recalculateAchievements()
+
+        // Observar base de datos local (Room) reactivamente
+        viewModelScope.launch {
+            sessionRepository.allSessions.collect { localSessions ->
+                _sessionHistory.value = localSessions
+                recalculateStreaks()
+                recalculateAchievements()
+            }
+        }
+
         // Leer el flag de DataStore y exponerlo
         viewModelScope.launch {
             onboardingPreferences.onboardingCompletedFlow.collectLatest { completed ->
                 _onboardingCompleted.value = completed
+            }
+        }
+        viewModelScope.launch {
+            onboardingPreferences.notificationsEnabledFlow.collectLatest { enabled ->
+                _notificationsEnabled.value = enabled
             }
         }
         loadSessionsFromApi()
@@ -284,29 +314,9 @@ class MindTrackViewModel(
         viewModelScope.launch {
             val currentUserId = AuthManager.currentUser.value?.id ?: 1L
             
-            // Cargar Historial
-            when (val result = sessionRepository.getSessions()) {
-                is Result.Success -> {
-                    _apiConnectionError.value = false
-                    val apiSessions = result.data.filter { it.idUsuario == currentUserId }.map { dto ->
-                        SessionResult(
-                            id = dto.id.toString(),
-                            finalResult = dto.estadoAnimo,
-                            date = dto.notas ?: "01/06/2026 12:00",
-                            finalState = initialState.copy(), // Mocked
-                            choicesMade = 5, // Mocked
-                            path = emptyList() // Mocked
-                        )
-                    }
-                    _sessionHistory.value = apiSessions
-                    recalculateStreaks()
-                    recalculateAchievements()
-                }
-                is Result.Error -> {
-                    _apiConnectionError.value = true
-                }
-                else -> {}
-            }
+            // Sincronizar API -> Room
+            val syncResult = sessionRepository.syncSessions(currentUserId)
+            _apiConnectionError.value = syncResult is Result.Error
 
             // Cargar Estadísticas Reales del API
             when (val statsResult = userRepository.getEstadistica(currentUserId)) {
@@ -366,17 +376,24 @@ class MindTrackViewModel(
             choicesMade = _decisionPath.value.size,
             path = _decisionPath.value
         )
-        _sessionHistory.value = listOf(newResult) + _sessionHistory.value
-        recalculateStreaks()
-        recalculateAchievements()
+        
+        // No es necesario añadir a _sessionHistory manualmente porque Room lo notificará por el Flow
+        // _sessionHistory.value = listOf(newResult) + _sessionHistory.value
 
         // Enviar notificación de simulación terminada
         notificationHelper.showSimulationFinishedNotification(result)
 
-        // Guardar en la API
+        // Guardar en la API y en Room
         viewModelScope.launch {
             val currentUserId = AuthManager.currentUser.value?.id ?: 1L
             
+<<<<<<< HEAD
+=======
+            // 1. Guardar localmente en Room (CRUD: Create)
+            sessionRepository.insertLocalSession(newResult)
+
+            // 2. Guardar en API
+>>>>>>> diedereich
             val sessionDto = TrackSessionDto(
                 id = null,
                 idUsuario = currentUserId,
@@ -475,7 +492,7 @@ class MindTrackViewModel(
                 id = "first_step",
                 name = "Primer paso",
                 description = "Completa tu primera simulación.",
-                emoji = "",
+                emoji = "🚀",
                 category = AchievementCategory.CONSTANCIA,
                 unlocked = totalSessions >= 1,
                 progress = progressPercent(totalSessions, 1),
@@ -485,7 +502,7 @@ class MindTrackViewModel(
                 id = "steady_3",
                 name = "Ritmo de 3",
                 description = "Mantén tres simulaciones completadas.",
-                emoji = "",
+                emoji = "🎯",
                 category = AchievementCategory.CONSTANCIA,
                 unlocked = totalSessions >= 3,
                 progress = progressPercent(totalSessions, 3),
@@ -505,7 +522,7 @@ class MindTrackViewModel(
                 id = "unstoppable",
                 name = "Imparable",
                 description = "Alcanza 14 días seguidos de constancia.",
-                emoji = "",
+                emoji = "🔥",
                 category = AchievementCategory.CONSTANCIA,
                 unlocked = bestStreakValue >= 14,
                 progress = progressPercent(bestStreakValue, 14),
@@ -515,7 +532,7 @@ class MindTrackViewModel(
                 id = "thinker",
                 name = "Pensador",
                 description = "Consigue resultados de Éxito equilibrado.",
-                emoji = "",
+                emoji = "🧠",
                 category = AchievementCategory.MAESTRIA,
                 unlocked = successSessions >= 2,
                 progress = progressPercent(successSessions, 2),
@@ -535,7 +552,7 @@ class MindTrackViewModel(
                 id = "master",
                 name = "Maestro",
                 description = "Mantén el progreso alto con poco estrés.",
-                emoji = "",
+                emoji = "🏆",
                 category = AchievementCategory.MAESTRIA,
                 unlocked = masterySessions >= 5,
                 progress = progressPercent(masterySessions, 5),
@@ -555,7 +572,7 @@ class MindTrackViewModel(
                 id = "explorer",
                 name = "Explorador",
                 description = "Recorre al menos 3 rutas distintas.",
-                emoji = "",
+                emoji = "🗺️",
                 category = AchievementCategory.EXPLORACION,
                 unlocked = distinctPaths >= 3,
                 progress = progressPercent(distinctPaths, 3),
@@ -565,7 +582,7 @@ class MindTrackViewModel(
                 id = "cartographer",
                 name = "Cartógrafo",
                 description = "Descubre 5 rutas distintas.",
-                emoji = "️",
+                emoji = "🧭",
                 category = AchievementCategory.EXPLORACION,
                 unlocked = distinctPaths >= 5,
                 progress = progressPercent(distinctPaths, 5),
@@ -575,7 +592,7 @@ class MindTrackViewModel(
                 id = "curious",
                 name = "Curioso",
                 description = "Visita los 5 escenarios de la simulación.",
-                emoji = "",
+                emoji = "🔍",
                 category = AchievementCategory.EXPLORACION,
                 unlocked = distinctScenarios.size >= 5,
                 progress = progressPercent(distinctScenarios.size, 5),
@@ -585,7 +602,7 @@ class MindTrackViewModel(
                 id = "chronicle",
                 name = "Cronista",
                 description = "Completa 12 simulaciones.",
-                emoji = "",
+                emoji = "📖",
                 category = AchievementCategory.EXPLORACION,
                 unlocked = totalSessions >= 12,
                 progress = progressPercent(totalSessions, 12),
@@ -749,8 +766,21 @@ class MindTrackViewModel(
         }
     }
 
+    fun setNotificationsEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            onboardingPreferences.setNotificationsEnabled(enabled)
+            _notificationsEnabled.value = enabled
+        }
+    }
+
     fun logout() {
         resetSession()
+    }
+
+    fun deleteSession(session: SessionResult) {
+        viewModelScope.launch {
+            sessionRepository.deleteLocalSession(session)
+        }
     }
 
     fun setUser(user: ni.edu.uam.mindtrack.model.User, profileImageUri: String? = null) {

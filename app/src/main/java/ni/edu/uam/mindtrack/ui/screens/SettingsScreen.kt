@@ -22,17 +22,40 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
+import android.content.Intent
+import android.net.Uri
+import ni.edu.uam.mindtrack.R
 import ni.edu.uam.mindtrack.ui.components.SectionLabel
 import ni.edu.uam.mindtrack.ui.theme.*
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 
 @Composable
 fun SettingsScreen(viewModel: MindTrackViewModel) {
     val isDarkMode by viewModel.isDarkMode.collectAsState()
-    var notificationsEnabled by remember { mutableStateOf(false) }
+    val notificationsEnabled by viewModel.notificationsEnabled.collectAsState()
+    val context = LocalContext.current
+    
+    // Verificar si el sistema ha otorgado el permiso
+    val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+    } else {
+        true
+    }
+
+    // Obtener idioma actual
+    val currentLocale = AppCompatDelegate.getApplicationLocales().get(0)?.language ?: "es"
+    val languageLabel = if (currentLocale == "en") "English" else "Español"
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -48,7 +71,7 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
                 .padding(top = 16.dp, bottom = innerPadding.calculateBottomPadding() + 24.dp)
         ) {
             Text(
-                text = "Ajustes",
+                text = stringResource(R.string.settings_title),
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 22.sp,
@@ -58,13 +81,13 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
             )
 
             Spacer(Modifier.height(18.dp))
-            SectionLabel(text = "Preferencias")
+            SectionLabel(text = stringResource(R.string.preferences_section))
             Spacer(Modifier.height(10.dp))
 
             SettingsRow(
                 icon = Icons.Filled.DarkMode,
-                label = "Modo oscuro",
-                sub = "Activado siempre",
+                label = stringResource(R.string.dark_mode_label),
+                sub = stringResource(R.string.dark_mode_sub),
                 onClick = null
             ) {
                 Switch(
@@ -82,50 +105,65 @@ fun SettingsScreen(viewModel: MindTrackViewModel) {
             Spacer(Modifier.height(8.dp))
             SettingsRow(
                 icon = Icons.Outlined.Notifications,
-                label = "Notificaciones",
-                sub = "Recordatorios diarios",
+                label = stringResource(R.string.notifications_label),
+                sub = stringResource(R.string.notifications_sub),
                 onClick = null
             ) {
                 Switch(
-                    checked = notificationsEnabled,
-                    onCheckedChange = { notificationsEnabled = it },
+                    checked = notificationsEnabled && hasPermission,
+                    onCheckedChange = { viewModel.setNotificationsEnabled(it) },
+                    enabled = hasPermission,
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
                         checkedTrackColor = PrimaryAccent,
                         uncheckedThumbColor = Color.White,
                         uncheckedTrackColor = SurfaceElevated,
-                        uncheckedBorderColor = SurfaceElevated
+                        uncheckedBorderColor = SurfaceElevated,
+                        disabledCheckedThumbColor = Color.White.copy(alpha = 0.5f),
+                        disabledCheckedTrackColor = PrimaryAccent.copy(alpha = 0.5f)
                     )
                 )
             }
             Spacer(Modifier.height(8.dp))
             SettingsRow(
                 icon = Icons.Filled.Translate,
-                label = "Idioma",
-                sub = "Español",
-                onClick = null
+                label = stringResource(R.string.language_label),
+                sub = languageLabel,
+                onClick = {
+                    val nextLocale = if (currentLocale == "es") "en" else "es"
+                    val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags(nextLocale)
+                    AppCompatDelegate.setApplicationLocales(appLocale)
+                }
             )
 
             Spacer(Modifier.height(22.dp))
-            SectionLabel(text = "Cuenta y soporte")
+            SectionLabel(text = stringResource(R.string.account_support_section))
             Spacer(Modifier.height(10.dp))
 
             SettingsRow(
                 icon = Icons.Outlined.Lock,
-                label = "Privacidad y seguridad",
+                label = stringResource(R.string.privacy_security_label),
                 onClick = null
             )
             Spacer(Modifier.height(8.dp))
             SettingsRow(
                 icon = Icons.AutoMirrored.Filled.HelpOutline,
-                label = "Ayuda y soporte",
-                onClick = null
+                label = stringResource(R.string.help_support_label),
+                onClick = {
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("mailto:")
+                        putExtra(Intent.EXTRA_EMAIL, arrayOf("diedereicha@uamv.edu.ni"))
+                        putExtra(Intent.EXTRA_CC, arrayOf("eamarin@uamv.edu.ni"))
+                        putExtra(Intent.EXTRA_SUBJECT, "Soporte MindTrack")
+                    }
+                    context.startActivity(Intent.createChooser(intent, "Enviar correo de soporte"))
+                }
             )
             Spacer(Modifier.height(8.dp))
             SettingsRow(
                 icon = Icons.Outlined.Info,
-                label = "Acerca de MindTrack",
-                sub = "Versión 1.0.0",
+                label = stringResource(R.string.about_app_label),
+                sub = stringResource(R.string.version_label),
                 onClick = null
             )
         }

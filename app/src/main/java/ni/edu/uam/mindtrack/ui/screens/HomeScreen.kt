@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.outlined.Notifications
@@ -22,9 +23,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ni.edu.uam.mindtrack.R
+import ni.edu.uam.mindtrack.model.SessionResult
 import ni.edu.uam.mindtrack.ui.components.*
 import ni.edu.uam.mindtrack.ui.theme.*
 import ni.edu.uam.mindtrack.viewmodel.MindTrackViewModel
@@ -36,6 +40,7 @@ fun HomeScreen(
 ) {
     val userProfile by viewModel.userProfile.collectAsState()
     val apiError by viewModel.apiConnectionError.collectAsState()
+    val sessionHistory by viewModel.sessionHistory.collectAsState()
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -81,7 +86,7 @@ fun HomeScreen(
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(
-                                text = "El API no responde",
+                                text = stringResource(R.string.api_error_message),
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     color = ImpulsiveColor,
                                     fontWeight = FontWeight.Medium,
@@ -100,7 +105,7 @@ fun HomeScreen(
                 ) {
                     Column {
                         Text(
-                            text = "Hola,",
+                            text = stringResource(R.string.home_greeting),
                             style = MaterialTheme.typography.bodySmall.copy(
                                 color = TextMuted,
                                 fontWeight = FontWeight.SemiBold,
@@ -144,10 +149,10 @@ fun HomeScreen(
                         .padding(22.dp)
                 ) {
                     Column {
-                        Pill(text = "NUEVA SESIÓN")
+                        Pill(text = stringResource(R.string.new_session_pill))
                         Spacer(Modifier.height(14.dp))
                         Text(
-                            text = "Descubre tu perfil de\ntoma de decisiones",
+                            text = stringResource(R.string.hero_title),
                             style = MaterialTheme.typography.headlineMedium.copy(
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 24.sp,
@@ -158,7 +163,7 @@ fun HomeScreen(
                         )
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            text = "3 escenarios · ~3 minutos",
+                            text = stringResource(R.string.hero_subtitle),
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 color = TextSecondary,
                                 fontSize = 13.sp
@@ -166,7 +171,7 @@ fun HomeScreen(
                         )
                         Spacer(Modifier.height(18.dp))
                         MindTrackPrimaryButton(
-                            text = "Iniciar simulación",
+                            text = stringResource(R.string.start_simulation_button),
                             leadingIcon = Icons.Filled.PlayArrow,
                             onClick = onStartSimulation,
                             height = 48.dp
@@ -181,9 +186,9 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    StatTile(number = "3", label = "Escenarios", modifier = Modifier.weight(1f))
-                    StatTile(number = "~3'", label = "Duración", modifier = Modifier.weight(1f))
-                    StatTile(number = "3", label = "Perfiles", modifier = Modifier.weight(1f))
+                    StatTile(number = "3", label = stringResource(R.string.stat_scenarios_label), modifier = Modifier.weight(1f))
+                    StatTile(number = "~3'", label = stringResource(R.string.stat_duration_label), modifier = Modifier.weight(1f))
+                    StatTile(number = "3", label = stringResource(R.string.stat_profiles_label), modifier = Modifier.weight(1f))
                 }
 
                 Spacer(Modifier.height(24.dp))
@@ -193,9 +198,9 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    SectionLabel(text = "Última sesión")
+                    SectionLabel(text = stringResource(R.string.last_session_label))
                     Text(
-                        text = "VER TODO",
+                        text = stringResource(R.string.view_all_button),
                         style = MaterialTheme.typography.labelSmall.copy(
                             color = SecondaryAccent,
                             fontWeight = FontWeight.Bold,
@@ -207,58 +212,86 @@ fun HomeScreen(
 
                 Spacer(Modifier.height(10.dp))
 
-                // Last history card (mocked)
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Surface)
-                        .border(1.dp, BorderColor, RoundedCornerShape(16.dp))
-                        .padding(14.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                // Last history card (Room Data)
+                val lastSession = sessionHistory.firstOrNull()
+                if (lastSession != null) {
+                    SessionHistoryCard(
+                        session = lastSession,
+                        onDelete = { viewModel.deleteSession(it) }
+                    )
+                } else {
                     Box(
                         modifier = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(RationalColor.copy(alpha = 0.12f))
-                            .border(1.dp, RationalColor.copy(alpha = 0.30f), RoundedCornerShape(12.dp)),
+                            .fillMaxWidth()
+                            .padding(vertical = 20.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.Psychology,
-                            contentDescription = null,
-                            tint = RationalColor,
-                            modifier = Modifier.size(22.dp)
+                        Text(
+                            text = "No hay sesiones registradas",
+                            style = MaterialTheme.typography.bodyMedium.copy(color = TextMuted)
                         )
                     }
-                    Spacer(Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Pensador Racional",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp,
-                                color = TextWhite
-                            )
-                        )
-                        Spacer(Modifier.height(2.dp))
-                        Text(
-                            text = "Hace 2 días · 3 decisiones",
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = TextMuted,
-                                fontSize = 11.5.sp
-                            )
-                        )
-                    }
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = null,
-                        tint = TextMuted,
-                        modifier = Modifier.size(18.dp)
-                    )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun SessionHistoryCard(
+    session: SessionResult,
+    onDelete: (SessionResult) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(Surface)
+            .border(1.dp, BorderColor, RoundedCornerShape(16.dp))
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(RationalColor.copy(alpha = 0.12f))
+                .border(1.dp, RationalColor.copy(alpha = 0.30f), RoundedCornerShape(12.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Psychology,
+                contentDescription = null,
+                tint = RationalColor,
+                modifier = Modifier.size(22.dp)
+            )
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = session.finalResult,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    color = TextWhite
+                )
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = "${session.date} · ${session.choicesMade} decisiones",
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = TextMuted,
+                    fontSize = 11.5.sp
+                )
+            )
+        }
+        IconButton(onClick = { onDelete(session) }) {
+            Icon(
+                imageVector = Icons.Filled.DeleteOutline,
+                contentDescription = "Borrar",
+                tint = ImpulsiveColor.copy(alpha = 0.6f),
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }

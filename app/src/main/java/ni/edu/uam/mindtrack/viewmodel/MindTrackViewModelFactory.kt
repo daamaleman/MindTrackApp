@@ -3,6 +3,7 @@ package ni.edu.uam.mindtrack.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import ni.edu.uam.mindtrack.data.OnboardingPreferences
+import ni.edu.uam.mindtrack.data.local.database.MindTrackDatabase
 import ni.edu.uam.mindtrack.data.remote.RetrofitClient
 import ni.edu.uam.mindtrack.data.repository.UserRepository
 import ni.edu.uam.mindtrack.data.repository.SessionRepository
@@ -12,8 +13,9 @@ class MindTrackViewModelFactory(
     private val onboardingPreferences: OnboardingPreferences,
     private val context: android.content.Context
 ) : ViewModelProvider.Factory {
+    private val database = MindTrackDatabase.getDatabase(context)
     private val userRepository = UserRepository(RetrofitClient.apiService)
-    private val sessionRepository = SessionRepository(RetrofitClient.apiService)
+    private val sessionRepository = SessionRepository(RetrofitClient.apiService, database.sessionDao())
     private val notificationHelper = NotificationHelper(context)
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
