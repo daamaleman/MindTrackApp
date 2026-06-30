@@ -14,6 +14,9 @@ interface MindTrackApiService {
     @PUT("api/usuarios/{id}")
     suspend fun updateUsuario(@Path("id") id: Long, @Body usuario: UserDto): Response<UserDto>
 
+    @DELETE("api/usuarios")
+    suspend fun deleteAllUsuarios(): Response<Unit>
+
     @GET("api/sessions")
     suspend fun getSessions(): Response<List<TrackSessionDto>>
 

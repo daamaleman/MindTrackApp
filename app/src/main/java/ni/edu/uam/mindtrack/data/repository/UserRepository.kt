@@ -60,6 +60,19 @@ class UserRepository(private val apiService: MindTrackApiService) {
         }
     }
 
+    suspend fun deleteAllUsuarios(): Result<Unit> {
+        return try {
+            val response = apiService.deleteAllUsuarios()
+            if (response.isSuccessful) {
+                Result.Success(Unit)
+            } else {
+                Result.Error("Error al eliminar usuarios: ${response.code()}")
+            }
+        } catch (e: Exception) {
+            Result.Error(e.message ?: "Unknown Error", e)
+        }
+    }
+
     // Estadísticas
     suspend fun getEstadistica(idUsuario: Long): Result<EstadisticaDto> {
         return try {
